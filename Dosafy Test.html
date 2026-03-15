@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dosafy — Light Professional Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Instrument+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f2744;
+    --navy2: #1a3a5c;
+    --teal: #0d7c6e;
+    --teal-light: #e6f4f2;
+    --teal-mid: #b3ddd8;
+    --accent: #1a8c7d;
+    --gold: #c9943a;
+    --text: #1a2332;
+    --muted: #6b7a8d;
+    --border: #e2e8f0;
+    --bg: #f8fafc;
+    --white: #ffffff;
+    --surface: #f1f5f9;
+    --red: #dc2626;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #e8ecf0;
+    font-family: 'Instrument Sans', sans-serif;
+    color: var(--text);
+  }
+
+  /* ── Switcher ── */
+  .switcher {
+    position: sticky; top: 0; z-index: 200;
+    background: var(--navy);
+    padding: 12px 32px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .sw-brand { font-family: 'Playfair Display', serif; font-size: 18px; color: white; letter-spacing: 0.02em; }
+  .sw-tabs { display: flex; gap: 6px; }
+  .sw-tab {
+    padding: 7px 18px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.5);
+    background: transparent; letter-spacing: 0.03em;
+  }
+  .sw-tab.active { background: white; color: var(--navy); border-color: white; }
+  .sw-note { font-size: 11px; color: rgba(255,255,255,0.3); font-family: 'DM Mono', monospace; }
+
+  .preview { display: none; }
+  .preview.active { display: block; }
+
+  /* ════════════════════════════════════════
+     OPTION A — LANDING PAGE (Light)
+  ════════════════════════════════════════ */
+
+  #landing { background: var(--white); }
+
+  /* Nav */
+  .l-nav {
+    background: var(--white); border-bottom: 1px solid var(--border);
+    padding: 0 64px; height: 68px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 44px; z-index: 50;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .l-brand {
+    font-family: 'Playfair Display', serif; font-size: 22px; color: var(--navy);
+    letter-spacing: 0.04em; display: flex; align-items: center; gap: 10px;
+  }
+  .l-brand-dot { width: 8px; height: 8px; background: var(--teal); border-radius: 50%; }
+  .l-links { display: flex; gap: 6px; align-items: center; }
+  .l-link { padding: 8px 14px; font-size: 13px; color: var(--muted); cursor: pointer; border-radius: 6px; transition: all 0.15s; font-weight: 500; }
+  .l-link:hover { background: var(--surface); color: var(--text); }
+  .l-login { font-size: 13px; color: var(--navy2); font-weight: 600; padding: 8px 16px; cursor: pointer; }
+  .l-cta { background: var(--navy); color: white; font-size: 13px; font-weight: 600; padding: 9px 22px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+  .l-cta:hover { background: var(--navy2); }
+
+  /* Hero */
+  .l-hero {
+    padding: 100px 64px 80px;
+    background: linear-gradient(160deg, #f8fafc 0%, #eef6f5 40%, #f0f7ff 100%);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    position: relative; overflow: hidden;
+  }
+  .l-hero::before {
+    content: '';
+    position: absolute; top: -100px; right: -100px;
+    width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,124,110,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .l-hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--teal-light); border: 1px solid var(--teal-mid);
+    border-radius: 100px; padding: 5px 14px; margin-bottom: 24px;
+    font-size: 11px; font-weight: 600; color: var(--teal); letter-spacing: 0.08em; text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  .l-hero-eyebrow span { width: 6px; height: 6px; background: var(--teal); border-radius: 50%; animation: blink 2s infinite; }
+  .l-hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 4.5vw, 58px); font-weight: 700; line-height: 1.1;
+    color: var(--navy); letter-spacing: -0.01em; margin-bottom: 20px;
+  }
+  .l-hero-title em { color: var(--teal); font-style: italic; }
+  .l-hero-sub {
+    font-size: 16px; line-height: 1.7; color: var(--muted); margin-bottom: 36px;
+    font-weight: 400; max-width: 480px;
+  }
+  .l-hero-actions { display: flex; gap: 12px; margin-bottom: 48px; }
+  .btn-navy { background: var(--navy); color: white; font-size: 14px; font-weight: 600; padding: 13px 28px; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(15,39,68,0.25); }
+  .btn-navy:hover { background: var(--navy2); transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: var(--navy); font-size: 14px; font-weight: 600; padding: 13px 28px; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--border); transition: all 0.2s; }
+  .btn-outline:hover { border-color: var(--navy); }
+  .l-trust { display: flex; gap: 24px; }
+  .l-trust-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); font-weight: 500; }
+  .l-trust-icon { color: var(--teal); font-size: 14px; }
+
+  /* Hero right — card mockup */
+  .l-hero-card {
+    background: white; border-radius: 20px; padding: 28px;
+    box-shadow: 0 20px 60px rgba(15,39,68,0.12), 0 4px 16px rgba(15,39,68,0.06);
+    border: 1px solid var(--border); position: relative;
+  }
+  .l-hero-card::before {
+    content: ''; position: absolute; top: -2px; left: 32px; right: 32px; height: 4px;
+    background: linear-gradient(90deg, var(--navy), var(--teal));
+    border-radius: 0 0 4px 4px;
+  }
+  .lhc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .lhc-title { font-weight: 700; font-size: 15px; color: var(--navy); }
+  .lhc-badge { background: var(--teal-light); color: var(--teal); font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 100px; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; }
+  .lhc-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); }
+  .lhc-row:last-of-type { border-bottom: none; }
+  .lhc-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .lhc-val { font-size: 14px; font-weight: 700; color: var(--navy); }
+  .lhc-val.teal { color: var(--teal); font-size: 18px; }
+  .lhc-val.gold { color: var(--gold); }
+  .lhc-unit { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 3px; }
+  .lhc-result {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+    border-radius: 12px; padding: 16px 20px; margin-top: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .lhc-result-label { font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; }
+  .lhc-result-val { font-family: 'Playfair Display', serif; font-size: 28px; color: white; }
+  .lhc-result-unit { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+  /* Stats strip */
+  .l-stats {
+    background: var(--navy);
+    padding: 40px 64px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  }
+  .l-stat { text-align: center; padding: 0 24px; border-right: 1px solid rgba(255,255,255,0.1); }
+  .l-stat:last-child { border-right: none; }
+  .l-stat-num { font-family: 'Playfair Display', serif; font-size: 36px; color: white; margin-bottom: 4px; }
+  .l-stat-lbl { font-size: 12px; color: rgba(255,255,255,0.5); font-family: 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* Features */
+  .l-features { padding: 100px 64px; background: white; }
+  .l-sec-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; }
+  .l-sec-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 3vw, 40px); color: var(--navy); margin-bottom: 12px; }
+  .l-sec-sub { font-size: 15px; color: var(--muted); max-width: 500px; line-height: 1.7; margin-bottom: 56px; }
+  .l-feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .l-feat-card { padding: 28px; border: 1px solid var(--border); border-radius: 16px; transition: all 0.2s; background: var(--bg); }
+  .l-feat-card:hover { border-color: var(--teal-mid); box-shadow: 0 8px 24px rgba(13,124,110,0.08); transform: translateY(-2px); }
+  .l-feat-icon { width: 44px; height: 44px; background: var(--teal-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 16px; }
+  .l-feat-title { font-weight: 700; font-size: 15px; margin-bottom: 8px; color: var(--navy); }
+  .l-feat-desc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  /* Calculator cards strip */
+  .l-calcs { padding: 80px 64px; background: var(--bg); }
+  .l-calc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
+  .l-calc-card { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 24px; cursor: pointer; transition: all 0.2s; }
+  .l-calc-card:hover { border-color: var(--teal-mid); box-shadow: 0 8px 24px rgba(13,124,110,0.08); }
+  .l-calc-card-top { display: flex; justify-content: space-between; margin-bottom: 14px; }
+  .l-calc-chip { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 9px; border-radius: 100px; }
+  .chip-free { background: var(--teal-light); color: var(--teal); }
+  .chip-pro { background: #fef3c7; color: #92400e; }
+  .chip-soon { background: var(--surface); color: var(--muted); }
+  .l-calc-name { font-weight: 700; font-size: 15px; color: var(--navy); margin-bottom: 6px; }
+  .l-calc-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* CTA */
+  .l-cta-section {
+    padding: 100px 64px; text-align: center;
+    background: linear-gradient(160deg, #f0f7ff 0%, var(--teal-light) 100%);
+    border-top: 1px solid var(--teal-mid);
+  }
+  .l-cta-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 3.5vw, 44px); color: var(--navy); margin-bottom: 16px; }
+  .l-cta-sub { font-size: 15px; color: var(--muted); margin-bottom: 40px; }
+
+  /* Footer */
+  .l-footer { background: var(--navy); padding: 32px 64px; display: flex; align-items: center; justify-content: space-between; }
+  .l-footer-brand { font-family: 'Playfair Display', serif; font-size: 18px; color: white; }
+  .l-footer-note { font-size: 11px; color: rgba(255,255,255,0.3); font-family: 'DM Mono', monospace; font-style: italic; max-width: 400px; text-align: center; }
+  .l-footer-links { display: flex; gap: 20px; }
+  .l-footer-link { font-size: 12px; color: rgba(255,255,255,0.4); cursor: pointer; }
+
+  /* ════════════════════════════════════════
+     OPTION B — CATALOG (Light)
+  ════════════════════════════════════════ */
+
+  #catalog { background: var(--bg); min-height: 100vh; }
+
+  .c-nav {
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 0 48px; height: 64px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 44px; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .c-brand { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--navy); display: flex; align-items: center; gap: 8px; }
+  .c-brand-dot { width: 7px; height: 7px; background: var(--teal); border-radius: 50%; }
+  .c-nav-mid { display: flex; gap: 2px; }
+  .c-nav-item { padding: 6px 14px; border-radius: 6px; font-size: 13px; color: var(--muted); cursor: pointer; font-weight: 500; transition: all 0.15s; }
+  .c-nav-item:hover { background: var(--surface); color: var(--text); }
+  .c-nav-item.active { background: var(--teal-light); color: var(--teal); font-weight: 600; }
+  .c-nav-right { display: flex; gap: 8px; align-items: center; }
+  .c-login { font-size: 13px; color: var(--muted); padding: 7px 14px; cursor: pointer; font-weight: 500; }
+  .c-signup { background: var(--navy); color: white; font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 8px; cursor: pointer; }
+
+  /* Page hero — compact */
+  .c-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #1a3a5c 100%);
+    padding: 48px 48px 40px; position: relative; overflow: hidden;
+  }
+  .c-hero::before {
+    content: ''; position: absolute; right: -80px; top: -80px;
+    width: 320px; height: 320px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,124,110,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .c-hero-inner { max-width: 1040px; margin: 0 auto; display: flex; align-items: flex-end; justify-content: space-between; }
+  .c-hero-text { position: relative; z-index: 1; }
+  .c-hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--teal-mid); margin-bottom: 10px; }
+  .c-hero-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 3vw, 36px); color: white; margin-bottom: 8px; }
+  .c-hero-sub { font-size: 14px; color: rgba(255,255,255,0.55); max-width: 500px; line-height: 1.6; }
+  .c-hero-stats { display: flex; gap: 40px; position: relative; z-index: 1; }
+  .c-stat { text-align: right; }
+  .c-stat-num { font-family: 'Playfair Display', serif; font-size: 28px; color: white; }
+  .c-stat-lbl { font-size: 10px; color: rgba(255,255,255,0.4); font-family: 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+
+  /* Body */
+  .c-body { max-width: 1040px; margin: 0 auto; padding: 40px 24px; }
+
+  /* Filter bar */
+  .c-filter { display: flex; gap: 8px; margin-bottom: 40px; align-items: center; flex-wrap: wrap; }
+  .c-search {
+    flex: 1; min-width: 200px; background: white; border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 16px; display: flex; align-items: center; gap: 8px; cursor: text;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .c-search-ph { font-size: 13px; color: #a0aec0; }
+  .c-chip { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; background: white; transition: all 0.15s; white-space: nowrap; }
+  .c-chip:hover { border-color: var(--teal-mid); color: var(--teal); }
+  .c-chip.active { background: var(--teal); border-color: var(--teal); color: white; }
+
+  /* Section */
+  .c-section { margin-bottom: 48px; }
+  .c-sec-hdr { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+  .c-sec-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--navy); }
+  .c-sec-count { font-size: 11px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 2px 9px; border-radius: 100px; font-family: 'DM Mono', monospace; }
+  .c-sec-accent { flex: 1; } /* spacer */
+
+  .c-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  .c-card {
+    background: white; border: 1px solid var(--border); border-radius: 14px; padding: 24px;
+    cursor: pointer; transition: all 0.2s; position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .c-card:hover { border-color: var(--teal-mid); box-shadow: 0 8px 24px rgba(13,124,110,0.1); transform: translateY(-2px); }
+  .c-card.featured { border-color: var(--teal-mid); border-width: 1.5px; }
+  .c-card.featured::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--navy), var(--teal)); border-radius: 14px 14px 0 0; }
+  .c-card.dimmed { opacity: 0.55; cursor: default; }
+  .c-card.dimmed:hover { transform: none; border-color: var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+
+  .c-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .c-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .icon-teal { background: var(--teal-light); }
+  .icon-gold { background: #fef3c7; }
+  .icon-gray { background: var(--surface); }
+
+  .c-badges { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+  .cb { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500; padding: 2px 8px; border-radius: 100px; letter-spacing: 0.05em; }
+  .cb-free { background: var(--teal-light); color: var(--teal); }
+  .cb-pro { background: #fef3c7; color: #92400e; }
+  .cb-new { background: #eff6ff; color: #1d4ed8; }
+  .cb-soon { background: var(--surface); color: var(--muted); }
+
+  .c-card-name { font-weight: 700; font-size: 15px; color: var(--navy); margin-bottom: 6px; }
+  .c-card-desc { font-size: 12px; color: var(--muted); line-height: 1.65; margin-bottom: 16px; }
+  .c-card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .c-tag { font-size: 10px; color: var(--muted); background: var(--surface); padding: 2px 8px; border-radius: 4px; font-family: 'DM Mono', monospace; }
+
+  /* Disclaimer */
+  .c-disclaimer {
+    margin-top: 48px; background: #fff7ed; border: 1px solid #fed7aa;
+    border-radius: 10px; padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+    font-size: 12px; color: #92400e;
+  }
+
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+</style>
+</head>
+<body>
+
+<!-- Switcher -->
+<div class="switcher">
+  <div class="sw-brand">Dosafy</div>
+  <div class="sw-tabs">
+    <div class="sw-tab active" onclick="show('landing', this)">Option A — Landing Page</div>
+    <div class="sw-tab" onclick="show('catalog', this)">Option B — Catalog Home</div>
+  </div>
+  <div class="sw-note">Click to switch</div>
+</div>
+
+<!-- ════════════ OPTION A ════════════ -->
+<div id="landing" class="preview active">
+
+  <nav class="l-nav">
+    <div class="l-brand"><div class="l-brand-dot"></div>Dosafy</div>
+    <div class="l-links">
+      <div class="l-link">Calculators</div>
+      <div class="l-link">For Hospitals</div>
+      <div class="l-link">Pricing</div>
+      <div class="l-link">About</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="l-login">Log In</div>
+      <div class="l-cta">Get Started Free</div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="l-hero">
+    <div>
+      <div class="l-hero-eyebrow"><span></span>Now in Beta — Free for Clinicians</div>
+      <div class="l-hero-title">Clinical dosing,<br><em>precisely calculated.</em></div>
+      <div class="l-hero-sub">Accurate, weight-based drug calculators built by pharmacists. Customizable to your institution's protocols. No Epic required.</div>
+      <div class="l-hero-actions">
+        <div class="btn-navy">Explore Calculators →</div>
+        <div class="btn-outline">For Hospitals</div>
+      </div>
+      <div class="l-trust">
+        <div class="l-trust-item"><span class="l-trust-icon">✓</span>Zero patient data stored</div>
+        <div class="l-trust-item"><span class="l-trust-icon">✓</span>Works on any device</div>
+        <div class="l-trust-item"><span class="l-trust-icon">✓</span>Built by pharmacists</div>
+      </div>
+    </div>
+    <div>
+      <div class="l-hero-card">
+        <div class="lhc-header">
+          <div class="lhc-title">Heparin Infusion</div>
+          <div class="lhc-badge">ACS Protocol</div>
+        </div>
+        <div class="lhc-row"><span class="lhc-label">Patient Weight</span><span class="lhc-val">85 <span class="lhc-unit">kg</span></span></div>
+        <div class="lhc-row"><span class="lhc-label">Bolus Dose</span><span class="lhc-val gold">5,000 <span class="lhc-unit">units</span></span></div>
+        <div class="lhc-row"><span class="lhc-label">Infusion Rate</span><span class="lhc-val">1,000 <span class="lhc-unit">units/hr</span></span></div>
+        <div class="lhc-result">
+          <div>
+            <div class="lhc-result-label">Initial Pump Rate</div>
+            <div class="lhc-result-unit">Set on Baxter Spectrum</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="lhc-result-val">20.0</div>
+            <div class="lhc-result-unit">mL / hr</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="l-stats">
+    <div class="l-stat"><div class="l-stat-num">8+</div><div class="l-stat-lbl">Calculators</div></div>
+    <div class="l-stat"><div class="l-stat-num">0</div><div class="l-stat-lbl">Patient Data Stored</div></div>
+    <div class="l-stat"><div class="l-stat-num">Any EMR</div><div class="l-stat-lbl">Compatible</div></div>
+    <div class="l-stat"><div class="l-stat-num">Free</div><div class="l-stat-lbl">To Get Started</div></div>
+  </div>
+
+  <!-- Features -->
+  <section class="l-features">
+    <div style="max-width:1040px;margin:0 auto;">
+      <div class="l-sec-eyebrow">Why Dosafy</div>
+      <div class="l-sec-title">Built for the bedside,<br>not the boardroom.</div>
+      <div class="l-sec-sub">Most clinical software is built by engineers. Dosafy is built by pharmacists who understand exactly what you need in the moment.</div>
+      <div class="l-feat-grid">
+        <div class="l-feat-card"><div class="l-feat-icon">⚖️</div><div class="l-feat-title">Institution Customizable</div><div class="l-feat-desc">Upload your own protocol nomograms. Every hospital is different — your calculator should be too.</div></div>
+        <div class="l-feat-card"><div class="l-feat-icon">🔒</div><div class="l-feat-title">Zero Patient Data</div><div class="l-feat-desc">No PHI ever stored or transmitted. Calculations run locally. Simplified HIPAA compliance.</div></div>
+        <div class="l-feat-card"><div class="l-feat-icon">📱</div><div class="l-feat-title">Works on Any Device</div><div class="l-feat-desc">Phone, tablet, or desktop. Use it at the bedside, nursing station, or from the pharmacy.</div></div>
+        <div class="l-feat-card"><div class="l-feat-icon">⚡</div><div class="l-feat-title">Instant Results</div><div class="l-feat-desc">Results appear as you type. Faster than any paper nomogram, more accurate than mental math.</div></div>
+        <div class="l-feat-card"><div class="l-feat-icon">🛡️</div><div class="l-feat-title">Error Prevention</div><div class="l-feat-desc">Weight limits, max dose caps, and out-of-range alerts catch errors before they reach the patient.</div></div>
+        <div class="l-feat-card"><div class="l-feat-icon">🏥</div><div class="l-feat-title">No Epic Required</div><div class="l-feat-desc">Works alongside Meditech, Cerner, CPSI, or paper. No IT approval needed to start today.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Calculator preview -->
+  <section class="l-calcs">
+    <div style="max-width:1040px;margin:0 auto;">
+      <div class="l-sec-eyebrow">Calculator Library</div>
+      <div class="l-sec-title">Everything you need,<br>in one place.</div>
+      <div class="l-calc-grid">
+        <div class="l-calc-card"><div class="l-calc-card-top"><span class="l-calc-chip chip-free">Free</span></div><div class="l-calc-name">Heparin Infusion</div><div class="l-calc-desc">Weight-based IV heparin with full PTT nomogram for ACS and DVT/VTE protocols.</div></div>
+        <div class="l-calc-card"><div class="l-calc-card-top"><span class="l-calc-chip chip-pro">Pro</span></div><div class="l-calc-name">Protamine Reversal</div><div class="l-calc-desc">Heparin reversal dosing based on total dose given and time since administration.</div></div>
+        <div class="l-calc-card"><div class="l-calc-card-top"><span class="l-calc-chip chip-pro">Pro</span></div><div class="l-calc-name">Vancomycin AUC/MIC</div><div class="l-calc-desc">Bayesian-guided vancomycin targeting AUC/MIC 400–600 per ASHP/IDSA guidelines.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="l-cta-section">
+    <div class="l-sec-eyebrow" style="text-align:center;">Get Started Today</div>
+    <div class="l-cta-title">Free for individual clinicians.<br>Customizable for your institution.</div>
+    <div class="l-cta-sub">No credit card required. Start calculating in seconds.</div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <div class="btn-navy">Create Free Account</div>
+      <div class="btn-outline">Request Hospital Demo</div>
+    </div>
+  </section>
+
+  <footer class="l-footer">
+    <div class="l-footer-brand">Dosafy</div>
+    <div class="l-footer-note">For educational and reference purposes only — not intended for clinical decision making</div>
+    <div class="l-footer-links">
+      <div class="l-footer-link">Privacy</div>
+      <div class="l-footer-link">Terms</div>
+      <div class="l-footer-link">Contact</div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ════════════ OPTION B ════════════ -->
+<div id="catalog" class="preview">
+  <div id="catalog">
+
+    <nav class="c-nav">
+      <div class="c-brand"><div class="c-brand-dot"></div>Dosafy</div>
+      <div class="c-nav-mid">
+        <div class="c-nav-item active">Calculators</div>
+        <div class="c-nav-item">For Hospitals</div>
+        <div class="c-nav-item">Pricing</div>
+        <div class="c-nav-item">About</div>
+      </div>
+      <div class="c-nav-right">
+        <div class="c-login">Log In</div>
+        <div class="c-signup">Sign Up Free</div>
+      </div>
+    </nav>
+
+    <!-- Compact hero -->
+    <div class="c-hero">
+      <div class="c-hero-inner">
+        <div class="c-hero-text">
+          <div class="c-hero-eyebrow">Clinical Calculator Library</div>
+          <div class="c-hero-title">Dosing tools built by pharmacists,<br>for every clinician.</div>
+          <div class="c-hero-sub">Accurate, weight-based calculators. Zero patient data stored. Works on any device.</div>
+        </div>
+        <div class="c-hero-stats">
+          <div class="c-stat"><div class="c-stat-num">8+</div><div class="c-stat-lbl">Calculators</div></div>
+          <div class="c-stat"><div class="c-stat-num">Free</div><div class="c-stat-lbl">To Start</div></div>
+          <div class="c-stat"><div class="c-stat-num">0</div><div class="c-stat-lbl">PHI Stored</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="c-body">
+
+      <!-- Filter bar -->
+      <div class="c-filter">
+        <div class="c-search"><span style="color:#a0aec0;">🔍</span><span class="c-search-ph">Search calculators...</span></div>
+        <div class="c-chip active">All</div>
+        <div class="c-chip">Anticoagulation</div>
+        <div class="c-chip">Antimicrobials</div>
+        <div class="c-chip">Endocrine</div>
+        <div class="c-chip">Renal</div>
+      </div>
+
+      <!-- Anticoagulation -->
+      <div class="c-section">
+        <div class="c-sec-hdr">
+          <div class="c-sec-title">Anticoagulation</div>
+          <div class="c-sec-count">2 available</div>
+        </div>
+        <div class="c-grid">
+          <div class="c-card featured">
+            <div class="c-card-top"><div class="c-icon icon-teal">💉</div><div class="c-badges"><span class="cb cb-free">FREE</span><span class="cb cb-new">NEW</span></div></div>
+            <div class="c-card-name">Heparin Infusion Calculator</div>
+            <div class="c-card-desc">Weight-based IV heparin for ACS and DVT/VTE with full PTT nomogram, hold instructions, and pump rate output.</div>
+            <div class="c-card-tags"><span class="c-tag">ACS</span><span class="c-tag">DVT/VTE</span><span class="c-tag">PTT Nomogram</span><span class="c-tag">Bolus + Rate</span></div>
+          </div>
+          <div class="c-card">
+            <div class="c-card-top"><div class="c-icon icon-gold">🔄</div><div class="c-badges"><span class="cb cb-pro">PRO</span></div></div>
+            <div class="c-card-name">Protamine Reversal</div>
+            <div class="c-card-desc">Heparin reversal dosing based on total dose given and time since last administration. Includes max dose caps.</div>
+            <div class="c-card-tags"><span class="c-tag">Dose-based</span><span class="c-tag">Time-based</span><span class="c-tag">Max caps</span></div>
+          </div>
+          <div class="c-card dimmed">
+            <div class="c-card-top"><div class="c-icon icon-gray">🩸</div><div class="c-badges"><span class="cb cb-soon">COMING SOON</span></div></div>
+            <div class="c-card-name">Argatroban Infusion</div>
+            <div class="c-card-desc">Weight-based argatroban for HIT with aPTT monitoring and titration guidance.</div>
+            <div class="c-card-tags"><span class="c-tag">HIT</span><span class="c-tag">aPTT</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Antimicrobials -->
+      <div class="c-section">
+        <div class="c-sec-hdr">
+          <div class="c-sec-title">Antimicrobials</div>
+          <div class="c-sec-count">1 available · 2 coming soon</div>
+        </div>
+        <div class="c-grid">
+          <div class="c-card">
+            <div class="c-card-top"><div class="c-icon icon-teal">🧬</div><div class="c-badges"><span class="cb cb-pro">PRO</span><span class="cb cb-new">NEW</span></div></div>
+            <div class="c-card-name">Vancomycin AUC/MIC</div>
+            <div class="c-card-desc">Bayesian-guided vancomycin dosing using two serum levels. Targets AUC/MIC 400–600 per ASHP/IDSA 2020 guidelines.</div>
+            <div class="c-card-tags"><span class="c-tag">Bayesian</span><span class="c-tag">AUC/MIC 400-600</span><span class="c-tag">Renal adjusted</span></div>
+          </div>
+          <div class="c-card dimmed">
+            <div class="c-card-top"><div class="c-icon icon-gray">💊</div><div class="c-badges"><span class="cb cb-soon">COMING SOON</span></div></div>
+            <div class="c-card-name">Aminoglycoside Dosing</div>
+            <div class="c-card-desc">Extended-interval and traditional dosing with CrCl-based renal adjustments and monitoring parameters.</div>
+            <div class="c-card-tags"><span class="c-tag">Extended interval</span><span class="c-tag">Renal dosing</span></div>
+          </div>
+          <div class="c-card dimmed">
+            <div class="c-card-top"><div class="c-icon icon-gray">🔬</div><div class="c-badges"><span class="cb cb-soon">COMING SOON</span></div></div>
+            <div class="c-card-name">Beta-Lactam TDM</div>
+            <div class="c-card-desc">PK/PD optimization for pip-tazo and meropenem with extended infusion protocols.</div>
+            <div class="c-card-tags"><span class="c-tag">PK/PD</span><span class="c-tag">Extended infusion</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Endocrine -->
+      <div class="c-section">
+        <div class="c-sec-hdr">
+          <div class="c-sec-title">Endocrine</div>
+          <div class="c-sec-count">Coming soon</div>
+        </div>
+        <div class="c-grid">
+          <div class="c-card dimmed">
+            <div class="c-card-top"><div class="c-icon icon-gray">🩺</div><div class="c-badges"><span class="cb cb-soon">COMING SOON</span></div></div>
+            <div class="c-card-name">Insulin Infusion</div>
+            <div class="c-card-desc">Weight-based insulin drip with glucose targets, dose adjustments, and hypoglycemia protocol.</div>
+            <div class="c-card-tags"><span class="c-tag">DKA</span><span class="c-tag">Hyperglycemia</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="c-disclaimer">
+        ⚠️ &nbsp; <strong>Educational reference only</strong> — Dosafy calculators are not intended for clinical decision making. Always verify doses with your institution's protocols.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id, tab) {
+  document.querySelectorAll('.preview').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sw-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  tab.classList.add('active');
+}
+</script>
+</body>
+</html>
