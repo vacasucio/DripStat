@@ -560,6 +560,7 @@ canvas{display:block;}
 .fhir-meds-btn:hover{background:var(--navy2);}
 .fhir-bar-active .calc-page-header,.fhir-bar-active .page-header{margin-top:52px;}
 @media(max-width:768px){#fhir-bar-inner{padding:0 16px;}#fhir-bar .fhir-tag{display:none;}}
+
 </style>
 </head>
 <body>
@@ -1357,7 +1358,7 @@ const PROTOCOLS={
       {label:'< 30 sec',min:0,max:29,type:'increase',bolus_per_kg:60,max_bolus:4000,rate_per_kg:2,hold:null,notify:true,redraw:6,note:'Notify MD if 2 consecutive results in this range'},
       {label:'30–49 sec',min:30,max:49,type:'increase',bolus_per_kg:30,max_bolus:2000,rate_per_kg:1,hold:null,notify:false,redraw:6,note:'Notify MD if 2 consecutive results in this range'},
       {label:'50–70 sec',min:50,max:70,type:'therapeutic',bolus_per_kg:0,max_bolus:0,rate_per_kg:0,hold:null,notify:false,redraw:6,note:'PTT daily if 2 consecutive therapeutic values'},
-      {label:'71–95 sec',min:71,max:95,type:'decrease',bolus_per_kg:0,max_bolus:0,rate_per_kg:-2,hold:null,notify:false,redraw:6,note:''},
+      {label:'71–95 sec',min:71,max:95,type:'decrease',bolus_per_kg:0,max_bolus:0,rate_per_kg:-2,hold:null,notify:false,redraw:6,note:'',warn_row:true},
       {label:'> 95 sec',min:96,max:9999,type:'hold',bolus_per_kg:0,max_bolus:0,rate_per_kg:-3,hold:60,notify:true,redraw:6,note:''},
     ]},
   DVT:{bolus_per_kg:80,max_bolus:8000,inf_per_kg_hr:18,max_inf:1800,
@@ -1365,7 +1366,7 @@ const PROTOCOLS={
       {label:'< 35 sec',min:0,max:34,type:'increase',bolus_per_kg:60,max_bolus:5000,rate_per_kg:4,hold:null,notify:true,redraw:6,note:''},
       {label:'35–59 sec',min:35,max:59,type:'increase',bolus_per_kg:30,max_bolus:3000,rate_per_kg:2,hold:null,notify:false,redraw:6,note:''},
       {label:'60–90 sec',min:60,max:90,type:'therapeutic',bolus_per_kg:0,max_bolus:0,rate_per_kg:0,hold:null,notify:false,redraw:6,note:'PTT daily if 2 consecutive therapeutic values'},
-      {label:'91–120 sec',min:91,max:120,type:'decrease',bolus_per_kg:0,max_bolus:0,rate_per_kg:-2,hold:null,notify:false,redraw:6,note:''},
+      {label:'91–120 sec',min:91,max:120,type:'decrease',bolus_per_kg:0,max_bolus:0,rate_per_kg:-2,hold:null,notify:false,redraw:6,note:'',warn_row:true},
       {label:'121–138 sec',min:121,max:138,type:'hold',bolus_per_kg:0,max_bolus:0,rate_per_kg:-3,hold:30,notify:false,redraw:6,note:''},
       {label:'> 139 sec',min:139,max:9999,type:'hold',bolus_per_kg:0,max_bolus:0,rate_per_kg:-4,hold:60,notify:true,redraw:6,note:''},
     ]}
@@ -1464,7 +1465,10 @@ function renderPTTRanges(){
   el.innerHTML=`<div class="ptt-ranges-hdr">PTT Ranges — ${ind}</div>`+ranges.map(r=>{
     const isActive=!isNaN(pttVal)&&pttVal>=r.min&&pttVal<=r.max;
     const action=typeof actionLabels[r.type]==='function'?actionLabels[r.type](r):actionLabels[r.type];
-    return `<div class="ptt-range-row ${isActive?'active':''}"><div class="ptt-dot" style="background:${dotColors[r.type]};${isActive?'box-shadow:0 0 0 3px rgba(13,124,110,.15);':''}"></div><span class="ptt-range-lbl">${r.label}</span><span class="ptt-range-action">${action}</span></div>`;
+    // warn_row = near-therapeutic high → amber/yellow background matching low-PTT color style
+    const rowBg=isActive?'background:var(--teal-light);':r.warn_row?'background:#fffbeb;':'';
+    const dotColor=r.warn_row&&!isActive?'#d97706':dotColors[r.type];
+    return `<div class="ptt-range-row" style="${rowBg}"><div class="ptt-dot" style="background:${dotColor};${isActive?'box-shadow:0 0 0 3px rgba(13,124,110,.15);':''}"></div><span class="ptt-range-lbl" style="${r.warn_row?'color:#92400e;font-weight:600;':''}">${r.label}</span><span class="ptt-range-action" style="${r.warn_row?'color:#92400e;':''}">${action}</span></div>`;
   }).join('');
 }
 
@@ -1478,6 +1482,11 @@ function calcPTT(){
   if(wKg>200){el.innerHTML=`<div class="error-card">⚠️ Weight > 200 kg — please verify before calculating</div>`;return;}
   if(isNaN(currentRate)||document.getElementById('ptt-current-rate').value===''){el.innerHTML=`<div class="result-empty"><div class="result-empty-icon">⚙️</div>Enter the current infusion rate to calculate adjustments</div>`;return;}
   if(isNaN(pttVal)||document.getElementById('ptt-val').value===''){el.innerHTML=`<div class="result-empty"><div class="result-empty-icon">🔬</div>Enter a PTT value to see adjustment instructions</div>`;return;}
+
+  const roundInc = 50;          // round adjusted rate to nearest 50 units/hr
+  const adminMaxRate = null;    // max rate cap — null = no cap
+  const adminMaxBolus = null;   // max bolus cap — null = use per-protocol limits
+
   const p=PROTOCOLS[ind];
   const range=p.ptt_ranges.find(r=>pttVal>=r.min&&pttVal<=r.max);
   if(!range) return;
@@ -1485,23 +1494,62 @@ function calcPTT(){
     el.innerHTML=`<div class="therapeutic-card"><div class="therapeutic-icon">✅</div><div class="therapeutic-title">Therapeutic Range</div><div class="therapeutic-sub">No dose adjustment required</div><div style="margin-top:12px;font-size:13px;color:#166534;">🕐 Draw PTT in ${range.redraw} hours${range.note?' · '+range.note:''}</div></div>`;
     return;
   }
-  const adjBolus=range.bolus_per_kg>0?Math.min(mround(wKg*range.bolus_per_kg,1000),range.max_bolus):0;
+
+  // Bolus — apply admin max bolus cap if configured
+  let adjBolus=range.bolus_per_kg>0?Math.min(mround(wKg*range.bolus_per_kg,1000),range.max_bolus):0;
+  const bolusCapSource = adminMaxBolus!=null && adjBolus>adminMaxBolus ? 'admin' : 'protocol';
+  if(adminMaxBolus!=null) adjBolus=Math.min(adjBolus,adminMaxBolus);
+
+  // Rate — round to admin rounding increment
   const rawRateChange=mround(Math.abs(range.rate_per_kg)*wKg,50);
   const cappedRateChange=capRate(rawRateChange,range.rate_per_kg);
   const rateSign=range.rate_per_kg>=0?1:-1;
-  const newRateUnits=Math.max(currentRate+(rateSign*cappedRateChange),0);
+  const newRateRaw=Math.max(currentRate+(rateSign*cappedRateChange),0);
+  const newRateUnits=mround(newRateRaw,roundInc); // rounded to admin increment
   const newRateMl=(newRateUnits/CONC).toFixed(1);
+
+  // Max rate cap check
+  const rateExceedsCap = adminMaxRate!=null && newRateUnits>adminMaxRate;
+
   const holdClass=!range.hold?'hold-none':range.hold===30?'hold-30':'hold-60';
   const holdText=!range.hold?'No Hold Required':`HOLD ${range.hold} Minutes`;
   const pttDrawMsg=range.note?`Draw PTT in ${range.redraw} hours · ${range.note}`:`Draw PTT in ${range.redraw} hours`;
   const rateDir=rateSign>0?'Increase':'Decrease';
   const rateColor=rateSign>0?'warn':'green';
+
+  // Critical alert content — subtherapeutic vs supratherapeutic
+  const isCritSubtherapeutic = range.notify && range.type==='increase';
+  const isCritSupratherapeutic = range.notify && range.type==='hold';
+
   let html=`<div class="ptt-result-card"><div class="ptt-result-header"><div class="ptt-result-title">◈ Adjustments · PTT ${pttVal} sec · ${ind} · ${wKg} kg</div><div class="hold-badge ${holdClass}">${holdText}</div></div>`;
-  if(range.notify) html+=`<div class="notify-banner"><div class="notify-text">📞 Notify Physician</div></div>`;
+  if(isCritSubtherapeutic) html+=`
+    <div style="background:#fef2f2;border-bottom:2px solid var(--red);padding:14px 20px;">
+      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px;">🚨 CRITICALLY SUBTHERAPEUTIC PTT</div>
+      <div style="font-size:12px;color:#7f1d1d;line-height:1.7;font-family:'DM Mono',monospace;">
+        1. Verify IV line patency and that infusion is running<br>
+        2. Confirm pump rate matches the last ordered rate<br>
+        3. Administer adjustment bolus and increase rate per below<br>
+        4. Notify physician immediately — two consecutive critical lows require MD re-evaluation<br>
+        5. Recheck PTT in 6 hours
+      </div>
+    </div>`;
+  if(isCritSupratherapeutic) html+=`
+    <div style="background:#fef2f2;border-bottom:2px solid var(--red);padding:14px 20px;">
+      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px;">🚨 CRITICALLY SUPRATHERAPEUTIC PTT</div>
+      <div style="font-size:12px;color:#7f1d1d;line-height:1.7;font-family:'DM Mono',monospace;">
+        1. HOLD infusion immediately per hold duration below<br>
+        2. Assess patient for signs of bleeding: hematuria, neurological changes, hematoma, GI bleeding<br>
+        3. Notify physician immediately<br>
+        4. Do NOT restart infusion without physician order<br>
+        5. Recheck PTT in 6 hours after infusion resumes
+      </div>
+    </div>`;
+  if(range.notify&&!isCritSubtherapeutic&&!isCritSupratherapeutic) html+=`<div class="notify-banner"><div class="notify-text">📞 Notify Physician</div></div>`;
+  if(rateExceedsCap) html+=`<div class="notify-banner" style="background:#fef2f2;border-color:#fecaca;"><div class="notify-text" style="color:var(--red);">🚫 Rate ${newRateUnits.toLocaleString()} units/hr exceeds institutional cap of ${adminMaxRate.toLocaleString()} units/hr — Pharmacist review required before administration</div></div>`;
   html+=`<div class="ptt-action-rows">`;
-  if(adjBolus>0) html+=`<div class="ptt-action-row"><div class="ptt-action-icon">💉</div><div class="ptt-action-content"><div class="ptt-action-label">Adjustment Bolus</div><div class="ptt-action-value warn">${adjBolus.toLocaleString()} units</div><div class="ptt-action-sub">${range.bolus_per_kg} units/kg × ${wKg} kg → nearest 1,000 (max ${range.max_bolus.toLocaleString()})</div></div></div>`;
+  if(adjBolus>0) html+=`<div class="ptt-action-row"><div class="ptt-action-icon">💉</div><div class="ptt-action-content"><div class="ptt-action-label">Adjustment Bolus</div><div class="ptt-action-value warn">${adjBolus.toLocaleString()} units</div><div class="ptt-action-sub">${range.bolus_per_kg} units/kg × ${wKg} kg → nearest 1,000 · ${bolusCapSource==='admin'?'capped at '+adminMaxBolus.toLocaleString()+' (admin setting)':'max '+range.max_bolus.toLocaleString()+' (protocol)'}</div></div></div>`;
   html+=`<div class="ptt-action-row"><div class="ptt-action-icon">⚙️</div><div class="ptt-action-content"><div class="ptt-action-label">${rateDir} Rate By</div><div class="ptt-action-value ${rateColor}">${cappedRateChange.toLocaleString()} units/hr</div><div class="ptt-action-sub">${Math.abs(range.rate_per_kg)} units/kg/hr × ${wKg} kg → nearest 50${cappedRateChange<rawRateChange?' · capped at '+(Math.abs(range.rate_per_kg)*100).toLocaleString()+' units/hr max':''}</div></div></div>
-  <div class="ptt-action-row" style="background:var(--teal-light);"><div class="ptt-action-icon">🔧</div><div class="ptt-action-content"><div class="ptt-action-label">New Pump Rate</div><div class="ptt-action-value teal">${newRateMl} mL/hr</div><div class="ptt-action-sub">${newRateUnits.toLocaleString()} units/hr ÷ ${CONC} units/mL · (from ${currentRate.toLocaleString()} ${rateSign>0?'+':'−'} ${cappedRateChange.toLocaleString()})</div></div></div>
+  <div class="ptt-action-row" style="background:${rateExceedsCap?'#fef2f2':'var(--teal-light)'};${rateExceedsCap?'border-left:3px solid var(--red);':''}"><div class="ptt-action-icon">🔧</div><div class="ptt-action-content"><div class="ptt-action-label">New Pump Rate</div><div class="ptt-action-value ${rateExceedsCap?'red':'teal'}">${newRateMl} mL/hr</div><div class="ptt-action-sub">${newRateUnits.toLocaleString()} units/hr ÷ ${CONC} units/mL · rounded to nearest ${roundInc} · (from ${currentRate.toLocaleString()} ${rateSign>0?'+':'−'} ${cappedRateChange.toLocaleString()})</div></div></div>
   <div class="ptt-action-row"><div class="ptt-action-icon">🕐</div><div class="ptt-action-content"><div class="ptt-action-label">Next PTT Draw</div><div class="ptt-action-value navy" style="font-size:15px;font-family:'Instrument Sans',sans-serif;font-weight:600;">${pttDrawMsg}</div></div></div>`;
   html+=`</div></div>
   <button class="program-pump-btn" onclick="openPumpModal('${newRateMl}','${newRateUnits}','Heparin 25,000 units / 500 mL','50')">
