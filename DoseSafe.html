@@ -613,14 +613,14 @@ canvas{display:block;}
 
 <!-- ══ MEDICATIONS MODAL ══ -->
 <div id="meds-modal" style="display:none;">
-  <div class="pump-modal-overlay" onclick="if(event.target===this)document.getElementById('meds-modal').style.display='none'">
+  <div class="pump-modal-overlay" onclick="if(event.target===this)closeMedsModal()">
     <div class="pump-modal" onclick="event.stopPropagation()" style="max-width:720px;">
       <div class="pump-modal-header">
         <div>
           <div class="pump-modal-title">💊 Active Medications</div>
           <div class="pump-modal-sub" id="meds-modal-sub">From FHIR · Active orders</div>
         </div>
-        <div class="pump-modal-close" onclick="document.getElementById('meds-modal').style.display='none'">✕</div>
+        <div class="pump-modal-close" onclick="closeMedsModal()">✕</div>
       </div>
       <div id="meds-modal-content" style="padding:0 24px 24px;max-height:65vh;overflow-y:auto;"></div>
     </div>
@@ -2940,9 +2940,11 @@ function openMedsModal() {
 
   modal.style.display = 'block';
   document.body.style.overflow = 'hidden';
-  modal.querySelector('.pump-modal-overlay').onclick = function(e) {
-    if (e.target === this) { modal.style.display = 'none'; document.body.style.overflow = ''; }
-  };
+}
+
+function closeMedsModal() {
+  document.getElementById('meds-modal').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 // ── Init ──
