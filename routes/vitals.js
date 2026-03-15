@@ -9,6 +9,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const { TEST_PATIENT_ID, vitals: mockVitals, patient: mockPatient } = require('../testData');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
 
@@ -69,6 +70,13 @@ function formatVital(obs) {
 // GET /api/vitals/:patientId — snapshot of latest vitals
 router.get('/:patientId', async (req, res) => {
   const { patientId } = req.params;
+  if (patientId === TEST_PATIENT_ID) return res.json({
+    patientId,
+    weight:    mockVitals.weightTrend[0],
+    height:    { id: 'mock-ht-001', date: new Date().toISOString(), status: 'final', value: mockPatient.height.value, unit: mockPatient.height.unit, components: null },
+    temperature: null, heartRate: null, respiratoryRate: null, oxygenSaturation: null,
+    _isMock: true,
+  });
   try {
     const [weightList, heightList, tempList, hrList, rrList, o2List] = await Promise.all([
       fetchVital(patientId, LOINC.WEIGHT, 1),
@@ -96,6 +104,7 @@ router.get('/:patientId', async (req, res) => {
 // GET /api/vitals/:patientId/weight — weight trend for dosing calculations
 router.get('/:patientId/weight', async (req, res) => {
   const { patientId } = req.params;
+  if (patientId === TEST_PATIENT_ID) return res.json(mockVitals);
   const count = Math.min(parseInt(req.query.count) || 30, 100);
   try {
     const list = await fetchVital(patientId, LOINC.WEIGHT, count);

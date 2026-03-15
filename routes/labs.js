@@ -10,6 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const { TEST_PATIENT_ID, labs: mockLabs } = require('../testData');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
 
@@ -56,6 +57,7 @@ function formatObs(obs) {
 // GET /api/labs/:patientId — all latest labs in one call
 router.get('/:patientId', async (req, res) => {
   const { patientId } = req.params;
+  if (patientId === TEST_PATIENT_ID) return res.json(mockLabs);
   try {
     const [scrList, pttList, vancoList, bunList] = await Promise.all([
       fetchObs(patientId, LOINC.SCR, 1),
@@ -80,6 +82,7 @@ router.get('/:patientId', async (req, res) => {
 // GET /api/labs/:patientId/scr
 router.get('/:patientId/scr', async (req, res) => {
   const { patientId } = req.params;
+  if (patientId === TEST_PATIENT_ID) return res.json({ patientId, serumCreatinine: [mockLabs.serumCreatinine] });
   try {
     const list = await fetchObs(patientId, LOINC.SCR, 5);
     res.json({ patientId, serumCreatinine: list.map(formatObs) });
@@ -91,6 +94,7 @@ router.get('/:patientId/scr', async (req, res) => {
 // GET /api/labs/:patientId/ptt
 router.get('/:patientId/ptt', async (req, res) => {
   const { patientId } = req.params;
+  if (patientId === TEST_PATIENT_ID) return res.json({ patientId, ptt: [mockLabs.ptt] });
   try {
     const list = await fetchObs(patientId, LOINC.PTT, 5);
     res.json({ patientId, ptt: list.map(formatObs) });
@@ -102,6 +106,7 @@ router.get('/:patientId/ptt', async (req, res) => {
 // GET /api/labs/:patientId/vancomycin
 router.get('/:patientId/vancomycin', async (req, res) => {
   const { patientId } = req.params;
+  if (patientId === TEST_PATIENT_ID) return res.json({ patientId, vancomycinTroughs: [] });
   const count = Math.min(parseInt(req.query.count) || 10, 50);
   try {
     const list = await fetchObs(patientId, LOINC.VANCOMYCIN, count);
@@ -114,6 +119,7 @@ router.get('/:patientId/vancomycin', async (req, res) => {
 // GET /api/labs/:patientId/bun
 router.get('/:patientId/bun', async (req, res) => {
   const { patientId } = req.params;
+  if (patientId === TEST_PATIENT_ID) return res.json({ patientId, bun: [mockLabs.bun] });
   try {
     const list = await fetchObs(patientId, LOINC.BUN, 5);
     res.json({ patientId, bun: list.map(formatObs) });

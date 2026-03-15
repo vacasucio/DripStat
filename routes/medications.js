@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const { TEST_PATIENT_ID, medications: mockMeds } = require('../testData');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
 
@@ -65,6 +66,7 @@ function formatMedRequest(mr) {
 // GET /api/medications/:patientId
 router.get('/:patientId', async (req, res) => {
   const { patientId } = req.params;
+  if (patientId === TEST_PATIENT_ID) return res.json(mockMeds);
   const status = req.query.status || 'active';
   const count = Math.min(parseInt(req.query.count) || 50, 100);
 

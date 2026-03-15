@@ -979,6 +979,7 @@ canvas{display:block;}
             <div class="form-field">
               <label class="form-label">Current PTT (seconds)</label>
               <input type="number" class="form-input" id="ptt-val" placeholder="Enter PTT value" min="0" max="500" oninput="calcPTT()">
+              <div id="ptt-fhir-date" style="display:none;margin-top:6px;font-size:11px;font-family:'DM Mono',monospace;"></div>
             </div>
             <div class="ptt-ranges" id="ptt-ranges-display">
               <div class="ptt-ranges-hdr">PTT Ranges</div>
@@ -2800,12 +2801,53 @@ function populateFHIRFields(patient, labs, weightData) {
   }
 
   const pttVal = labs.ptt?.value;
+  const pttDate = labs.ptt?.date ?? null;
   const vancoTrough = labs.vancomycinTroughs?.[0]?.value;
 
   // — Heparin calculator —
   fhirFill('weight', weightKg);
   fhirFill('ptt-weight', weightKg);
   if (pttVal != null) fhirFill('ptt-val', pttVal);
+
+  // PTT draw timestamp
+  const pttDateEl = document.getElementById('ptt-fhir-date');
+  if (pttDateEl) {
+    if (pttVal != null && pttDate) {
+      const drawn = new Date(pttDate);
+      const ageHours = (Date.now() - drawn.getTime()) / 3600000;
+      const label = drawn.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+      let color = 'var(--muted)';
+      let prefix = 'Drawn: ';
+      if (ageHours > 24) { color = 'var(--red)'; prefix = '⚠ Drawn: '; }
+      else if (ageHours > 6) { color = '#d97706'; prefix = '⚠ Drawn: '; }
+      pttDateEl.style.display = 'block';
+      pttDateEl.style.color = color;
+      pttDateEl.textContent = prefix + label;
+    } else {
+      pttDateEl.style.display = 'none';
+    }
+  }
+
+  // Heparin drip rate from active medications
+  if (_fhirMeds?.medications) {
+    const heparinDrip = _fhirMeds.medications.find(m => {
+      const name = (m.medicationName || '').toLowerCase();
+      return name.includes('heparin') && m.dosages?.some(d =>
+        (d.route || '').toLowerCase().includes('iv') ||
+        (d.timing || '').toLowerCase().includes('infusion') ||
+        (d.text || '').toLowerCase().includes('infusion') ||
+        (d.doseQuantity?.unit || '').toLowerCase().includes('/hr')
+      );
+    });
+    if (heparinDrip) {
+      const dripDose = heparinDrip.dosages.find(d =>
+        (d.doseQuantity?.unit || '').toLowerCase().includes('/hr')
+      );
+      if (dripDose?.doseQuantity?.value != null) {
+        fhirFill('ptt-current-rate', dripDose.doseQuantity.value);
+      }
+    }
+  }
 
   // — Vancomycin calculator (both modes) —
   ['m1', 'm2'].forEach(m => {

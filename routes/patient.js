@@ -9,6 +9,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const { TEST_PATIENT_ID, patient: mockPatient } = require('../testData');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
 
@@ -53,6 +54,7 @@ function extractQuantity(obs) {
 // GET /api/patient/:id
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
+  if (id === TEST_PATIENT_ID) return res.json(mockPatient);
   try {
     const [patientRes, weightObs, heightObs] = await Promise.all([
       axios.get(`${FHIR_BASE}/Patient/${id}`, { headers: { Accept: 'application/fhir+json' } }),
