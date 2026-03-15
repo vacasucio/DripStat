@@ -541,6 +541,25 @@ canvas{display:block;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.85);}}
 @media(max-width:900px){.calc-layout,.ptt-layout{grid-template-columns:1fr;}.calc-inputs-card{position:static;}}
 @media(max-width:768px){.hero{padding:70px 24px 80px;}.stats-strip{grid-template-columns:repeat(2,1fr);padding:40px 24px;}.feat-grid,.calc-prev-grid,.proof-grid,.hosp-grid,.cat-grid{grid-template-columns:1fr;}.section,.cat-hero{padding:60px 24px;}.nav{padding:0 20px;}.nav-links{display:none;}.footer-top{flex-direction:column;gap:32px;}.footer-cols{gap:32px;flex-wrap:wrap;}.cat-hero-inner{flex-direction:column;gap:24px;}.rounding-grid{grid-template-columns:1fr;}}
+
+/* ── FHIR bar ── */
+#fhir-bar{position:fixed;top:var(--nav-h);left:0;right:0;z-index:150;background:rgba(230,244,242,0.97);border-bottom:1px solid var(--teal-mid);backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(13,124,110,.1);}
+#fhir-bar-inner{max-width:1100px;margin:0 auto;padding:0 48px;display:flex;align-items:center;gap:10px;height:52px;flex-wrap:nowrap;}
+.fhir-pid-input{background:white;border:1.5px solid var(--teal-mid);color:var(--text);border-radius:8px;padding:7px 13px;font-size:13px;font-family:'Instrument Sans',sans-serif;outline:none;width:220px;transition:border-color .2s;}
+.fhir-pid-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,124,110,.12);}
+.fhir-load-btn{background:var(--teal);color:white;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;white-space:nowrap;transition:background .2s;flex-shrink:0;}
+.fhir-load-btn:hover{background:#0a6358;}
+.fhir-load-btn:disabled{opacity:.6;cursor:not-allowed;}
+.fhir-tag{display:inline-flex;align-items:center;gap:4px;background:white;border:1px solid var(--teal-mid);border-radius:6px;padding:3px 9px;font-size:11px;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;}
+.fhir-tag-lbl{color:var(--muted);font-size:10px;}
+.fhir-tag-val{color:var(--navy);font-weight:700;}
+.fhir-tag-val.warn{color:var(--red);}
+.fhir-tag-val.gold{color:var(--gold);}
+.fhir-field-loaded{border-color:var(--teal)!important;background:#e6f4f2!important;}
+.fhir-meds-btn{background:var(--navy);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.03em;white-space:nowrap;transition:background .2s;flex-shrink:0;}
+.fhir-meds-btn:hover{background:var(--navy2);}
+.fhir-bar-active .calc-page-header,.fhir-bar-active .page-header{margin-top:52px;}
+@media(max-width:768px){#fhir-bar-inner{padding:0 16px;}#fhir-bar .fhir-tag{display:none;}}
 </style>
 </head>
 <body>
@@ -579,6 +598,34 @@ canvas{display:block;}
     <div class="nav-cta" onclick="showPage('catalog')">Get Started Free</div>
   </div>
 </nav>
+
+<!-- ══ FHIR PATIENT BAR ══ -->
+<div id="fhir-bar" style="display:none;">
+  <div id="fhir-bar-inner">
+    <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);white-space:nowrap;flex-shrink:0;">⬡ FHIR Patient</span>
+    <input id="fhir-pid-input" class="fhir-pid-input" type="text" placeholder="Enter patient ID (e.g. 12724066)" onkeydown="if(event.key==='Enter')loadFHIRPatient()">
+    <button id="fhir-load-btn" class="fhir-load-btn" onclick="loadFHIRPatient()">Load Patient</button>
+    <div id="fhir-status" style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;"></div>
+    <div id="fhir-summary" style="display:none;align-items:center;gap:6px;flex-wrap:nowrap;overflow:hidden;flex:1;min-width:0;"></div>
+    <button id="fhir-meds-btn" class="fhir-meds-btn" style="display:none;" onclick="openMedsModal()">💊 Medications</button>
+  </div>
+</div>
+
+<!-- ══ MEDICATIONS MODAL ══ -->
+<div id="meds-modal" style="display:none;">
+  <div class="pump-modal-overlay" onclick="if(event.target===this)document.getElementById('meds-modal').style.display='none'">
+    <div class="pump-modal" onclick="event.stopPropagation()" style="max-width:720px;">
+      <div class="pump-modal-header">
+        <div>
+          <div class="pump-modal-title">💊 Active Medications</div>
+          <div class="pump-modal-sub" id="meds-modal-sub">From FHIR · Active orders</div>
+        </div>
+        <div class="pump-modal-close" onclick="document.getElementById('meds-modal').style.display='none'">✕</div>
+      </div>
+      <div id="meds-modal-content" style="padding:0 24px 24px;max-height:65vh;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════
      PAGE 1: LANDING
@@ -1281,6 +1328,9 @@ function showPage(id) {
   if(id==='catalog'||id==='heparin'||id==='vancomycin') document.getElementById('nl-calc').classList.add('active');
   document.getElementById('nav-back').style.display=(id==='heparin'||id==='vancomycin')?'flex':'none';
   if(id==='heparin'){syncFromInit();renderPTTRanges();}
+  const onCalc = id==='heparin'||id==='vancomycin';
+  document.getElementById('fhir-bar').style.display = onCalc ? '' : 'none';
+  document.body.classList.toggle('fhir-bar-active', onCalc);
 }
 
 function switchCalcTab(tab) {
@@ -2687,6 +2737,212 @@ function getPumpSteps(brand){
       <div class="pump-step-num">${i+1}</div>
       <div class="pump-step-text"><strong>${s.t}</strong> — ${s.d}</div>
     </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// FHIR PATIENT INTEGRATION
+// Fetches from the local Express/FHIR proxy (server.js)
+// ══════════════════════════════════════
+
+const FHIR_API = '';   // same origin — served by Express
+let _fhirPatient = null, _fhirLabs = null, _fhirMeds = null;
+
+async function loadFHIRPatient() {
+  const pidInput = document.getElementById('fhir-pid-input');
+  const patientId = pidInput ? pidInput.value.trim() : '';
+  if (!patientId) { setFHIRStatus('Enter a patient ID.', 'warn'); return; }
+
+  const btn = document.getElementById('fhir-load-btn');
+  if (btn) btn.disabled = true;
+  setFHIRStatus('Loading…', 'loading');
+  document.getElementById('fhir-summary').style.display = 'none';
+  document.getElementById('fhir-meds-btn').style.display = 'none';
+
+  try {
+    const [patient, labs, weightData, meds] = await Promise.all([
+      fetch(`${FHIR_API}/api/patient/${patientId}`).then(r => { if (!r.ok) throw new Error('Patient not found (HTTP ' + r.status + ')'); return r.json(); }),
+      fetch(`${FHIR_API}/api/labs/${patientId}`).then(r => r.json()),
+      fetch(`${FHIR_API}/api/vitals/${patientId}/weight`).then(r => r.json()),
+      fetch(`${FHIR_API}/api/medications/${patientId}`).then(r => r.json()),
+    ]);
+
+    _fhirPatient = patient;
+    _fhirLabs = labs;
+    _fhirMeds = meds;
+
+    populateFHIRFields(patient, labs, weightData);
+    renderFHIRSummary(patient, labs, meds);
+    setFHIRStatus('', 'ok');
+  } catch (err) {
+    setFHIRStatus('⚠ ' + err.message, 'error');
+    console.error('[FHIR]', err);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function populateFHIRFields(patient, labs, weightData) {
+  // Demographics
+  const age = patient.age;
+  const sex = patient.gender === 'male' ? 'M' : patient.gender === 'female' ? 'F' : '';
+  const weightKg = patient.weight?.value != null
+    ? Math.round(patient.weight.value)
+    : (weightData.stats?.latest != null ? Math.round(weightData.stats.latest) : null);
+  const heightCm = patient.height?.value != null ? Math.round(patient.height.value) : null;
+
+  // SCr: convert mcmol/L → mg/dL (÷ 88.4) if needed
+  let scrMgDl = null;
+  if (labs.serumCreatinine?.value != null) {
+    const unit = (labs.serumCreatinine.unit || '').toLowerCase();
+    scrMgDl = (unit.includes('mcmol') || unit.includes('µmol') || unit.includes('umol'))
+      ? parseFloat((labs.serumCreatinine.value / 88.4).toFixed(2))
+      : labs.serumCreatinine.value;
+  }
+
+  const pttVal = labs.ptt?.value;
+  const vancoTrough = labs.vancomycinTroughs?.[0]?.value;
+
+  // — Heparin calculator —
+  fhirFill('weight', weightKg);
+  fhirFill('ptt-weight', weightKg);
+  if (pttVal != null) fhirFill('ptt-val', pttVal);
+
+  // — Vancomycin calculator (both modes) —
+  ['m1', 'm2'].forEach(m => {
+    fhirFill(`${m}-age`, age);
+    fhirFillSelect(`${m}-sex`, sex);
+    if (currentUnits === 'metric') {
+      fhirFill(`${m}-wt`, weightKg);
+      fhirFill(`${m}-ht`, heightCm);
+    } else {
+      fhirFill(`${m}-wt`, weightKg != null ? Math.round(weightKg * 2.20462) : null);
+      fhirFill(`${m}-ht`, heightCm != null ? Math.round(heightCm / 2.54) : null);
+    }
+    fhirFill(`${m}-scr`, scrMgDl);
+  });
+
+  // Vancomycin mode 2 trough from most recent FHIR level
+  if (vancoTrough != null) fhirFill('m2-trough', vancoTrough);
+
+  // Trigger downstream recalculations
+  const wEl = document.getElementById('weight');
+  if (wEl && weightKg) { wEl.value = weightKg; }
+  calcInitial();
+  syncFromInit();
+  renderPTTRanges();
+  calcPTT();
+  updateCrClBadge(1);
+  updateCrClBadge(2);
+}
+
+// Set input value + FHIR highlight class
+function fhirFill(id, value) {
+  if (value == null) return;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = value;
+  el.classList.add('fhir-field-loaded');
+  el.title = 'Auto-populated from FHIR';
+}
+
+function fhirFillSelect(id, value) {
+  if (!value) return;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = value;
+  el.classList.add('fhir-field-loaded');
+}
+
+function renderFHIRSummary(patient, labs, meds) {
+  const summary = document.getElementById('fhir-summary');
+  if (!summary) return;
+
+  // SCr display
+  const scr = labs.serumCreatinine;
+  let scrDisplay = null;
+  if (scr?.value != null) {
+    const unit = (scr.unit || '').toLowerCase();
+    scrDisplay = (unit.includes('mcmol') || unit.includes('umol'))
+      ? (scr.value / 88.4).toFixed(2) + ' mg/dL'
+      : scr.value + ' ' + (scr.unit || '');
+  }
+
+  const ptt = labs.ptt?.value != null ? labs.ptt.value + ' s' : null;
+  const bun = labs.bun?.value != null ? labs.bun.value + ' ' + (labs.bun.unit || '') : null;
+  const vanco = labs.vancomycinTroughs?.[0]?.value != null
+    ? labs.vancomycinTroughs[0].value + ' mg/L' : null;
+  const wt = patient.weight?.value != null ? patient.weight.value + ' kg' : null;
+  const ht = patient.height?.value != null ? patient.height.value + ' cm' : null;
+
+  const tag = (lbl, val, cls = '') => val
+    ? `<span class="fhir-tag"><span class="fhir-tag-lbl">${lbl}</span><span class="fhir-tag-val${cls ? ' ' + cls : ''}">${val}</span></span>`
+    : '';
+
+  const pttClass = ptt && parseFloat(labs.ptt.value) > 90 ? 'warn' : '';
+
+  summary.innerHTML = `
+    <span style="font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap;flex-shrink:0;">${patient.name}</span>
+    ${tag('Sex', patient.gender ? patient.gender.charAt(0).toUpperCase() : null)}
+    ${tag('Age', patient.age ? patient.age + 'y' : null)}
+    ${tag('Wt', wt)}
+    ${tag('Ht', ht)}
+    ${tag('SCr', scrDisplay)}
+    ${tag('PTT', ptt, pttClass)}
+    ${tag('BUN', bun)}
+    ${tag('Vanco', vanco, 'gold')}
+  `;
+  summary.style.display = 'flex';
+
+  // Show meds button if data available
+  const medsBtn = document.getElementById('fhir-meds-btn');
+  if (medsBtn && meds?.medications?.length) medsBtn.style.display = '';
+}
+
+function setFHIRStatus(msg, type) {
+  const el = document.getElementById('fhir-status');
+  if (!el) return;
+  const colors = { loading: 'var(--muted)', ok: 'var(--green)', error: 'var(--red)', warn: '#92400e' };
+  el.style.color = colors[type] || 'var(--muted)';
+  el.textContent = msg;
+}
+
+function openMedsModal() {
+  if (!_fhirMeds) return;
+  const modal = document.getElementById('meds-modal');
+  const content = document.getElementById('meds-modal-content');
+  const sub = document.getElementById('meds-modal-sub');
+  if (!modal || !content) return;
+
+  const meds = _fhirMeds.medications || [];
+  if (sub) sub.textContent = `${_fhirPatient?.name || 'Patient'} · ${meds.length} active order${meds.length !== 1 ? 's' : ''} · Source: FHIR`;
+
+  if (meds.length === 0) {
+    content.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px;">No active medications found.</div>';
+  } else {
+    content.innerHTML = '<div style="padding-top:8px;">' + meds.map(med => {
+      const d = med.dosages?.[0];
+      const doseText = d?.text || [
+        d?.doseQuantity ? `${d.doseQuantity.value} ${d.doseQuantity.unit}` : '',
+        d?.route || '',
+        d?.timing || d?.frequency?.display || ''
+      ].filter(Boolean).join(' · ');
+      const dateStr = med.authoredOn ? new Date(med.authoredOn).toLocaleDateString() : '';
+      return `<div style="padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:14px;color:var(--navy);margin-bottom:3px;">${med.medicationName || 'Unknown medication'}</div>
+          ${doseText ? `<div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;">${doseText}</div>` : ''}
+          ${med.requester ? `<div style="font-size:11px;color:#b0bec5;margin-top:2px;">${med.requester}${dateStr ? ' · ' + dateStr : ''}</div>` : ''}
+        </div>
+        <span style="flex-shrink:0;font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:100px;background:var(--teal-light);color:var(--teal);border:1px solid var(--teal-mid);margin-top:2px;">active</span>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  modal.querySelector('.pump-modal-overlay').onclick = function(e) {
+    if (e.target === this) { modal.style.display = 'none'; document.body.style.overflow = ''; }
+  };
 }
 
 // ── Init ──
