@@ -906,7 +906,10 @@ canvas{display:block;}
           <div class="form-field">
             <label class="form-label">Patient Weight (kg)</label>
             <input type="number" class="form-input" id="weight" placeholder="Enter weight in kg" min="1" max="500" oninput="calcInitial()" onblur="roundWeight()">
-            <div class="conc-badge">⬡ 25,000 units / 500 mL = 50 units/mL</div>
+            <select class="form-select" id="init-conc" onchange="calcInitial()" style="margin-top:10px;font-size:13px;">
+            <option value="50">⬡ 25,000 units / 500 mL (50 units/mL)</option>
+            <option value="100">⬡ 25,000 units / 250 mL (100 units/mL)</option>
+          </select>
           </div>
           <div class="form-section-title" style="margin-top:24px;">Protocol Reference</div>
           <div class="lookup-card">
@@ -975,6 +978,13 @@ canvas{display:block;}
               <label class="form-label">Current Infusion Rate (units/hr)</label>
               <input type="number" class="form-input" id="ptt-current-rate" placeholder="e.g. 1000" min="0" oninput="calcPTT()">
               <div style="margin-top:6px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">Auto-filled from Initial Dosing tab if completed</div>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Heparin Concentration</label>
+              <select class="form-select" id="ptt-conc" onchange="calcPTT()">
+                <option value="50">25,000 units / 500 mL (50 units/mL)</option>
+                <option value="100">25,000 units / 250 mL (100 units/mL)</option>
+              </select>
             </div>
             <div class="form-section-title" style="margin-top:4px;">PTT Result</div>
             <div class="form-field">
@@ -1391,12 +1401,15 @@ function calcInitial(){
   const p=PROTOCOLS[ind];
   const bolus=Math.min(mround(p.bolus_per_kg*wKg,50),p.max_bolus);
   const infUnits=Math.min(mround(p.inf_per_kg_hr*wKg,50),p.max_inf);
-  const infMl=(infUnits/CONC).toFixed(1);
+  const conc = parseInt(document.getElementById('init-conc')?.value || '50');
+  const vtbi = conc === 100 ? 250 : 500;
+  const infMl=(infUnits/conc).toFixed(1);
+  const drugLabel=`Heparin 25,000 units / ${vtbi} mL`;
   el.innerHTML=`
     <div class="result-card">
       <div class="result-card-header">◈ Results · ${ind} · ${wKg} kg</div>
       <div class="result-row primary-row">
-        <div class="result-meta"><div class="result-name">Initial Pump Rate</div><div class="result-formula">${infUnits.toLocaleString()} units/hr ÷ ${CONC} units/mL</div></div>
+        <div class="result-meta"><div class="result-name">Initial Pump Rate</div><div class="result-formula">${infUnits.toLocaleString()} units/hr ÷ ${conc} units/mL</div></div>
         <div><div class="result-value teal">${infMl}</div><div class="result-unit">mL / hr</div></div>
       </div>
       <div class="result-row secondary-row">
@@ -1421,7 +1434,7 @@ function calcInitial(){
     <div style="background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:8px;margin-top:4px;">
       ⚠️ For educational & reference use only. Draw PTT in 4 hours then follow PTT adjustment nomogram.
     </div>
-    <button class="program-pump-btn" onclick="openPumpModal('${infMl}','${infUnits}','Heparin 25,000 units / 500 mL','50')">
+    <button class="program-pump-btn" onclick="openPumpModal('${infMl}','${infUnits}','${drugLabel}','${conc}',${vtbi})">
       🖥️ How to Program the Pump
     </button>`;
 }
@@ -1483,45 +1496,66 @@ function calcPTT(){
   if(isNaN(currentRate)||document.getElementById('ptt-current-rate').value===''){el.innerHTML=`<div class="result-empty"><div class="result-empty-icon">⚙️</div>Enter the current infusion rate to calculate adjustments</div>`;return;}
   if(isNaN(pttVal)||document.getElementById('ptt-val').value===''){el.innerHTML=`<div class="result-empty"><div class="result-empty-icon">🔬</div>Enter a PTT value to see adjustment instructions</div>`;return;}
 
-  const roundInc = 50;          // round adjusted rate to nearest 50 units/hr
-  const adminMaxRate = null;    // max rate cap — null = no cap
-  const adminMaxBolus = null;   // max bolus cap — null = use per-protocol limits
+  const roundInc = 50;
+  const conc = parseInt(document.getElementById('ptt-conc')?.value || '50');
+  const vtbi = conc === 100 ? 250 : 500;
+  const drugLabel = `Heparin 25,000 units / ${vtbi} mL`;
+
+  // Amber warnings shown above results
+  let warnHtml = '';
+  if(wKg > 100) warnHtml += `<div style="background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#92400e;margin-bottom:12px;">⚠️ <span><strong>Weight &gt; 100 kg</strong> — Some institutions use ideal body weight (IBW) for heparin dosing in obese patients. Confirm dosing weight with clinical pharmacist before proceeding.</span></div>`;
+  const scrVal = _fhirLabs?.serumCreatinine?.value;
+  if(scrVal != null && scrVal > 2.0) warnHtml += `<div style="background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#92400e;margin-bottom:12px;">⚠️ <span><strong>Renal Impairment (SCr ${scrVal} mg/dL)</strong> — Heparin clearance is not renally adjusted, but elevated SCr increases bleeding risk. Monitor closely for signs of bleeding and adjust monitoring frequency as needed.</span></div>`;
 
   const p=PROTOCOLS[ind];
   const range=p.ptt_ranges.find(r=>pttVal>=r.min&&pttVal<=r.max);
   if(!range) return;
+
   if(range.type==='therapeutic'){
-    el.innerHTML=`<div class="therapeutic-card"><div class="therapeutic-icon">✅</div><div class="therapeutic-title">Therapeutic Range</div><div class="therapeutic-sub">No dose adjustment required</div><div style="margin-top:12px;font-size:13px;color:#166534;">🕐 Draw PTT in ${range.redraw} hours${range.note?' · '+range.note:''}</div></div>`;
+    const nurseNote = `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px 18px;margin-top:14px;font-size:14px;color:#166534;line-height:1.6;">💬 <strong>Nurse instruction:</strong> PTT is therapeutic — continue current infusion at ${currentRate.toLocaleString()} units/hr (${(currentRate/conc).toFixed(1)} mL/hr) without change. Recheck PTT in ${range.redraw} hours.${range.note?' '+range.note:''}</div>`;
+    el.innerHTML = warnHtml + `<div class="therapeutic-card"><div class="therapeutic-icon">✅</div><div class="therapeutic-title">Therapeutic Range</div><div class="therapeutic-sub">No dose adjustment required</div><div style="margin-top:12px;font-size:13px;color:#166534;">🕐 Draw PTT in ${range.redraw} hours${range.note?' · '+range.note:''}</div></div>` + nurseNote;
     return;
   }
 
-  // Bolus — apply admin max bolus cap if configured
-  let adjBolus=range.bolus_per_kg>0?Math.min(mround(wKg*range.bolus_per_kg,1000),range.max_bolus):0;
-  const bolusCapSource = adminMaxBolus!=null && adjBolus>adminMaxBolus ? 'admin' : 'protocol';
-  if(adminMaxBolus!=null) adjBolus=Math.min(adjBolus,adminMaxBolus);
+  // Bolus
+  let adjBolus = range.bolus_per_kg > 0 ? Math.min(mround(wKg*range.bolus_per_kg,1000), range.max_bolus) : 0;
 
-  // Rate — round to admin rounding increment
-  const rawRateChange=mround(Math.abs(range.rate_per_kg)*wKg,50);
-  const cappedRateChange=capRate(rawRateChange,range.rate_per_kg);
-  const rateSign=range.rate_per_kg>=0?1:-1;
-  const newRateRaw=Math.max(currentRate+(rateSign*cappedRateChange),0);
-  const newRateUnits=mround(newRateRaw,roundInc); // rounded to admin increment
-  const newRateMl=(newRateUnits/CONC).toFixed(1);
+  // Rate change
+  const rawRateChange = mround(Math.abs(range.rate_per_kg)*wKg, 50);
+  const cappedRateChange = capRate(rawRateChange, range.rate_per_kg);
+  const rateSign = range.rate_per_kg >= 0 ? 1 : -1;
+  const newRateRaw = Math.max(currentRate + (rateSign*cappedRateChange), 0);
+  let newRateUnits = mround(newRateRaw, roundInc);
 
-  // Max rate cap check
-  const rateExceedsCap = adminMaxRate!=null && newRateUnits>adminMaxRate;
+  // Protocol max rate cap (1,000 units/hr ACS · 1,800 units/hr DVT/VTE)
+  const protocolMaxRate = p.max_inf;
+  const rateExceedsCap = newRateUnits > protocolMaxRate;
+  if(rateExceedsCap) newRateUnits = protocolMaxRate;
 
-  const holdClass=!range.hold?'hold-none':range.hold===30?'hold-30':'hold-60';
-  const holdText=!range.hold?'No Hold Required':`HOLD ${range.hold} Minutes`;
-  const pttDrawMsg=range.note?`Draw PTT in ${range.redraw} hours · ${range.note}`:`Draw PTT in ${range.redraw} hours`;
-  const rateDir=rateSign>0?'Increase':'Decrease';
-  const rateColor=rateSign>0?'warn':'green';
+  const newRateMl = (newRateUnits/conc).toFixed(1);
 
-  // Critical alert content — subtherapeutic vs supratherapeutic
+  const holdClass = !range.hold ? 'hold-none' : range.hold===30 ? 'hold-30' : 'hold-60';
+  const holdText = !range.hold ? 'No Hold Required' : `HOLD ${range.hold} Minutes`;
+  const pttDrawMsg = range.note ? `Draw PTT in ${range.redraw} hours · ${range.note}` : `Draw PTT in ${range.redraw} hours`;
+  const rateDir = rateSign > 0 ? 'Increase' : 'Decrease';
+  const rateColor = rateSign > 0 ? 'warn' : 'green';
+
+  // Nurse instruction sentence
+  let nurseSentence;
+  if(range.type === 'increase') {
+    const bolusPart = adjBolus > 0 ? `Give ${adjBolus.toLocaleString()} units IV bolus now, then increase` : 'Increase';
+    nurseSentence = `${bolusPart} the pump from ${currentRate.toLocaleString()} to ${newRateUnits.toLocaleString()} units/hr (${newRateMl} mL/hr), and recheck PTT in ${range.redraw} hours.`;
+  } else if(range.type === 'decrease') {
+    nurseSentence = `Decrease the pump from ${currentRate.toLocaleString()} to ${newRateUnits.toLocaleString()} units/hr (${newRateMl} mL/hr) and recheck PTT in ${range.redraw} hours.`;
+  } else {
+    nurseSentence = `Hold the infusion for ${range.hold} minutes, then decrease the pump from ${currentRate.toLocaleString()} to ${newRateUnits.toLocaleString()} units/hr (${newRateMl} mL/hr) when restarted, and recheck PTT in ${range.redraw} hours.`;
+  }
+
+  // Critical alerts
   const isCritSubtherapeutic = range.notify && range.type==='increase';
   const isCritSupratherapeutic = range.notify && range.type==='hold';
 
-  let html=`<div class="ptt-result-card"><div class="ptt-result-header"><div class="ptt-result-title">◈ Adjustments · PTT ${pttVal} sec · ${ind} · ${wKg} kg</div><div class="hold-badge ${holdClass}">${holdText}</div></div>`;
+  let html = warnHtml + `<div class="ptt-result-card"><div class="ptt-result-header"><div class="ptt-result-title">◈ Adjustments · PTT ${pttVal} sec · ${ind} · ${wKg} kg</div><div class="hold-badge ${holdClass}">${holdText}</div></div>`;
   if(isCritSubtherapeutic) html+=`
     <div style="background:#fef2f2;border-bottom:2px solid var(--red);padding:14px 20px;">
       <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px;">🚨 CRITICALLY SUBTHERAPEUTIC PTT</div>
@@ -1545,14 +1579,15 @@ function calcPTT(){
       </div>
     </div>`;
   if(range.notify&&!isCritSubtherapeutic&&!isCritSupratherapeutic) html+=`<div class="notify-banner"><div class="notify-text">📞 Notify Physician</div></div>`;
-  if(rateExceedsCap) html+=`<div class="notify-banner" style="background:#fef2f2;border-color:#fecaca;"><div class="notify-text" style="color:var(--red);">🚫 Rate ${newRateUnits.toLocaleString()} units/hr exceeds institutional cap of ${adminMaxRate.toLocaleString()} units/hr — Pharmacist review required before administration</div></div>`;
+  if(rateExceedsCap) html+=`<div class="notify-banner" style="background:#fef2f2;border-color:#fecaca;"><div class="notify-text" style="color:var(--red);">🚫 Rate capped at protocol maximum of ${protocolMaxRate.toLocaleString()} units/hr (${ind} limit) — Pharmacist review required before administration</div></div>`;
   html+=`<div class="ptt-action-rows">`;
-  if(adjBolus>0) html+=`<div class="ptt-action-row"><div class="ptt-action-icon">💉</div><div class="ptt-action-content"><div class="ptt-action-label">Adjustment Bolus</div><div class="ptt-action-value warn">${adjBolus.toLocaleString()} units</div><div class="ptt-action-sub">${range.bolus_per_kg} units/kg × ${wKg} kg → nearest 1,000 · ${bolusCapSource==='admin'?'capped at '+adminMaxBolus.toLocaleString()+' (admin setting)':'max '+range.max_bolus.toLocaleString()+' (protocol)'}</div></div></div>`;
+  if(adjBolus>0) html+=`<div class="ptt-action-row"><div class="ptt-action-icon">💉</div><div class="ptt-action-content"><div class="ptt-action-label">Adjustment Bolus</div><div class="ptt-action-value warn">${adjBolus.toLocaleString()} units</div><div class="ptt-action-sub">${range.bolus_per_kg} units/kg × ${wKg} kg → nearest 1,000 · max ${range.max_bolus.toLocaleString()} (protocol)</div></div></div>`;
   html+=`<div class="ptt-action-row"><div class="ptt-action-icon">⚙️</div><div class="ptt-action-content"><div class="ptt-action-label">${rateDir} Rate By</div><div class="ptt-action-value ${rateColor}">${cappedRateChange.toLocaleString()} units/hr</div><div class="ptt-action-sub">${Math.abs(range.rate_per_kg)} units/kg/hr × ${wKg} kg → nearest 50${cappedRateChange<rawRateChange?' · capped at '+(Math.abs(range.rate_per_kg)*100).toLocaleString()+' units/hr max':''}</div></div></div>
-  <div class="ptt-action-row" style="background:${rateExceedsCap?'#fef2f2':'var(--teal-light)'};${rateExceedsCap?'border-left:3px solid var(--red);':''}"><div class="ptt-action-icon">🔧</div><div class="ptt-action-content"><div class="ptt-action-label">New Pump Rate</div><div class="ptt-action-value ${rateExceedsCap?'red':'teal'}">${newRateMl} mL/hr</div><div class="ptt-action-sub">${newRateUnits.toLocaleString()} units/hr ÷ ${CONC} units/mL · rounded to nearest ${roundInc} · (from ${currentRate.toLocaleString()} ${rateSign>0?'+':'−'} ${cappedRateChange.toLocaleString()})</div></div></div>
+  <div class="ptt-action-row" style="background:${rateExceedsCap?'#fef2f2':'var(--teal-light)'};${rateExceedsCap?'border-left:3px solid var(--red);':''}"><div class="ptt-action-icon">🔧</div><div class="ptt-action-content"><div class="ptt-action-label">New Pump Rate${rateExceedsCap?' — capped at protocol max':''}</div><div class="ptt-action-value ${rateExceedsCap?'red':'teal'}">${newRateMl} mL/hr</div><div class="ptt-action-sub">${newRateUnits.toLocaleString()} units/hr ÷ ${conc} units/mL · rounded to nearest ${roundInc}${rateExceedsCap?' · capped at '+protocolMaxRate.toLocaleString()+' ('+ind+' protocol max)':' · (from '+currentRate.toLocaleString()+' '+(rateSign>0?'+':'−')+' '+cappedRateChange.toLocaleString()+')'}</div></div></div>
   <div class="ptt-action-row"><div class="ptt-action-icon">🕐</div><div class="ptt-action-content"><div class="ptt-action-label">Next PTT Draw</div><div class="ptt-action-value navy" style="font-size:15px;font-family:'Instrument Sans',sans-serif;font-weight:600;">${pttDrawMsg}</div></div></div>`;
   html+=`</div></div>
-  <button class="program-pump-btn" onclick="openPumpModal('${newRateMl}','${newRateUnits}','Heparin 25,000 units / 500 mL','50')">
+  <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:14px 18px;margin-top:14px;font-size:14px;color:#0c4a6e;line-height:1.6;">💬 <strong>Nurse instruction:</strong> ${nurseSentence}</div>
+  <button class="program-pump-btn" onclick="openPumpModal('${newRateMl}','${newRateUnits}','${drugLabel}','${conc}',${vtbi})">
     🖥️ How to Program the Pump
   </button>`;
   el.innerHTML=html;
@@ -2545,13 +2580,14 @@ function clearMode2() {
 // Init — no auto-calc on load, wait for Calculate button
 
 // ══ PUMP MODAL ══
-let _pumpRate='', _pumpUnits='', _pumpDrug='', _pumpConc='';
+let _pumpRate='', _pumpUnits='', _pumpDrug='', _pumpConc='', _pumpVtbi=500;
 let _activePump = 'spectrum';
 
-function openPumpModal(mlhr, unitshr, drug, conc){
-  _pumpRate=mlhr; _pumpUnits=unitshr; _pumpDrug=drug; _pumpConc=conc;
+function openPumpModal(mlhr, unitshr, drug, conc, vtbi){
+  vtbi = vtbi || 500;
+  _pumpRate=mlhr; _pumpUnits=unitshr; _pumpDrug=drug; _pumpConc=conc; _pumpVtbi=vtbi;
   document.getElementById('pm-rate').textContent = mlhr + ' mL/hr';
-  document.getElementById('pm-vtbi').textContent = '500';
+  document.getElementById('pm-vtbi').textContent = vtbi;
   document.getElementById('pm-drug').textContent = drug;
   document.getElementById('pm-conc').textContent = conc + ' units/mL';
   const modal = document.getElementById('pump-modal');
@@ -2581,7 +2617,7 @@ function switchPump(brand){
 }
 
 function getPumpSVG(brand){
-  const r = _pumpRate, d = _pumpDrug.split('/')[0].trim(), c = _pumpConc;
+  const r = _pumpRate, d = _pumpDrug.split('/')[0].trim(), c = _pumpConc, v = _pumpVtbi||500;
   if(brand==='spectrum'){
     return `<svg viewBox="0 0 260 400" xmlns="http://www.w3.org/2000/svg">
       <rect x="20" y="10" width="220" height="380" rx="16" fill="#1a3050"/>
@@ -2598,7 +2634,7 @@ function getPumpSVG(brand){
       <text x="220" y="120" text-anchor="end" fill="#4a9fd4" font-size="8" font-family="Arial">mL/hr</text>
       <line x1="40" y1="126" x2="220" y2="126" stroke="#1a4060" stroke-width="1"/>
       <text x="48" y="139" fill="#7ab8d4" font-size="8" font-family="Arial">VTBI</text>
-      <text x="220" y="143" text-anchor="end" fill="#a0c8e8" font-size="14" font-family="Arial">500 mL</text>
+      <text x="220" y="143" text-anchor="end" fill="#a0c8e8" font-size="14" font-family="Arial">${v} mL</text>
       <text x="48" y="157" fill="#7ab8d4" font-size="8" font-family="Arial">CONC</text>
       <text x="220" y="161" text-anchor="end" fill="#a0c8e8" font-size="12" font-family="Arial">${c} units/mL</text>
       <text x="48" y="177" fill="#7ab8d4" font-size="8" font-family="Arial">DRUG</text>
@@ -2647,7 +2683,7 @@ function getPumpSVG(brand){
       <text x="222" y="118" text-anchor="end" fill="white" font-size="30" font-weight="bold" font-family="Arial">${r}</text>
       <line x1="36" y1="126" x2="224" y2="126" stroke="#0a3060" stroke-width="1"/>
       <text x="44" y="140" fill="#8ab8d8" font-size="8" font-family="Arial">VTBI (mL)</text>
-      <text x="222" y="148" text-anchor="end" fill="#a0c8e8" font-size="16" font-family="Arial">500</text>
+      <text x="222" y="148" text-anchor="end" fill="#a0c8e8" font-size="16" font-family="Arial">${v}</text>
       <text x="44" y="162" fill="#8ab8d8" font-size="8" font-family="Arial">CONC (units/mL)</text>
       <text x="222" y="170" text-anchor="end" fill="#a0c8e8" font-size="13" font-family="Arial">${c}</text>
       <rect x="36" y="178" width="188" height="16" rx="3" fill="#001525"/>
@@ -2685,7 +2721,7 @@ function getPumpSVG(brand){
       <text x="222" y="118" text-anchor="end" fill="white" font-size="30" font-weight="bold" font-family="Arial">${r}</text>
       <line x1="36" y1="126" x2="224" y2="126" stroke="#0a3020" stroke-width="1"/>
       <text x="44" y="140" fill="#8ad8b0" font-size="8" font-family="Arial">VTBI (mL)</text>
-      <text x="222" y="148" text-anchor="end" fill="#a0e8c0" font-size="16" font-family="Arial">500</text>
+      <text x="222" y="148" text-anchor="end" fill="#a0e8c0" font-size="16" font-family="Arial">${v}</text>
       <text x="44" y="162" fill="#8ad8b0" font-size="8" font-family="Arial">CONC (units/mL)</text>
       <text x="222" y="170" text-anchor="end" fill="#a0e8c0" font-size="13" font-family="Arial">${c}</text>
       <rect x="36" y="178" width="188" height="16" rx="3" fill="#001510"/>
@@ -2719,7 +2755,7 @@ function getPumpSVG(brand){
     <text x="222" y="124" text-anchor="end" fill="white" font-size="30" font-weight="bold" font-family="Arial">${r}</text>
     <line x1="36" y1="132" x2="224" y2="132" stroke="#202038" stroke-width="1"/>
     <text x="44" y="146" fill="#7070c0" font-size="8" font-family="Arial">VTBI (mL)</text>
-    <text x="222" y="154" text-anchor="end" fill="#b0b0ff" font-size="16" font-family="Arial">500</text>
+    <text x="222" y="154" text-anchor="end" fill="#b0b0ff" font-size="16" font-family="Arial">${v}</text>
     <text x="44" y="168" fill="#7070c0" font-size="8" font-family="Arial">CONC (units/mL)</text>
     <text x="222" y="176" text-anchor="end" fill="#b0b0ff" font-size="13" font-family="Arial">${c}</text>
     <rect x="36" y="182" width="188" height="14" rx="3" fill="#080818"/>
@@ -2738,14 +2774,14 @@ function getPumpSVG(brand){
 }
 
 function getPumpSteps(brand){
-  const r=_pumpRate, drug=_pumpDrug, conc=_pumpConc;
+  const r=_pumpRate, drug=_pumpDrug, conc=_pumpConc, vtbi=_pumpVtbi||500;
   const steps = {
     spectrum:[
       {t:'Power on & Channel Select',d:`Press <strong>ON</strong>. Select <strong>Channel A</strong> (or first available channel). Confirm "New Patient" if prompted.`},
       {t:'Drug Library (optional)',d:`Tap <strong>DRUG LIBRARY</strong>. Search for <strong>"Heparin"</strong>. If not found, select <strong>No Drug Selected</strong> and proceed manually.`},
       {t:'Enter Concentration',d:`When prompted, enter concentration: <strong>${conc} units/mL</strong>. Confirm units are "units/mL".`},
       {t:'Enter Rate',d:`Enter rate: <strong>${r} mL/hr</strong>. Confirm on screen. Press <strong>NEXT</strong>.`},
-      {t:'Enter VTBI',d:`Enter VTBI: <strong>500 mL</strong> (full bag). Press <strong>NEXT</strong>.`},
+      {t:'Enter VTBI',d:`Enter VTBI: <strong>${vtbi} mL</strong> (full bag). Press <strong>NEXT</strong>.`},
       {t:'Soft Limits Check',d:`If limits are exceeded the pump will alert in yellow. Confirm the clinical override if appropriate. A red "Hard Limit" cannot be overridden.`},
       {t:'Second Nurse Verification',d:`Per most policies, a second RN must verify: drug, concentration, rate, and VTBI. Both nurses confirm on screen or paper MAR.`},
       {t:'Prime & Connect',d:`Ensure line is primed. Connect to patient IV access. Press <strong>START</strong>.`},
@@ -2755,8 +2791,8 @@ function getPumpSteps(brand){
       {t:'Begin New Infusion',d:`Press <strong>NEW INFUSION</strong> (soft key). Select the appropriate profile/care area if prompted (e.g., "ICU", "MED-SURG").`},
       {t:'Select Drug',d:`In the drug library, search <strong>"Heparin"</strong>. Confirm concentration: <strong>${conc} units/mL</strong>. Select the correct concentration entry.`},
       {t:'Enter Rate',d:`Type <strong>${r}</strong> on the keypad for mL/hr. Press <strong>CONFIRM</strong>.`},
-      {t:'Enter VTBI',d:`Enter VTBI: <strong>500 mL</strong>. Press <strong>CONFIRM</strong>.`},
-      {t:'Review Summary Screen',d:`Alaris shows a summary of all programmed values. Verify: Drug, Conc <strong>${conc} units/mL</strong>, Rate <strong>${r} mL/hr</strong>, VTBI <strong>500 mL</strong>.`},
+      {t:'Enter VTBI',d:`Enter VTBI: <strong>${vtbi} mL</strong>. Press <strong>CONFIRM</strong>.`},
+      {t:'Review Summary Screen',d:`Alaris shows a summary of all programmed values. Verify: Drug, Conc <strong>${conc} units/mL</strong>, Rate <strong>${r} mL/hr</strong>, VTBI <strong>${vtbi} mL</strong>.`},
       {t:'Two-Nurse Check',d:`Second RN verifies all values on the summary screen. Both sign the MAR per institutional policy.`},
       {t:'Start Infusion',d:`Press <strong>START</strong>. Confirm green "RUNNING" status on screen.`},
     ],
@@ -2765,7 +2801,7 @@ function getPumpSteps(brand){
       {t:'Program New Infusion',d:`Press <strong>PROGRAM</strong>. Select <strong>PRIMARY</strong> channel.`},
       {t:'Drug & Concentration',d:`Select <strong>DRUG LIBRARY</strong> → search "Heparin". Confirm concentration <strong>${conc} units/mL</strong>. If not in library, use <strong>MANUAL ENTRY</strong>.`},
       {t:'Enter Rate',d:`Enter <strong>${r} mL/hr</strong>. Press <strong>NEXT</strong>.`},
-      {t:'Enter VTBI',d:`Enter <strong>500 mL</strong>. Press <strong>NEXT</strong>.`},
+      {t:'Enter VTBI',d:`Enter <strong>${vtbi} mL</strong>. Press <strong>NEXT</strong>.`},
       {t:'Dose Limit Check',d:`The Plum 360 will check soft and hard limits. Confirm any soft limit overrides with the authorizing clinician.`},
       {t:'Independent Double Check',d:`ICU Medical recommends independent double-check for high-alert medications. Second nurse verifies all values on the screen.`},
       {t:'Start',d:`Press <strong>START INFUSION</strong>. Verify green "INFUSING" indicator is active on screen.`},
@@ -2775,7 +2811,7 @@ function getPumpSteps(brand){
       {t:'Select Drug / Label',d:`Navigate to drug library or manual entry. Select or type <strong>Heparin</strong>. Confirm you are entering an <strong>infusion</strong> (not bolus) program.`},
       {t:'Enter Concentration',d:`Enter concentration: <strong>${conc} units/mL</strong>. Verify the units match exactly.`},
       {t:'Enter Rate',d:`Enter rate: <strong>${r} mL/hr</strong>. Double-check the decimal point placement.`},
-      {t:'Enter VTBI',d:`Set VTBI (volume to be infused): <strong>500 mL</strong> for a full 500 mL bag.`},
+      {t:'Enter VTBI',d:`Set VTBI (volume to be infused): <strong>${vtbi} mL</strong> for a full ${vtbi} mL bag.`},
       {t:'Review All Values',d:`Before starting, read back all values: Drug → Concentration → Rate → VTBI. Compare against the pharmacy label.`},
       {t:'Independent Double Check',d:`Heparin is a high-alert medication. Per most policies, a second clinician must independently verify all pump settings before starting.`},
       {t:'Start & Document',d:`Press <strong>START / RUN</strong>. Document start time, rate, and VTBI on the MAR or flow sheet.`},
