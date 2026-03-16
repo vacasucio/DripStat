@@ -561,6 +561,52 @@ canvas{display:block;}
 .fhir-bar-active .calc-page-header,.fhir-bar-active .page-header{margin-top:52px;}
 @media(max-width:768px){#fhir-bar-inner{padding:0 16px;}#fhir-bar .fhir-tag{display:none;}}
 
+/* ══ ADMIN MODE ══ */
+.admin-footer-link{font-size:10px;color:rgba(255,255,255,.1);cursor:pointer;font-family:'DM Mono',monospace;transition:color .2s;user-select:none;letter-spacing:.05em;}
+.admin-footer-link:hover{color:rgba(255,255,255,.3);}
+.admin-pin-input{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:white;border-radius:6px;padding:5px 10px;font-size:13px;font-family:'DM Mono',monospace;width:90px;outline:none;letter-spacing:.2em;text-align:center;}
+.admin-pin-input:focus{border-color:rgba(255,255,255,.4);}
+.admin-pin-btn{background:rgba(255,255,255,.1);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;}
+.admin-pin-btn:hover{background:rgba(255,255,255,.2);}
+.admin-pin-err{font-size:10px;color:#fca5a5;font-family:'DM Mono',monospace;}
+#admin-panel{position:fixed;top:0;right:0;height:100vh;width:400px;background:#0e1e35;border-left:1px solid rgba(255,255,255,.1);z-index:9998;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.4);}
+#admin-panel.open{transform:translateX(0);}
+.ap-header{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+.ap-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.ap-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);}
+.ap-exit{background:rgba(255,255,255,.07);color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 11px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;}
+.ap-exit:hover{background:rgba(220,38,38,.25);border-color:rgba(220,38,38,.5);color:#fca5a5;}
+.ap-inst{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:white;border-radius:8px;padding:8px 12px;font-size:14px;font-family:'Instrument Sans',sans-serif;width:100%;outline:none;}
+.ap-inst:focus{border-color:rgba(13,124,110,.7);}
+.ap-body{padding:16px 20px;flex:1;overflow-y:auto;}
+.ap-sec{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin:16px 0 8px;display:flex;align-items:center;gap:8px;}
+.ap-sec::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07);}
+.ap-field{margin-bottom:10px;}
+.ap-lbl{display:block;font-size:9px;font-weight:600;color:rgba(255,255,255,.35);margin-bottom:4px;font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;}
+.ap-inp{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);color:white;border-radius:6px;padding:7px 10px;font-size:13px;font-family:'DM Mono',monospace;width:100%;outline:none;transition:border-color .15s;}
+.ap-inp:focus{border-color:rgba(13,124,110,.6);}
+.ap-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ap-proto-sel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:white;border-radius:8px;padding:8px 32px 8px 11px;font-size:13px;font-family:'Instrument Sans',sans-serif;width:100%;outline:none;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.ap-proto-sel:focus{border-color:rgba(13,124,110,.6);}
+.ap-shared-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:12px;margin-bottom:4px;}
+.ap-range-tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.ap-range-tbl thead th{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:5px 3px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);}
+.ap-range-tbl tbody td{padding:3px 2px;border-bottom:1px solid rgba(255,255,255,.04);}
+.ap-tbl-inp{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);color:white;border-radius:3px;padding:3px 4px;font-size:11px;font-family:'DM Mono',monospace;width:100%;outline:none;}
+.ap-tbl-inp:focus{border-color:rgba(13,124,110,.6);}
+.ap-range-lbl{font-size:9px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;white-space:nowrap;padding-right:4px;}
+.ap-save{width:100%;background:var(--teal);color:white;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all .2s;margin-top:14px;}
+.ap-save:hover{background:#0a6358;}
+.ap-save.saved{background:var(--green);}
+.ap-reset-btn{width:100%;background:transparent;color:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:9px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s;margin-top:6px;}
+.ap-reset-btn:hover{border-color:rgba(220,38,38,.4);color:#fca5a5;}
+.ap-reset-confirm{display:none;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.25);border-radius:8px;padding:10px 12px;margin-top:6px;font-size:11px;color:#fca5a5;font-family:'DM Mono',monospace;text-align:center;line-height:1.5;}
+.ap-rc-btns{display:flex;gap:6px;margin-top:8px;}
+.ap-rc-yes{flex:1;background:rgba(220,38,38,.35);color:white;border:none;border-radius:5px;padding:6px;font-size:10px;font-weight:700;cursor:pointer;font-family:'DM Mono',monospace;}
+.ap-rc-no{flex:1;background:rgba(255,255,255,.07);color:rgba(255,255,255,.45);border:none;border-radius:5px;padding:6px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;}
+#admin-mode-badge{display:none;align-items:center;gap:5px;background:var(--warn-light);border:1px solid #fde68a;border-radius:5px;padding:3px 10px;font-size:10px;font-weight:700;color:#92400e;font-family:'DM Mono',monospace;cursor:pointer;margin-left:auto;align-self:center;margin-right:12px;white-space:nowrap;}
+#admin-mode-badge:hover{background:#fef3c7;}
+
 </style>
 </head>
 <body>
@@ -750,6 +796,12 @@ canvas{display:block;}
       <div class="footer-copy">© 2025 DoseSafe LLC. All rights reserved.</div>
       <div class="footer-disc">For educational and reference purposes only — not intended for clinical decision making.</div>
       <div class="footer-copy">dosesafe.com</div>
+      <span class="admin-footer-link" id="admin-footer-link" onclick="adminTogglePinArea()">admin</span>
+    </div>
+    <div id="admin-pin-area" style="display:none;align-items:center;gap:8px;justify-content:flex-end;padding:8px 0 0;flex-wrap:wrap;">
+      <input id="admin-pin-input" class="admin-pin-input" type="password" placeholder="••••" maxlength="4" onkeydown="if(event.key==='Enter')adminSubmitPin()">
+      <button class="admin-pin-btn" onclick="adminSubmitPin()">Unlock</button>
+      <span id="admin-pin-err" class="admin-pin-err"></span>
     </div>
   </footer>
 </div>
@@ -858,6 +910,7 @@ canvas{display:block;}
     <div class="calc-tabs">
       <div class="calc-tab active" id="tab-btn-init" onclick="switchCalcTab('init')">💉 Initial Dosing <span class="calc-tab-badge">Calculator</span></div>
       <div class="calc-tab" id="tab-btn-ptt" onclick="switchCalcTab('ptt')">🔬 PTT Adjustment <span class="calc-tab-badge">Nomogram</span></div>
+      <div id="admin-mode-badge" onclick="openAdminPanel()">⚙ Admin Mode Active</div>
     </div>
   </div>
 
@@ -1321,6 +1374,41 @@ canvas{display:block;}
   </div>
 </div>
 
+<!-- ══ ADMIN PANEL ══ -->
+<div id="admin-panel">
+  <div class="ap-header">
+    <div class="ap-title-row">
+      <span class="ap-title">⚙ Admin Mode</span>
+      <button class="ap-exit" onclick="closeAdminPanel()">Exit Admin</button>
+    </div>
+    <input class="ap-inst" id="ap-inst-name" placeholder="Institution Name (optional)">
+  </div>
+  <div class="ap-body">
+    <div class="ap-shared-box">
+      <div class="ap-sec" style="margin-top:0;">Shared Settings</div>
+      <div class="ap-field">
+        <label class="ap-lbl">Admin PIN (leave blank to keep current)</label>
+        <input class="ap-inp" id="ap-new-pin" type="password" placeholder="New 4-digit PIN" maxlength="4">
+      </div>
+    </div>
+    <div class="ap-sec">Protocol</div>
+    <select class="ap-proto-sel" id="ap-proto-select" onchange="adminLoadProtocol(this.value)">
+      <option value="DVT">Heparin VTE (DVT/VTE)</option>
+      <option value="ACS">Heparin ACS</option>
+    </select>
+    <div id="ap-proto-settings"></div>
+    <button class="ap-save" id="ap-save-btn" onclick="adminSave()">Save Settings</button>
+    <button class="ap-reset-btn" onclick="adminShowResetConfirm()">↺ Reset to Published Defaults</button>
+    <div class="ap-reset-confirm" id="ap-reset-confirm">
+      Reset this protocol to hardcoded defaults? All custom changes will be lost.
+      <div class="ap-rc-btns">
+        <button class="ap-rc-yes" onclick="adminDoReset()">Confirm Reset</button>
+        <button class="ap-rc-no" onclick="adminHideResetConfirm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 // ══ LOGO ══
@@ -1382,6 +1470,29 @@ const PROTOCOLS={
     ]}
 };
 const CONC=50;
+
+// ══ ADMIN PROTOCOL RESOLVER ══
+// Returns effective protocol: localStorage customization OR hardcoded defaults
+const _ADMIN_LS = { PIN:'dosesafe_admin_pin', INST:'dosesafe_admin_inst', ACS:'dosesafe_admin_heparin_acs', DVT:'dosesafe_admin_heparin_vte' };
+function getProtocol(ind){
+  const key = _ADMIN_LS[ind];
+  if(!key) return PROTOCOLS[ind];
+  try {
+    const stored = localStorage.getItem(key);
+    if(!stored) return PROTOCOLS[ind];
+    const parsed = JSON.parse(stored);
+    const base = PROTOCOLS[ind];
+    // Merge ptt_ranges: preserve label/type/min/max/notify/warn_row/note from defaults; override editable fields
+    let ptt_ranges = base.ptt_ranges;
+    if(parsed.ptt_ranges && parsed.ptt_ranges.length === base.ptt_ranges.length){
+      ptt_ranges = parsed.ptt_ranges.map((r,i)=>({...base.ptt_ranges[i],...r}));
+    }
+    return {...base,...parsed,ptt_ranges};
+  } catch(e){ return PROTOCOLS[ind]; }
+}
+function getAdminPin(){ return localStorage.getItem(_ADMIN_LS.PIN)||'1234'; }
+function getInstName(){ return localStorage.getItem(_ADMIN_LS.INST)||''; }
+
 function mround(v,m){return Math.round(v/m)*m;}
 function capRate(u,pk){return Math.min(u,Math.abs(pk)*100);}
 
@@ -1398,9 +1509,10 @@ function calcInitial(){
   const wKg=Math.round(wRaw);
   if(wKg<30){el.innerHTML=`<div class="error-card">⚠️ Weight < 30 kg — please verify before calculating</div>`;return;}
   if(wKg>200){el.innerHTML=`<div class="error-card">⚠️ Weight > 200 kg — please verify before calculating</div>`;return;}
-  const p=PROTOCOLS[ind];
+  const p=getProtocol(ind);
+  const roundInc=p.round_inc||50;
   const bolus=Math.min(mround(p.bolus_per_kg*wKg,50),p.max_bolus);
-  const infUnits=Math.min(mround(p.inf_per_kg_hr*wKg,50),p.max_inf);
+  const infUnits=Math.min(mround(p.inf_per_kg_hr*wKg,roundInc),p.max_inf);
   const conc = parseInt(document.getElementById('init-conc')?.value || '50');
   const vtbi = conc === 100 ? 250 : 500;
   const infMl=(infUnits/conc).toFixed(1);
@@ -1426,8 +1538,8 @@ function calcInitial(){
       <table class="lookup-tbl">
         <thead><tr><th>Indication</th><th>Bolus (units/kg)</th><th>Max Bolus</th><th>Infusion (units/kg/hr)</th><th>Max Infusion</th></tr></thead>
         <tbody>
-          <tr class="${ind==='ACS'?'active-row':''}"><td>ACS</td><td>60</td><td>5,000 units</td><td>12</td><td>1,000 units/hr</td></tr>
-          <tr class="${ind==='DVT'?'active-row':''}"><td>DVT/VTE</td><td>80</td><td>8,000 units</td><td>18</td><td>1,800 units/hr</td></tr>
+          <tr class="${ind==='ACS'?'active-row':''}"><td>ACS</td><td>${getProtocol('ACS').bolus_per_kg}</td><td>${getProtocol('ACS').max_bolus.toLocaleString()} units</td><td>${getProtocol('ACS').inf_per_kg_hr}</td><td>${getProtocol('ACS').max_inf.toLocaleString()} units/hr</td></tr>
+          <tr class="${ind==='DVT'?'active-row':''}"><td>DVT/VTE</td><td>${getProtocol('DVT').bolus_per_kg}</td><td>${getProtocol('DVT').max_bolus.toLocaleString()} units</td><td>${getProtocol('DVT').inf_per_kg_hr}</td><td>${getProtocol('DVT').max_inf.toLocaleString()} units/hr</td></tr>
         </tbody>
       </table>
     </div>
@@ -1452,8 +1564,8 @@ function syncFromInit(){
   const ind=pttIndEl.value||initInd;
   const wKg=parseFloat(pttWEl.value)||initWKg;
   if(ind&&wKg&&!pttRateEl.value){
-    const p=PROTOCOLS[ind];
-    if(p){const autoRate=Math.min(mround(p.inf_per_kg_hr*Math.round(wKg),50),p.max_inf);pttRateEl.value=autoRate;}
+    const p=getProtocol(ind);
+    if(p){const autoRate=Math.min(mround(p.inf_per_kg_hr*Math.round(wKg),p.round_inc||50),p.max_inf);pttRateEl.value=autoRate;}
   }
 }
 
@@ -1474,7 +1586,7 @@ function renderPTTRanges(){
   if(!ind){el.innerHTML=`<div class="ptt-ranges-hdr">PTT Ranges</div><div style="padding:16px;color:var(--muted);font-size:12px;text-align:center;">Select indication to see ranges</div>`;return;}
   const dotColors={therapeutic:'#16a34a',increase:'#f59e0b',decrease:'#0d7c6e',hold:'#dc2626'};
   const actionLabels={therapeutic:'No Change',increase:r=>`Bolus + ↑${r.rate_per_kg}/kg/hr`,decrease:r=>`↓${Math.abs(r.rate_per_kg)}/kg/hr`,hold:r=>`Hold ${r.hold}min + ↓${Math.abs(r.rate_per_kg)}/kg/hr`};
-  const ranges=PROTOCOLS[ind].ptt_ranges;
+  const ranges=getProtocol(ind).ptt_ranges;
   el.innerHTML=`<div class="ptt-ranges-hdr">PTT Ranges — ${ind}</div>`+ranges.map(r=>{
     const isActive=!isNaN(pttVal)&&pttVal>=r.min&&pttVal<=r.max;
     const action=typeof actionLabels[r.type]==='function'?actionLabels[r.type](r):actionLabels[r.type];
@@ -1496,7 +1608,6 @@ function calcPTT(){
   if(isNaN(currentRate)||document.getElementById('ptt-current-rate').value===''){el.innerHTML=`<div class="result-empty"><div class="result-empty-icon">⚙️</div>Enter the current infusion rate to calculate adjustments</div>`;return;}
   if(isNaN(pttVal)||document.getElementById('ptt-val').value===''){el.innerHTML=`<div class="result-empty"><div class="result-empty-icon">🔬</div>Enter a PTT value to see adjustment instructions</div>`;return;}
 
-  const roundInc = 50;
   const conc = parseInt(document.getElementById('ptt-conc')?.value || '50');
   const vtbi = conc === 100 ? 250 : 500;
   const drugLabel = `Heparin 25,000 units / ${vtbi} mL`;
@@ -1507,7 +1618,8 @@ function calcPTT(){
   const scrVal = _fhirLabs?.serumCreatinine?.value;
   if(scrVal != null && scrVal > 2.0) warnHtml += `<div style="background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#92400e;margin-bottom:12px;">⚠️ <span><strong>Renal Impairment (SCr ${scrVal} mg/dL)</strong> — Heparin clearance is not renally adjusted, but elevated SCr increases bleeding risk. Monitor closely for signs of bleeding and adjust monitoring frequency as needed.</span></div>`;
 
-  const p=PROTOCOLS[ind];
+  const p=getProtocol(ind);
+  const roundInc = p.round_inc || 50;
   const range=p.ptt_ranges.find(r=>pttVal>=r.min&&pttVal<=r.max);
   if(!range) return;
 
@@ -1532,6 +1644,11 @@ function calcPTT(){
   const rateExceedsCap = newRateUnits > protocolMaxRate;
   if(rateExceedsCap) newRateUnits = protocolMaxRate;
 
+  // If protocol defines a fixed restart rate for hold ranges, apply it
+  if(p.restart_rate && range.type === 'hold'){
+    newRateUnits = Math.min(p.restart_rate, protocolMaxRate);
+  }
+
   const newRateMl = (newRateUnits/conc).toFixed(1);
 
   const holdClass = !range.hold ? 'hold-none' : range.hold===30 ? 'hold-30' : 'hold-60';
@@ -1548,7 +1665,7 @@ function calcPTT(){
   } else if(range.type === 'decrease') {
     nurseSentence = `Decrease the pump from ${currentRate.toLocaleString()} to ${newRateUnits.toLocaleString()} units/hr (${newRateMl} mL/hr) and recheck PTT in ${range.redraw} hours.`;
   } else {
-    nurseSentence = `Hold the infusion for ${range.hold} minutes, then decrease the pump from ${currentRate.toLocaleString()} to ${newRateUnits.toLocaleString()} units/hr (${newRateMl} mL/hr) when restarted, and recheck PTT in ${range.redraw} hours.`;
+    nurseSentence = `Hold the infusion for ${range.hold} minutes, then restart at ${newRateUnits.toLocaleString()} units/hr (${newRateMl} mL/hr), and recheck PTT in ${range.redraw} hours.`;
   }
 
   // Critical alerts
@@ -3071,6 +3188,183 @@ function openMedsModal() {
 function closeMedsModal() {
   document.getElementById('meds-modal').style.display = 'none';
   document.body.style.overflow = '';
+}
+
+// ══ ADMIN MODE ══
+let _adminUnlocked = false;
+let _adminWrongAttempts = 0;
+let _adminLockUntil = 0;
+let _adminLockInterval = null;
+let _adminCurrentProto = 'DVT';
+
+function adminTogglePinArea(){
+  if(_adminUnlocked){ openAdminPanel(); return; }
+  const area = document.getElementById('admin-pin-area');
+  const showing = area.style.display === 'flex';
+  area.style.display = showing ? 'none' : 'flex';
+  if(!showing){
+    const inp = document.getElementById('admin-pin-input');
+    inp.value = '';
+    document.getElementById('admin-pin-err').textContent = '';
+    setTimeout(()=>inp.focus(), 50);
+  }
+}
+
+function adminSubmitPin(){
+  const now = Date.now();
+  if(now < _adminLockUntil){ return; }
+  const entered = (document.getElementById('admin-pin-input').value||'').trim();
+  if(entered === getAdminPin()){
+    _adminWrongAttempts = 0;
+    _adminUnlocked = true;
+    document.getElementById('admin-pin-area').style.display = 'none';
+    document.getElementById('admin-pin-input').value = '';
+    openAdminPanel();
+  } else {
+    _adminWrongAttempts++;
+    document.getElementById('admin-pin-input').value = '';
+    if(_adminWrongAttempts >= 3){
+      _adminLockUntil = Date.now() + 60000;
+      _adminWrongAttempts = 0;
+      if(_adminLockInterval) clearInterval(_adminLockInterval);
+      _adminLockInterval = setInterval(()=>{
+        const rem = Math.ceil((_adminLockUntil - Date.now()) / 1000);
+        const err = document.getElementById('admin-pin-err');
+        if(!err) return;
+        if(rem <= 0){ clearInterval(_adminLockInterval); _adminLockInterval = null; err.textContent = ''; }
+        else { err.textContent = `Locked — retry in ${rem}s`; }
+      }, 500);
+      document.getElementById('admin-pin-err').textContent = 'Too many attempts — locked for 60s';
+    } else {
+      document.getElementById('admin-pin-err').textContent = `Incorrect PIN (${3-_adminWrongAttempts} left)`;
+    }
+  }
+}
+
+function openAdminPanel(){
+  document.getElementById('ap-inst-name').value = getInstName();
+  document.getElementById('ap-new-pin').value = '';
+  adminLoadProtocol(_adminCurrentProto);
+  document.getElementById('admin-panel').classList.add('open');
+  adminUpdateBadge();
+}
+
+function closeAdminPanel(){
+  document.getElementById('admin-panel').classList.remove('open');
+  _adminUnlocked = false;
+  adminUpdateBadge();
+}
+
+function adminUpdateBadge(){
+  const b = document.getElementById('admin-mode-badge');
+  if(b) b.style.display = _adminUnlocked ? 'flex' : 'none';
+}
+
+function adminLoadProtocol(pk){
+  _adminCurrentProto = pk;
+  document.getElementById('ap-proto-select').value = pk;
+  document.getElementById('ap-reset-confirm').style.display = 'none';
+  const p = getProtocol(pk);
+  const therRange = p.ptt_ranges.find(r=>r.type==='therapeutic');
+  const therLow = therRange ? therRange.min : '';
+  const therHigh = therRange ? therRange.max : '';
+  const roundInc = p.round_inc || 50;
+  const restartRate = p.restart_rate || '';
+  const html = `
+    <div class="ap-sec">Protocol Parameters</div>
+    <div class="ap-row2">
+      <div class="ap-field"><label class="ap-lbl">Initial Bolus (units/kg)</label><input class="ap-inp" id="aps-bolus-per-kg" type="number" value="${p.bolus_per_kg}"></div>
+      <div class="ap-field"><label class="ap-lbl">Max Initial Bolus (units)</label><input class="ap-inp" id="aps-max-bolus" type="number" value="${p.max_bolus}"></div>
+    </div>
+    <div class="ap-row2">
+      <div class="ap-field"><label class="ap-lbl">Infusion Rate (units/kg/hr)</label><input class="ap-inp" id="aps-inf-per-kg-hr" type="number" value="${p.inf_per_kg_hr}"></div>
+      <div class="ap-field"><label class="ap-lbl">Max Infusion Rate (units/hr)</label><input class="ap-inp" id="aps-max-inf" type="number" value="${p.max_inf}"></div>
+    </div>
+    <div class="ap-row2">
+      <div class="ap-field"><label class="ap-lbl">Therapeutic PTT Low (sec)</label><input class="ap-inp" id="aps-ther-low" type="number" value="${therLow}"></div>
+      <div class="ap-field"><label class="ap-lbl">Therapeutic PTT High (sec)</label><input class="ap-inp" id="aps-ther-high" type="number" value="${therHigh}"></div>
+    </div>
+    <div class="ap-row2">
+      <div class="ap-field"><label class="ap-lbl">Rate Rounding Increment (units/hr)</label><input class="ap-inp" id="aps-round-inc" type="number" value="${roundInc}"></div>
+      <div class="ap-field"><label class="ap-lbl">Restart Rate After Hold (units/hr)</label><input class="ap-inp" id="aps-restart-rate" type="number" value="${restartRate}" placeholder="optional"></div>
+    </div>
+    <div class="ap-sec" style="margin-top:18px;">PTT Adjustment Nomogram</div>
+    <div style="overflow-x:auto;">
+    <table class="ap-range-tbl">
+      <thead><tr><th>Range</th><th>Bol /kg</th><th>Max Bol</th><th>Rate /kg</th><th>Hold min</th><th>Draw hr</th></tr></thead>
+      <tbody>
+        ${p.ptt_ranges.map((r,i)=>`
+          <tr>
+            <td><span class="ap-range-lbl">${r.label}</span></td>
+            <td><input class="ap-tbl-inp" data-ri="${i}" data-f="bolus_per_kg" type="number" value="${r.bolus_per_kg}"></td>
+            <td><input class="ap-tbl-inp" data-ri="${i}" data-f="max_bolus" type="number" value="${r.max_bolus}"></td>
+            <td><input class="ap-tbl-inp" data-ri="${i}" data-f="rate_per_kg" type="number" step="0.5" value="${r.rate_per_kg}"></td>
+            <td><input class="ap-tbl-inp" data-ri="${i}" data-f="hold" type="number" value="${r.hold??''}"></td>
+            <td><input class="ap-tbl-inp" data-ri="${i}" data-f="redraw" type="number" value="${r.redraw}"></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>`;
+  document.getElementById('ap-proto-settings').innerHTML = html;
+}
+
+function adminSave(){
+  const pk = _adminCurrentProto;
+  const p = getProtocol(pk);
+  // Shared
+  const instName = (document.getElementById('ap-inst-name').value||'').trim();
+  if(instName) localStorage.setItem(_ADMIN_LS.INST, instName);
+  const newPin = (document.getElementById('ap-new-pin').value||'').trim();
+  if(newPin && /^\d{4}$/.test(newPin)) localStorage.setItem(_ADMIN_LS.PIN, newPin);
+  // Protocol fields
+  const therLow = parseInt(document.getElementById('aps-ther-low').value);
+  const therHigh = parseInt(document.getElementById('aps-ther-high').value);
+  const ranges = JSON.parse(JSON.stringify(p.ptt_ranges));
+  document.querySelectorAll('.ap-tbl-inp').forEach(inp=>{
+    const ri = parseInt(inp.dataset.ri);
+    const f = inp.dataset.f;
+    if(ri >= ranges.length) return;
+    const raw = inp.value;
+    ranges[ri][f] = raw==='' ? null : f==='rate_per_kg' ? parseFloat(raw) : parseInt(raw);
+  });
+  if(!isNaN(therLow)&&!isNaN(therHigh)){
+    const ti = ranges.findIndex(r=>r.type==='therapeutic');
+    if(ti>=0){ ranges[ti].min=therLow; ranges[ti].max=therHigh; }
+  }
+  const restartRaw = document.getElementById('aps-restart-rate').value;
+  const settings = {
+    bolus_per_kg: parseFloat(document.getElementById('aps-bolus-per-kg').value)||p.bolus_per_kg,
+    max_bolus: parseInt(document.getElementById('aps-max-bolus').value)||p.max_bolus,
+    inf_per_kg_hr: parseFloat(document.getElementById('aps-inf-per-kg-hr').value)||p.inf_per_kg_hr,
+    max_inf: parseInt(document.getElementById('aps-max-inf').value)||p.max_inf,
+    round_inc: parseInt(document.getElementById('aps-round-inc').value)||50,
+    restart_rate: restartRaw ? parseInt(restartRaw) : null,
+    ptt_ranges: ranges,
+  };
+  localStorage.setItem(_ADMIN_LS[pk], JSON.stringify(settings));
+  const btn = document.getElementById('ap-save-btn');
+  btn.textContent = '✓ Saved';
+  btn.classList.add('saved');
+  setTimeout(()=>{ btn.textContent='Save Settings'; btn.classList.remove('saved'); }, 3000);
+  try{ calcInitial(); }catch(e){}
+  try{ calcPTT(); }catch(e){}
+}
+
+function adminShowResetConfirm(){ document.getElementById('ap-reset-confirm').style.display='block'; }
+function adminHideResetConfirm(){ document.getElementById('ap-reset-confirm').style.display='none'; }
+
+function adminDoReset(){
+  const pk = _adminCurrentProto;
+  localStorage.removeItem(_ADMIN_LS[pk]);
+  adminHideResetConfirm();
+  adminLoadProtocol(pk);
+  try{ calcInitial(); }catch(e){}
+  try{ calcPTT(); }catch(e){}
+  const btn = document.getElementById('ap-save-btn');
+  const origColor = btn.style.background;
+  btn.textContent='↺ Reset Complete';
+  btn.style.background='var(--warn)';
+  setTimeout(()=>{ btn.textContent='Save Settings'; btn.style.background=origColor||''; }, 2500);
 }
 
 // ── Init ──
