@@ -14,10 +14,12 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Serve DoseSafe.html as root
 app.use(express.static(path.join(__dirname)));
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'DoseSafe.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, 'app.html'));
 });
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin.html'));
