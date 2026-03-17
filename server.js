@@ -19,21 +19,20 @@ app.use(express.json());
 
 // ── HTTP Basic Auth ────────────────────────────────────────────────────────
 // Protects all routes except /api/health (kept open for Railway health checks).
-// Skipped entirely when BASIC_AUTH_USER is not set (local dev without creds).
-const AUTH_USER = process.env.BASIC_AUTH_USER;
-const AUTH_PASS = process.env.BASIC_AUTH_PASS;
-
-if (AUTH_USER && AUTH_PASS) {
-  app.use((req, res, next) => {
-    if (req.path === '/api/health') return next();
-    const credentials = basicAuth(req);
-    if (!credentials || credentials.name !== AUTH_USER || credentials.pass !== AUTH_PASS) {
-      res.set('WWW-Authenticate', 'Basic realm="DoseSafe", charset="UTF-8"');
-      return res.status(401).send('Authentication required');
-    }
-    next();
-  });
-}
+// Credentials are read from process.env on every request so the middleware is
+// always registered — it simply passes through when the vars are not set.
+app.use((req, res, next) => {
+  if (req.path === '/api/health') return next();
+  const authUser = process.env.BASIC_AUTH_USER;
+  const authPass = process.env.BASIC_AUTH_PASS;
+  if (!authUser || !authPass) return next(); // auth not configured — allow
+  const credentials = basicAuth(req);
+  if (!credentials || credentials.name !== authUser || credentials.pass !== authPass) {
+    res.set('WWW-Authenticate', 'Basic realm="DoseSafe", charset="UTF-8"');
+    return res.status(401).send('Authentication required');
+  }
+  next();
+});
 
 // ── Session middleware ──────────────────────────────────────────────────────
 app.use(session({
@@ -226,4 +225,11 @@ app.listen(PORT, () => {
   console.log(`DoseSafe server running on http://localhost:${PORT}`);
   console.log(`FHIR base: ${process.env.FHIR_BASE_URL}`);
   console.log(`SMART on FHIR: ${process.env.CERNER_CLIENT_ID ? 'configured' : 'not configured (open sandbox only)'}`);
+  const authUser = process.env.BASIC_AUTH_USER;
+  const authPass = process.env.BASIC_AUTH_PASS;
+  if (authUser && authPass) {
+    console.log(`Basic auth: ENABLED (user: "${authUser}", password length: ${authPass.length})`);
+  } else {
+    console.log(`Basic auth: DISABLED — BASIC_AUTH_USER=${authUser ?? 'not set'}, BASIC_AUTH_PASS=${authPass ? '[set]' : 'not set'}`);
+  }
 });
