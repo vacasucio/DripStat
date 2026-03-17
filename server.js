@@ -205,6 +205,17 @@ app.get('/api/token/refresh', async (req, res) => {
   }
 });
 
+// ── Debug: env inspection (remove after confirming Railway env injection) ──
+app.get('/debug/env', (req, res) => {
+  res.json({
+    NODE_ENV:        process.env.NODE_ENV        ?? null,
+    FHIR_BASE_URL:   process.env.FHIR_BASE_URL   ?? null,
+    BASIC_AUTH_USER: process.env.BASIC_AUTH_USER ?? null,
+    BASIC_AUTH_PASS: process.env.BASIC_AUTH_PASS ? `[set, length ${process.env.BASIC_AUTH_PASS.length}]` : null,
+    PORT:            process.env.PORT            ?? null,
+  });
+});
+
 // ── FHIR-backed API routes ─────────────────────────────────────────────────
 app.use('/api/patient', patientRoutes);
 app.use('/api/labs', labRoutes);
