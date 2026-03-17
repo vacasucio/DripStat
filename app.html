@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DoseSafe — Clinical Calculators</title>
+<title>DoseDefender — Clinical Calculators</title>
 <style>
 :root {
   --navy:#0f2744;--navy2:#1a3a5c;--navy3:#243b55;
@@ -569,7 +569,7 @@ canvas{display:block;}
 <!-- ══ LOGO DEF ══ -->
 <template id="logo-light-tpl">
 <svg width="240" height="52" viewBox="0 0 240 52" xmlns="http://www.w3.org/2000/svg">
-  <text x="97" y="32" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#0f2744" text-anchor="middle" letter-spacing="2">DoseSafe</text>
+  <text x="97" y="32" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#0f2744" text-anchor="middle" letter-spacing="2">DoseDefender</text>
   <line x1="14" y1="40" x2="184" y2="40" stroke="#0d7c6e" stroke-width="1.5"/>
   <text x="97" y="50" font-family="Georgia,serif" font-size="8" fill="#0d7c6e" text-anchor="middle" letter-spacing="3">CLINICAL DOSING</text>
   <rect x="191" y="6" width="30" height="36" rx="3" fill="#0d7c6e"/>
@@ -592,7 +592,7 @@ canvas{display:block;}
   <span id="inst-divider" style="display:none;width:1px;height:22px;background:var(--border);margin:0 14px;flex-shrink:0;align-self:center;"></span>
   <span id="inst-label" style="display:none;font-size:13px;color:var(--navy);font-weight:600;white-space:nowrap;font-family:'Instrument Sans',sans-serif;letter-spacing:-.01em;"></span>
   <div style="flex:1;"></div>
-  <a href="/" style="font-size:13px;color:var(--muted);font-weight:500;padding:7px 14px;text-decoration:none;border-radius:6px;transition:all .15s;display:flex;align-items:center;gap:5px;" onmouseover="this.style.background='var(--surface)';this.style.color='var(--text)'" onmouseout="this.style.background='';this.style.color='var(--muted)'">← dosesafe.com</a>
+  <a href="/" style="font-size:13px;color:var(--muted);font-weight:500;padding:7px 14px;text-decoration:none;border-radius:6px;transition:all .15s;display:flex;align-items:center;gap:5px;" onmouseover="this.style.background='var(--surface)';this.style.color='var(--text)'" onmouseout="this.style.background='';this.style.color='var(--muted)'">← dosedefender.com</a>
 </nav>
 
 <!-- ══ FHIR PATIENT BAR ══ -->
@@ -704,7 +704,7 @@ canvas{display:block;}
         </div>
       </div>
     </div>
-    <div class="cat-disc">⚠️ &nbsp;<strong>Educational reference only</strong> — DoseSafe calculators are not intended for clinical decision making. Always verify doses with your institution's protocols.</div>
+    <div class="cat-disc">⚠️ &nbsp;<strong>Educational reference only</strong> — DoseDefender calculators are not intended for clinical decision making. Always verify doses with your institution's protocols.</div>
   </div>
 </div>
 
@@ -1260,7 +1260,7 @@ const CONC=50;
 
 // ══ ADMIN PROTOCOL RESOLVER ══
 // Returns effective protocol: localStorage customization OR hardcoded defaults
-const _ADMIN_LS = { PIN:'dosesafe_admin_pin', INST:'dosesafe_admin_inst', ACS:'dosesafe_admin_heparin_acs', DVT:'dosesafe_admin_heparin_vte' };
+const _ADMIN_LS = { PIN:'dosedefender_admin_pin', INST:'dosedefender_admin_inst', ACS:'dosedefender_admin_heparin_acs', DVT:'dosedefender_admin_heparin_vte' };
 function getProtocol(ind){
   const key = _ADMIN_LS[ind];
   if(!key) return PROTOCOLS[ind];
@@ -2439,7 +2439,7 @@ MONITORING (per ASHP/IDSA/SIDP 2020)
 ─────────────────────────────────────────────
 DISCLAIMER: For educational and reference use only. Not intended for clinical
 decision making. Always verify with clinical pharmacist and attending physician.
-Calculated by DoseSafe · dosesafe.com`;
+Calculated by DoseDefender · dosedefender.com`;
   return note;
 }
 

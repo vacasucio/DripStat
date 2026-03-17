@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DoseSafe — Admin Settings</title>
+<title>DoseDefender — Admin Settings</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Instrument+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -294,7 +294,7 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
       <span class="admin-badge">⚙ Admin Settings</span>
     </div>
     <div class="nav-right">
-      <a href="/" class="btn-return">← Back to DoseSafe</a>
+      <a href="/" class="btn-return">← Back to DoseDefender</a>
       <button class="btn-logout" onclick="logout()">Logout</button>
     </div>
   </nav>
@@ -302,7 +302,7 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
   <div class="admin-body">
 
     <div class="disc-bar">
-      ⚠️ <span>Settings saved here take effect immediately when clinicians return to DoseSafe. Only modify values in accordance with your institution's approved heparin protocol. All changes are stored in this browser's localStorage.</span>
+      ⚠️ <span>Settings saved here take effect immediately when clinicians return to DoseDefender. Only modify values in accordance with your institution's approved heparin protocol. All changes are stored in this browser's localStorage.</span>
     </div>
 
     <!-- ── Shared Settings ── -->
@@ -379,16 +379,16 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
 </div><!-- /admin-panel -->
 
 <script>
-// ══ localStorage KEYS (must match DoseSafe.html getProtocol() / _ADMIN_LS) ══
+// ══ localStorage KEYS (must match DoseDefender.html getProtocol() / _ADMIN_LS) ══
 const LS = {
-  PIN:  'dosesafe_admin_pin',
-  INST: 'dosesafe_admin_inst',
-  ACS:  'dosesafe_admin_heparin_acs',
-  DVT:  'dosesafe_admin_heparin_vte',
+  PIN:  'dosedefender_admin_pin',
+  INST: 'dosedefender_admin_inst',
+  ACS:  'dosedefender_admin_heparin_acs',
+  DVT:  'dosedefender_admin_heparin_vte',
 };
-const SESSION_KEY = 'dosesafe_admin_auth';
+const SESSION_KEY = 'dosedefender_admin_auth';
 
-// ══ PUBLISHED DEFAULTS (mirror of PROTOCOLS in DoseSafe.html) ══
+// ══ PUBLISHED DEFAULTS (mirror of PROTOCOLS in DoseDefender.html) ══
 const DEFAULTS = {
   ACS: {
     bolus_per_kg:60, max_bolus:5000, inf_per_kg_hr:12, max_inf:1000,

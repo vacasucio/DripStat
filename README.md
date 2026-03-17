@@ -1,6 +1,6 @@
-# DoseSafe — Clinical Dosing Calculator
+# DoseDefender — Clinical Dosing Calculator
 
-Node.js/Express backend that bridges the **Cerner FHIR R4 open sandbox** to the DoseSafe frontend, providing structured patient data for pharmacy dosing calculators.
+Node.js/Express backend that bridges the **Cerner FHIR R4 open sandbox** to the DoseDefender frontend, providing structured patient data for pharmacy dosing calculators.
 
 ## FHIR Sandbox
 
@@ -26,7 +26,7 @@ npm start
 npm run dev
 ```
 
-Open `http://localhost:3000` to load **DoseSafe.html**.
+Open `http://localhost:3000` to load **DoseDefender.html**.
 
 ---
 
@@ -108,7 +108,7 @@ dosafy/
 │   ├── labs.js            # Lab results endpoints
 │   ├── medications.js     # Medication list endpoints
 │   └── vitals.js          # Vital signs endpoints
-├── DoseSafe.html          # Frontend application
+├── DoseDefender.html          # Frontend application
 ├── .env                   # Local environment (git-ignored)
 ├── .env.example           # Environment template
 ├── package.json

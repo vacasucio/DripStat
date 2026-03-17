@@ -1,7 +1,7 @@
 {
-  "name": "dosesafe-server",
+  "name": "dosedefender-server",
   "version": "1.0.0",
-  "description": "DoseSafe FHIR-powered pharmacy dosing calculator backend",
+  "description": "DoseDefender FHIR-powered pharmacy dosing calculator backend",
   "main": "server.js",
   "engines": {
     "node": ">=18.0.0"

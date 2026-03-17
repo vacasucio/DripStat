@@ -28,7 +28,7 @@ app.use((req, res, next) => {
   if (!authUser || !authPass) return next(); // auth not configured — allow
   const credentials = basicAuth(req);
   if (!credentials || credentials.name !== authUser || credentials.pass !== authPass) {
-    res.set('WWW-Authenticate', 'Basic realm="DoseSafe", charset="UTF-8"');
+    res.set('WWW-Authenticate', 'Basic realm="DoseDefender", charset="UTF-8"');
     return res.status(401).send('Authentication required');
   }
   next();
@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 
 // ── Session middleware ──────────────────────────────────────────────────────
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'dosesafe-dev-secret',
+  secret: process.env.SESSION_SECRET || 'dosedefender-dev-secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -62,7 +62,7 @@ app.get('/admin', (req, res) => {
 app.get('/smart-configuration', (req, res) => {
   const base = process.env.APP_BASE_URL || `http://localhost:${PORT}`;
   res.json({
-    name: 'DoseSafe',
+    name: 'DoseDefender',
     description: 'Clinical dosing calculators — heparin, vancomycin AUC/MIC, and more',
     launch_url: `${base}/launch`,
     redirect_uris: [process.env.CERNER_REDIRECT_URI || `${base}/callback`],
@@ -233,7 +233,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`DoseSafe server running on http://localhost:${PORT}`);
+  console.log(`DoseDefender server running on http://localhost:${PORT}`);
   console.log(`FHIR base: ${process.env.FHIR_BASE_URL}`);
   console.log(`SMART on FHIR: ${process.env.CERNER_CLIENT_ID ? 'configured' : 'not configured (open sandbox only)'}`);
   const authUser = process.env.BASIC_AUTH_USER;

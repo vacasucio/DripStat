@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DoseSafe — Clinical Dosing Calculators</title>
+<title>DoseDefender — Clinical Dosing Calculators</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -164,7 +164,7 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
 <!-- ══ LOGO DEF ══ -->
 <template id="logo-light-tpl">
 <svg width="240" height="52" viewBox="0 0 240 52" xmlns="http://www.w3.org/2000/svg">
-  <text x="97" y="32" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#0f2744" text-anchor="middle" letter-spacing="2">DoseSafe</text>
+  <text x="97" y="32" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#0f2744" text-anchor="middle" letter-spacing="2">DoseDefender</text>
   <line x1="14" y1="40" x2="184" y2="40" stroke="#0d7c6e" stroke-width="1.5"/>
   <text x="97" y="50" font-family="Georgia,serif" font-size="8" fill="#0d7c6e" text-anchor="middle" letter-spacing="3">CLINICAL DOSING</text>
   <rect x="191" y="6" width="30" height="36" rx="3" fill="#0d7c6e"/>
@@ -228,9 +228,9 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
 
   <section class="section" id="features">
     <div class="section-inner">
-      <div class="sec-eyebrow">Why DoseSafe</div>
+      <div class="sec-eyebrow">Why DoseDefender</div>
       <div class="sec-title">Built for the bedside,<br>not the boardroom.</div>
-      <div class="sec-sub">Most clinical software is built by engineers. DoseSafe is built by pharmacists who understand exactly what you need in the moment.</div>
+      <div class="sec-sub">Most clinical software is built by engineers. DoseDefender is built by pharmacists who understand exactly what you need in the moment.</div>
       <div class="feat-grid">
         <div class="feat-card"><div class="feat-icon">⚖️</div><div class="feat-title">Institution Customizable</div><div class="feat-desc">Upload your own protocol nomograms. Every hospital is different — your calculator should reflect your institution's guidelines.</div></div>
         <div class="feat-card"><div class="feat-icon">🔒</div><div class="feat-title">Zero Patient Data</div><div class="feat-desc">No PHI ever stored or transmitted. All calculations run locally on your device. Simplified compliance.</div></div>
@@ -315,9 +315,9 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
       </div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2025 DoseSafe LLC. All rights reserved.</div>
+      <div class="footer-copy">© 2025 DoseDefender LLC. All rights reserved.</div>
       <div class="footer-disc">For educational and reference purposes only — not intended for clinical decision making.</div>
-      <div class="footer-copy">dosesafe.com</div>
+      <div class="footer-copy">dosedefender.com</div>
       <a href="admin.html" style="font-size:10px;color:rgba(255,255,255,.1);font-family:'DM Mono',monospace;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.3)'" onmouseout="this.style.color='rgba(255,255,255,.1)'">admin</a>
     </div>
   </footer>
@@ -325,7 +325,7 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
 
 <script>
 // ══ ADMIN CONSTANTS ══
-const _ADMIN_LS = { PIN:'dosesafe_admin_pin', INST:'dosesafe_admin_inst', ACS:'dosesafe_admin_heparin_acs', DVT:'dosesafe_admin_heparin_vte' };
+const _ADMIN_LS = { PIN:'dosedefender_admin_pin', INST:'dosedefender_admin_inst', ACS:'dosedefender_admin_heparin_acs', DVT:'dosedefender_admin_heparin_vte' };
 
 function getInstName(){ return localStorage.getItem(_ADMIN_LS.INST)||''; }
 function getAdminPin(){ return localStorage.getItem(_ADMIN_LS.PIN)||'1234'; }
