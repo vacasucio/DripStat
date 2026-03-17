@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const session = require('express-session');
 const axios = require('axios');
+const basicAuth = require('basic-auth');
 
 const patientRoutes = require('./routes/patient');
 const labRoutes = require('./routes/labs');
@@ -15,6 +16,24 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// ── HTTP Basic Auth ────────────────────────────────────────────────────────
+// Protects all routes except /api/health (kept open for Railway health checks).
+// Skipped entirely when BASIC_AUTH_USER is not set (local dev without creds).
+const AUTH_USER = process.env.BASIC_AUTH_USER;
+const AUTH_PASS = process.env.BASIC_AUTH_PASS;
+
+if (AUTH_USER && AUTH_PASS) {
+  app.use((req, res, next) => {
+    if (req.path === '/api/health') return next();
+    const credentials = basicAuth(req);
+    if (!credentials || credentials.name !== AUTH_USER || credentials.pass !== AUTH_PASS) {
+      res.set('WWW-Authenticate', 'Basic realm="DoseSafe", charset="UTF-8"');
+      return res.status(401).send('Authentication required');
+    }
+    next();
+  });
+}
 
 // ── Session middleware ──────────────────────────────────────────────────────
 app.use(session({
