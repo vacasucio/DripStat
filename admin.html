@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DoseSafe — Admin Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Instrument+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0f2744;--navy2:#1a3a5c;--navy3:#243b55;
+  --teal:#0d7c6e;--teal-light:#e6f4f2;--teal-mid:#9dcdc7;
+  --text:#1a2332;--muted:#64748b;--border:#e2e8f0;--bg:#f8fafc;--white:#fff;
+  --red:#dc2626;--red-light:#fef2f2;--green:#16a34a;--green-light:#f0fdf4;
+  --warn:#f59e0b;--warn-light:#fffbeb;--surface:#f1f5f9;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(--bg);min-height:100vh;}
+
+/* ══ PIN SCREEN ══ */
+#pin-screen{
+  min-height:100vh;
+  background:linear-gradient(160deg,#060f1c 0%,#0f2744 55%,#091e38 100%);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.pin-card{
+  background:white;border-radius:20px;padding:52px 44px 44px;
+  max-width:380px;width:100%;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.05);
+}
+.pin-wordmark{
+  font-family:'Playfair Display',serif;font-size:28px;font-weight:700;
+  color:var(--navy);letter-spacing:-.01em;margin-bottom:4px;
+}
+.pin-wordmark em{color:var(--teal);font-style:italic;}
+.pin-eyebrow{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:40px;
+}
+.pin-lbl{
+  display:block;font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:12px;
+}
+.pin-input{
+  width:100%;background:var(--bg);border:2px solid var(--border);
+  color:var(--navy);border-radius:12px;padding:16px;
+  font-size:30px;font-family:'DM Mono',monospace;letter-spacing:.5em;
+  text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;
+  margin-bottom:14px;
+}
+.pin-input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(13,124,110,.1);}
+.pin-input:disabled{opacity:.4;cursor:not-allowed;}
+.pin-btn{
+  width:100%;background:var(--navy);color:white;border:none;border-radius:12px;
+  padding:15px;font-size:14px;font-weight:600;cursor:pointer;
+  font-family:'Instrument Sans',sans-serif;transition:all .2s;
+  box-shadow:0 4px 14px rgba(15,39,68,.25);
+}
+.pin-btn:hover{background:var(--navy2);transform:translateY(-1px);}
+.pin-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.pin-err{
+  display:block;margin-top:12px;font-size:12px;
+  color:var(--red);font-family:'DM Mono',monospace;min-height:18px;
+}
+.pin-lock{
+  margin-top:10px;font-size:12px;color:var(--muted);
+  font-family:'DM Mono',monospace;display:none;
+}
+
+/* ══ ADMIN NAV ══ */
+#admin-panel{display:none;}
+.admin-nav{
+  position:sticky;top:0;z-index:100;height:64px;
+  background:rgba(255,255,255,.97);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:0 48px;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+}
+.nav-left{display:flex;align-items:center;gap:14px;}
+.nav-wordmark{
+  font-family:'Playfair Display',serif;font-size:20px;font-weight:700;
+  color:var(--navy);letter-spacing:-.01em;
+}
+.nav-wordmark em{color:var(--teal);font-style:italic;}
+.admin-badge{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;background:var(--warn-light);
+  border:1px solid #fde68a;color:#92400e;
+  padding:3px 10px;border-radius:100px;
+}
+.nav-right{display:flex;gap:8px;align-items:center;}
+.btn-return{
+  background:var(--navy);color:white;border:none;
+  border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all .2s;
+  text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+}
+.btn-return:hover{background:var(--navy2);}
+.btn-logout{
+  background:transparent;color:var(--muted);
+  border:1.5px solid var(--border);border-radius:8px;
+  padding:7px 16px;font-size:12px;cursor:pointer;
+  font-family:'DM Mono',monospace;letter-spacing:.03em;transition:all .2s;
+}
+.btn-logout:hover{border-color:#fca5a5;color:var(--red);}
+
+/* ══ BODY LAYOUT ══ */
+.admin-body{max-width:960px;margin:0 auto;padding:36px 24px 80px;}
+
+.disc-bar{
+  background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;
+  padding:12px 18px;font-size:12px;color:#92400e;
+  display:flex;align-items:flex-start;gap:8px;margin-bottom:28px;line-height:1.6;
+}
+
+/* ══ SECTION CARDS ══ */
+.section-card{
+  background:white;border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;margin-bottom:20px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.section-hdr{
+  padding:15px 24px;background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.section-icon{font-size:17px;}
+.section-title{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--muted);font-weight:500;
+}
+.section-body{padding:24px;}
+
+/* ══ FORM ELEMENTS ══ */
+.field{margin-bottom:18px;}
+.field:last-child{margin-bottom:0;}
+.lbl{
+  display:block;font-size:10px;font-weight:600;color:var(--muted);
+  margin-bottom:6px;font-family:'DM Mono',monospace;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.inp{
+  background:var(--bg);border:1.5px solid var(--border);color:var(--text);
+  border-radius:10px;padding:11px 14px;font-size:14px;
+  font-family:'DM Mono',monospace;width:100%;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.inp:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,124,110,.1);background:white;}
+.inp-text{font-family:'Instrument Sans',sans-serif;}
+.inp-hint{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:5px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;}
+
+.proto-sel{
+  background:var(--bg);border:2px solid var(--teal-mid);color:var(--navy);
+  border-radius:10px;padding:12px 36px 12px 14px;font-size:15px;
+  font-family:'Instrument Sans',sans-serif;width:100%;outline:none;
+  appearance:none;cursor:pointer;font-weight:600;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;
+  transition:border-color .2s;
+}
+.proto-sel:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,124,110,.1);}
+.proto-status{
+  margin-top:8px;font-size:11px;font-family:'DM Mono',monospace;
+  display:flex;align-items:center;gap:6px;
+}
+.proto-status.custom{color:#92400e;}
+.proto-status.default{color:var(--green);}
+
+/* ══ NOMOGRAM TABLE ══ */
+.nomo-outer{margin-top:20px;}
+.nomo-sec-lbl{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+.nomo-sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.nomo-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:12px;}
+.nomo-tbl{width:100%;border-collapse:collapse;}
+.nomo-tbl thead th{
+  padding:10px 10px;
+  background:linear-gradient(135deg,var(--navy),var(--navy3));
+  color:rgba(255,255,255,.65);
+  font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:.1em;text-transform:uppercase;
+  text-align:left;font-weight:500;white-space:nowrap;
+}
+.nomo-tbl thead th:first-child{border-top-left-radius:11px;}
+.nomo-tbl thead th:last-child{border-top-right-radius:11px;}
+.nomo-tbl tbody td{
+  padding:7px 6px;border-bottom:1px solid var(--border);vertical-align:middle;
+}
+.nomo-tbl tbody tr:last-child td{border-bottom:none;}
+.nomo-tbl tbody tr:hover td{background:var(--teal-light);}
+.nomo-lbl{
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);
+  font-weight:600;white-space:nowrap;padding:0 8px 0 4px;
+}
+.type-chip{
+  font-family:'DM Mono',monospace;font-size:8px;padding:2px 7px;
+  border-radius:100px;font-weight:600;white-space:nowrap;
+}
+.t-increase{background:#fef3c7;color:#92400e;}
+.t-therapeutic{background:var(--green-light);color:var(--green);}
+.t-decrease{background:var(--teal-light);color:var(--teal);}
+.t-hold{background:var(--red-light);color:var(--red);}
+.nomo-inp{
+  background:var(--bg);border:1.5px solid var(--border);color:var(--text);
+  border-radius:6px;padding:6px 7px;font-size:12px;
+  font-family:'DM Mono',monospace;width:100%;outline:none;
+  transition:border-color .15s;min-width:54px;
+}
+.nomo-inp:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(13,124,110,.1);background:white;}
+.nomo-note{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:8px;}
+
+/* ══ SAVE / RESET ══ */
+.action-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.btn-save{
+  background:var(--teal);color:white;border:none;
+  border-radius:10px;padding:13px 32px;font-size:14px;font-weight:600;
+  cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all .2s;
+  box-shadow:0 4px 14px rgba(13,124,110,.25);
+}
+.btn-save:hover{background:#0a6358;transform:translateY(-1px);}
+.btn-save.saved{background:var(--green);box-shadow:0 4px 14px rgba(22,163,74,.25);}
+.btn-reset{
+  background:transparent;color:var(--muted);
+  border:1.5px solid var(--border);border-radius:10px;
+  padding:12px 22px;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all .2s;
+}
+.btn-reset:hover{border-color:#fca5a5;color:var(--red);}
+.save-confirm-msg{
+  font-size:13px;font-family:'DM Mono',monospace;
+  color:var(--green);display:none;
+}
+.reset-confirm-box{
+  display:none;margin-top:14px;background:var(--red-light);
+  border:1px solid #fecaca;border-radius:10px;padding:16px 20px;
+  font-size:13px;color:var(--red);line-height:1.65;
+}
+.reset-confirm-btns{display:flex;gap:8px;margin-top:12px;}
+.btn-yes-reset{
+  background:var(--red);color:white;border:none;border-radius:8px;
+  padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:'DM Mono',monospace;transition:background .2s;
+}
+.btn-yes-reset:hover{background:#b91c1c;}
+.btn-no-reset{
+  background:white;color:var(--muted);border:1.5px solid var(--border);
+  border-radius:8px;padding:8px 18px;font-size:12px;cursor:pointer;
+  font-family:'DM Mono',monospace;transition:all .2s;
+}
+.btn-no-reset:hover{border-color:var(--muted);color:var(--text);}
+
+@media(max-width:768px){
+  .admin-nav{padding:0 16px;}
+  .nav-wordmark{font-size:17px;}
+  .admin-body{padding:20px 16px 60px;}
+  .row2,.row3,.row4{grid-template-columns:1fr;}
+  .btn-return,.btn-logout{padding:7px 12px;font-size:12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     PIN SCREEN
+══════════════════════════════════ -->
+<div id="pin-screen">
+  <div class="pin-card">
+    <div class="pin-wordmark">Dose<em>Safe</em></div>
+    <div class="pin-eyebrow">Admin Settings</div>
+    <label class="pin-lbl" for="pin-input">Enter Admin PIN</label>
+    <input id="pin-input" class="pin-input" type="password"
+           placeholder="••••" maxlength="4"
+           inputmode="numeric" autocomplete="off"
+           onkeydown="if(event.key==='Enter')submitPin()">
+    <button class="pin-btn" id="pin-btn" onclick="submitPin()">Unlock Admin Settings</button>
+    <span id="pin-err" class="pin-err"></span>
+    <div id="pin-lock" class="pin-lock"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     ADMIN PANEL
+══════════════════════════════════ -->
+<div id="admin-panel">
+
+  <nav class="admin-nav">
+    <div class="nav-left">
+      <div class="nav-wordmark">Dose<em>Safe</em></div>
+      <span class="admin-badge">⚙ Admin Settings</span>
+    </div>
+    <div class="nav-right">
+      <a href="/" class="btn-return">← Back to DoseSafe</a>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="admin-body">
+
+    <div class="disc-bar">
+      ⚠️ <span>Settings saved here take effect immediately when clinicians return to DoseSafe. Only modify values in accordance with your institution's approved heparin protocol. All changes are stored in this browser's localStorage.</span>
+    </div>
+
+    <!-- ── Shared Settings ── -->
+    <div class="section-card">
+      <div class="section-hdr">
+        <span class="section-icon">🏥</span>
+        <span class="section-title">Shared Settings</span>
+      </div>
+      <div class="section-body">
+        <div class="row2">
+          <div class="field">
+            <label class="lbl" for="inst-name">Institution Name</label>
+            <input id="inst-name" class="inp inp-text" type="text"
+                   placeholder="e.g. General Hospital Pharmacy">
+            <div class="inp-hint">Displayed in the calculator header when set</div>
+          </div>
+          <div class="field">
+            <label class="lbl" for="new-pin">Change Admin PIN</label>
+            <input id="new-pin" class="inp" type="password"
+                   placeholder="New 4-digit PIN" maxlength="4" autocomplete="new-password">
+            <div class="inp-hint">Leave blank to keep current PIN</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Protocol Settings ── -->
+    <div class="section-card">
+      <div class="section-hdr">
+        <span class="section-icon">💉</span>
+        <span class="section-title">Heparin Protocol Settings</span>
+      </div>
+      <div class="section-body">
+        <div class="field" style="margin-bottom:24px;">
+          <label class="lbl" for="proto-select">Protocol</label>
+          <select id="proto-select" class="proto-sel"
+                  onchange="loadProtocol(this.value)">
+            <option value="DVT">Heparin VTE — DVT / Venous Thromboembolism</option>
+            <option value="ACS">Heparin ACS — Acute Coronary Syndrome</option>
+          </select>
+          <div class="proto-status" id="proto-status"></div>
+        </div>
+
+        <!-- Protocol parameter fields — rendered by JS -->
+        <div id="proto-fields"></div>
+      </div>
+    </div>
+
+    <!-- ── Save / Reset ── -->
+    <div class="section-card">
+      <div class="section-hdr">
+        <span class="section-icon">💾</span>
+        <span class="section-title">Save Changes</span>
+      </div>
+      <div class="section-body">
+        <div class="action-row">
+          <button class="btn-save" id="save-btn" onclick="saveSettings()">Save Settings</button>
+          <button class="btn-reset" onclick="showResetConfirm()">↺ Reset to Published Defaults</button>
+          <span class="save-confirm-msg" id="save-msg">✓ Settings saved successfully</span>
+        </div>
+        <div class="reset-confirm-box" id="reset-confirm">
+          <strong>Reset this protocol to published defaults?</strong><br>
+          All custom changes for the selected protocol will be permanently removed
+          from localStorage. Other protocols are not affected.
+          <div class="reset-confirm-btns">
+            <button class="btn-yes-reset" onclick="doReset()">Yes, Reset to Defaults</button>
+            <button class="btn-no-reset" onclick="hideResetConfirm()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin-body -->
+</div><!-- /admin-panel -->
+
+<script>
+// ══ localStorage KEYS (must match DoseSafe.html getProtocol() / _ADMIN_LS) ══
+const LS = {
+  PIN:  'dosesafe_admin_pin',
+  INST: 'dosesafe_admin_inst',
+  ACS:  'dosesafe_admin_heparin_acs',
+  DVT:  'dosesafe_admin_heparin_vte',
+};
+const SESSION_KEY = 'dosesafe_admin_auth';
+
+// ══ PUBLISHED DEFAULTS (mirror of PROTOCOLS in DoseSafe.html) ══
+const DEFAULTS = {
+  ACS: {
+    bolus_per_kg:60, max_bolus:5000, inf_per_kg_hr:12, max_inf:1000,
+    round_inc:50, restart_rate:null,
+    ptt_ranges:[
+      {label:'< 30 sec',  min:0,  max:29,   type:'increase',    bolus_per_kg:60, max_bolus:4000, rate_per_kg:2,  hold:null, redraw:6, notify:true,  note:'Notify MD if 2 consecutive results in this range'},
+      {label:'30–49 sec', min:30, max:49,   type:'increase',    bolus_per_kg:30, max_bolus:2000, rate_per_kg:1,  hold:null, redraw:6, notify:false, note:'Notify MD if 2 consecutive results in this range'},
+      {label:'50–70 sec', min:50, max:70,   type:'therapeutic', bolus_per_kg:0,  max_bolus:0,    rate_per_kg:0,  hold:null, redraw:6, notify:false, note:'PTT daily if 2 consecutive therapeutic values'},
+      {label:'71–95 sec', min:71, max:95,   type:'decrease',    bolus_per_kg:0,  max_bolus:0,    rate_per_kg:-2, hold:null, redraw:6, notify:false, note:'', warn_row:true},
+      {label:'> 95 sec',  min:96, max:9999, type:'hold',        bolus_per_kg:0,  max_bolus:0,    rate_per_kg:-3, hold:60,   redraw:6, notify:true,  note:''},
+    ]
+  },
+  DVT: {
+    bolus_per_kg:80, max_bolus:8000, inf_per_kg_hr:18, max_inf:1800,
+    round_inc:50, restart_rate:null,
+    ptt_ranges:[
+      {label:'< 35 sec',    min:0,   max:34,   type:'increase',    bolus_per_kg:60, max_bolus:5000, rate_per_kg:4,  hold:null, redraw:6, notify:true,  note:''},
+      {label:'35–59 sec',   min:35,  max:59,   type:'increase',    bolus_per_kg:30, max_bolus:3000, rate_per_kg:2,  hold:null, redraw:6, notify:false, note:''},
+      {label:'60–90 sec',   min:60,  max:90,   type:'therapeutic', bolus_per_kg:0,  max_bolus:0,    rate_per_kg:0,  hold:null, redraw:6, notify:false, note:'PTT daily if 2 consecutive therapeutic values'},
+      {label:'91–120 sec',  min:91,  max:120,  type:'decrease',    bolus_per_kg:0,  max_bolus:0,    rate_per_kg:-2, hold:null, redraw:6, notify:false, note:'', warn_row:true},
+      {label:'121–138 sec', min:121, max:138,  type:'hold',        bolus_per_kg:0,  max_bolus:0,    rate_per_kg:-3, hold:30,   redraw:6, notify:false, note:''},
+      {label:'> 139 sec',   min:139, max:9999, type:'hold',        bolus_per_kg:0,  max_bolus:0,    rate_per_kg:-4, hold:60,   redraw:6, notify:true,  note:''},
+    ]
+  }
+};
+
+// ══ PIN / AUTH ══
+let wrongAttempts = 0;
+let lockUntil = 0;
+let lockInterval = null;
+
+function getPin(){ return localStorage.getItem(LS.PIN) || '1234'; }
+
+function submitPin(){
+  if(Date.now() < lockUntil) return;
+  const val = (document.getElementById('pin-input').value || '').trim();
+  if(val === getPin()){
+    wrongAttempts = 0;
+    sessionStorage.setItem(SESSION_KEY, '1');
+    showAdminPanel();
+  } else {
+    wrongAttempts++;
+    document.getElementById('pin-input').value = '';
+    if(wrongAttempts >= 3){
+      lockUntil = Date.now() + 60000;
+      wrongAttempts = 0;
+      startLockdown();
+    } else {
+      const left = 3 - wrongAttempts;
+      document.getElementById('pin-err').textContent =
+        `Incorrect PIN — ${left} attempt${left === 1 ? '' : 's'} remaining`;
+    }
+  }
+}
+
+function startLockdown(){
+  const input = document.getElementById('pin-input');
+  const btn   = document.getElementById('pin-btn');
+  const lock  = document.getElementById('pin-lock');
+  input.disabled = btn.disabled = true;
+  document.getElementById('pin-err').textContent = '';
+  if(lockInterval) clearInterval(lockInterval);
+  lockInterval = setInterval(()=>{
+    const rem = Math.ceil((lockUntil - Date.now()) / 1000);
+    if(rem <= 0){
+      clearInterval(lockInterval); lockInterval = null;
+      input.disabled = btn.disabled = false;
+      lock.style.display = 'none';
+      input.focus();
+    } else {
+      lock.style.display = 'block';
+      lock.textContent = `Too many incorrect attempts — try again in ${rem}s`;
+    }
+  }, 500);
+}
+
+function showAdminPanel(){
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  document.getElementById('inst-name').value = localStorage.getItem(LS.INST) || '';
+  document.getElementById('new-pin').value = '';
+  loadProtocol('DVT');
+}
+
+function logout(){
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('pin-screen').style.display = 'flex';
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-err').textContent = '';
+  document.getElementById('pin-lock').style.display = 'none';
+  setTimeout(()=>document.getElementById('pin-input').focus(), 80);
+}
+
+// ══ PROTOCOL LOADING ══
+let currentProto = 'DVT';
+
+function getEffective(pk){
+  try {
+    const raw = localStorage.getItem(LS[pk]);
+    if(!raw) return JSON.parse(JSON.stringify(DEFAULTS[pk]));
+    const saved = JSON.parse(raw);
+    const base  = DEFAULTS[pk];
+    let ptt_ranges = base.ptt_ranges;
+    if(saved.ptt_ranges && saved.ptt_ranges.length === base.ptt_ranges.length){
+      ptt_ranges = saved.ptt_ranges.map((r, i) => ({...base.ptt_ranges[i], ...r}));
+    }
+    return {...base, ...saved, ptt_ranges};
+  } catch(e){ return JSON.parse(JSON.stringify(DEFAULTS[pk])); }
+}
+
+function loadProtocol(pk){
+  currentProto = pk;
+  document.getElementById('reset-confirm').style.display = 'none';
+
+  const isCustom = !!localStorage.getItem(LS[pk]);
+  const statusEl = document.getElementById('proto-status');
+  statusEl.className = 'proto-status ' + (isCustom ? 'custom' : 'default');
+  statusEl.textContent = isCustom
+    ? '⚙ Custom settings are active for this protocol'
+    : '✓ Using published defaults — no customizations saved';
+
+  const p = getEffective(pk);
+  const ther = p.ptt_ranges.find(r => r.type === 'therapeutic') || {};
+
+  document.getElementById('proto-fields').innerHTML = `
+    <div class="row4" style="margin-bottom:4px;">
+      <div class="field">
+        <label class="lbl">Initial Bolus (units/kg)</label>
+        <input id="pf-bolus-per-kg" class="inp" type="number" min="0" value="${p.bolus_per_kg}">
+      </div>
+      <div class="field">
+        <label class="lbl">Max Initial Bolus (units)</label>
+        <input id="pf-max-bolus" class="inp" type="number" min="0" value="${p.max_bolus}">
+      </div>
+      <div class="field">
+        <label class="lbl">Infusion Rate (units/kg/hr)</label>
+        <input id="pf-inf-per-kg-hr" class="inp" type="number" min="0" step="0.5" value="${p.inf_per_kg_hr}">
+      </div>
+      <div class="field">
+        <label class="lbl">Max Infusion Rate (units/hr)</label>
+        <input id="pf-max-inf" class="inp" type="number" min="0" value="${p.max_inf}">
+      </div>
+    </div>
+    <div class="row4">
+      <div class="field">
+        <label class="lbl">Therapeutic PTT Low (sec)</label>
+        <input id="pf-ther-low" class="inp" type="number" min="0" value="${ther.min ?? ''}">
+      </div>
+      <div class="field">
+        <label class="lbl">Therapeutic PTT High (sec)</label>
+        <input id="pf-ther-high" class="inp" type="number" min="0" value="${ther.max ?? ''}">
+      </div>
+      <div class="field">
+        <label class="lbl">Rate Rounding Increment (units/hr)</label>
+        <input id="pf-round-inc" class="inp" type="number" min="1" value="${p.round_inc || 50}">
+      </div>
+      <div class="field">
+        <label class="lbl">Restart Rate After Hold (units/hr)</label>
+        <input id="pf-restart-rate" class="inp" type="number" min="0"
+               value="${p.restart_rate || ''}" placeholder="optional">
+      </div>
+    </div>
+
+    <div class="nomo-outer">
+      <div class="nomo-sec-lbl">PTT Adjustment Nomogram</div>
+      <div class="nomo-scroll">
+        <table class="nomo-tbl">
+          <thead>
+            <tr>
+              <th style="min-width:110px;">PTT Range</th>
+              <th>Type</th>
+              <th>Bolus /kg</th>
+              <th>Max Bolus</th>
+              <th>Rate /kg/hr</th>
+              <th>Hold (min)</th>
+              <th>Redraw (hr)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${p.ptt_ranges.map((r, i) => `
+              <tr>
+                <td><span class="nomo-lbl">${r.label}</span></td>
+                <td><span class="type-chip t-${r.type}">${r.type}</span></td>
+                <td><input class="nomo-inp" data-ri="${i}" data-f="bolus_per_kg"
+                     type="number" min="0" value="${r.bolus_per_kg}"></td>
+                <td><input class="nomo-inp" data-ri="${i}" data-f="max_bolus"
+                     type="number" min="0" value="${r.max_bolus}"></td>
+                <td><input class="nomo-inp" data-ri="${i}" data-f="rate_per_kg"
+                     type="number" step="0.5" value="${r.rate_per_kg}"></td>
+                <td><input class="nomo-inp" data-ri="${i}" data-f="hold"
+                     type="number" min="0" value="${r.hold ?? ''}"></td>
+                <td><input class="nomo-inp" data-ri="${i}" data-f="redraw"
+                     type="number" min="1" value="${r.redraw}"></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="nomo-note">
+        Negative rate/kg/hr values decrease the infusion rate. Leave Hold blank for ranges with no hold. Changes apply to the selected protocol only.
+      </div>
+    </div>`;
+}
+
+// ══ SAVE ══
+function saveSettings(){
+  const pk = currentProto;
+  const p  = getEffective(pk);
+
+  // Shared
+  const instName = (document.getElementById('inst-name').value || '').trim();
+  if(instName) localStorage.setItem(LS.INST, instName);
+  const newPin = (document.getElementById('new-pin').value || '').trim();
+  if(newPin && /^\d{4}$/.test(newPin)){
+    localStorage.setItem(LS.PIN, newPin);
+    document.getElementById('new-pin').value = '';
+  }
+
+  // PTT ranges — deep copy defaults, overlay editable fields
+  const ranges = JSON.parse(JSON.stringify(p.ptt_ranges));
+  document.querySelectorAll('.nomo-inp').forEach(inp => {
+    const ri = parseInt(inp.dataset.ri);
+    const f  = inp.dataset.f;
+    if(ri >= ranges.length) return;
+    const raw = inp.value;
+    ranges[ri][f] = raw === '' ? null
+      : f === 'rate_per_kg' ? parseFloat(raw)
+      : parseInt(raw);
+  });
+
+  // Apply therapeutic range boundaries from convenience fields
+  const therLow  = parseInt(document.getElementById('pf-ther-low').value);
+  const therHigh = parseInt(document.getElementById('pf-ther-high').value);
+  if(!isNaN(therLow) && !isNaN(therHigh)){
+    const ti = ranges.findIndex(r => r.type === 'therapeutic');
+    if(ti >= 0){ ranges[ti].min = therLow; ranges[ti].max = therHigh; }
+  }
+
+  const restartRaw = document.getElementById('pf-restart-rate').value;
+  const settings = {
+    bolus_per_kg:  parseFloat(document.getElementById('pf-bolus-per-kg').value)  || p.bolus_per_kg,
+    max_bolus:     parseInt(document.getElementById('pf-max-bolus').value)        || p.max_bolus,
+    inf_per_kg_hr: parseFloat(document.getElementById('pf-inf-per-kg-hr').value) || p.inf_per_kg_hr,
+    max_inf:       parseInt(document.getElementById('pf-max-inf').value)          || p.max_inf,
+    round_inc:     parseInt(document.getElementById('pf-round-inc').value)        || 50,
+    restart_rate:  restartRaw ? parseInt(restartRaw) : null,
+    ptt_ranges:    ranges,
+  };
+
+  localStorage.setItem(LS[pk], JSON.stringify(settings));
+
+  // Feedback
+  const btn = document.getElementById('save-btn');
+  const msg = document.getElementById('save-msg');
+  btn.textContent = '✓ Saved';
+  btn.classList.add('saved');
+  msg.style.display = 'inline';
+  const statusEl = document.getElementById('proto-status');
+  statusEl.className = 'proto-status custom';
+  statusEl.textContent = '⚙ Custom settings are active for this protocol';
+  setTimeout(()=>{
+    btn.textContent = 'Save Settings';
+    btn.classList.remove('saved');
+    msg.style.display = 'none';
+  }, 3000);
+}
+
+// ══ RESET ══
+function showResetConfirm(){ document.getElementById('reset-confirm').style.display = 'block'; }
+function hideResetConfirm(){ document.getElementById('reset-confirm').style.display = 'none'; }
+function doReset(){
+  localStorage.removeItem(LS[currentProto]);
+  hideResetConfirm();
+  loadProtocol(currentProto);
+}
+
+// ══ INIT ══
+if(sessionStorage.getItem(SESSION_KEY) === '1'){
+  showAdminPanel();
+} else {
+  document.getElementById('pin-input').focus();
+}
+</script>
+</body>
+</html>

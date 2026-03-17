@@ -19,6 +19,9 @@ app.use(express.static(path.join(__dirname)));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'DoseSafe.html'));
 });
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+});
 
 // FHIR-backed API routes
 app.use('/api/patient', patientRoutes);
