@@ -10,6 +10,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const { TEST_PATIENT_ID, vitals: mockVitals, patient: mockPatient } = require('../testData');
+const { getFhirHeaders } = require('../lib/fhirHeaders');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
 

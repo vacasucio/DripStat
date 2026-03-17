@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const { TEST_PATIENT_ID, medications: mockMeds } = require('../testData');
+const { getFhirHeaders } = require('../lib/fhirHeaders');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
 
@@ -78,7 +79,7 @@ router.get('/:patientId', async (req, res) => {
         _count: count,
         _sort: '-authoredon',
       },
-      headers: { Accept: 'application/fhir+json' },
+      headers: getFhirHeaders(req),
     });
 
     const bundle = response.data;
@@ -100,7 +101,7 @@ router.get('/:patientId/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const response = await axios.get(`${FHIR_BASE}/MedicationRequest/${id}`, {
-      headers: { Accept: 'application/fhir+json' },
+      headers: getFhirHeaders(req),
     });
     res.json(formatMedRequest(response.data));
   } catch (err) {

@@ -10,6 +10,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const { TEST_PATIENT_ID, patient: mockPatient } = require('../testData');
+const { getFhirHeaders } = require('../lib/fhirHeaders');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
 
@@ -27,7 +28,7 @@ function calcAge(dob) {
   return age;
 }
 
-async function getLatestObservation(patientId, loincCode) {
+async function getLatestObservation(patientId, loincCode, headers) {
   const url = `${FHIR_BASE}/Observation`;
   const res = await axios.get(url, {
     params: {
@@ -36,7 +37,7 @@ async function getLatestObservation(patientId, loincCode) {
       _sort: '-date',
       _count: 1,
     },
-    headers: { Accept: 'application/fhir+json' },
+    headers,
   });
   const bundle = res.data;
   if (!bundle.entry || bundle.entry.length === 0) return null;
@@ -55,11 +56,12 @@ function extractQuantity(obs) {
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   if (id === TEST_PATIENT_ID) return res.json(mockPatient);
+  const headers = getFhirHeaders(req);
   try {
     const [patientRes, weightObs, heightObs] = await Promise.all([
-      axios.get(`${FHIR_BASE}/Patient/${id}`, { headers: { Accept: 'application/fhir+json' } }),
-      getLatestObservation(id, LOINC_WEIGHT),
-      getLatestObservation(id, LOINC_HEIGHT),
+      axios.get(`${FHIR_BASE}/Patient/${id}`, { headers }),
+      getLatestObservation(id, LOINC_WEIGHT, headers),
+      getLatestObservation(id, LOINC_HEIGHT, headers),
     ]);
 
     const pt = patientRes.data;

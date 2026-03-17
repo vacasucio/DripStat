@@ -11,6 +11,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const { TEST_PATIENT_ID, labs: mockLabs } = require('../testData');
+const { getFhirHeaders } = require('../lib/fhirHeaders');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
 
@@ -22,7 +23,7 @@ const LOINC = {
   BUN: '3094-0',         // Urea nitrogen [Mass/volume] in Serum or Plasma
 };
 
-async function fetchObs(patientId, loincCode, count = 1) {
+async function fetchObs(patientId, loincCode, count = 1, headers = { Accept: 'application/fhir+json' }) {
   const res = await axios.get(`${FHIR_BASE}/Observation`, {
     params: {
       patient: patientId,
@@ -30,7 +31,7 @@ async function fetchObs(patientId, loincCode, count = 1) {
       _sort: '-date',
       _count: count,
     },
-    headers: { Accept: 'application/fhir+json' },
+    headers,
   });
   return res.data.entry?.map(e => e.resource) || [];
 }
