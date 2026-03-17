@@ -588,10 +588,11 @@ canvas{display:block;}
 
 <!-- ══ APP NAV ══ -->
 <nav class="nav" id="main-nav">
-  <div class="nav-brand" id="nav-logo" onclick="showPage('catalog')"></div>
-  <span id="inst-label" style="display:none;font-size:13px;color:var(--muted);font-weight:500;margin-left:8px;white-space:nowrap;"></span>
+  <div class="nav-brand" id="nav-logo" onclick="showPage('catalog')" style="cursor:pointer;flex-shrink:0;"></div>
+  <span id="inst-divider" style="display:none;width:1px;height:22px;background:var(--border);margin:0 14px;flex-shrink:0;align-self:center;"></span>
+  <span id="inst-label" style="display:none;font-size:13px;color:var(--navy);font-weight:600;white-space:nowrap;font-family:'Instrument Sans',sans-serif;letter-spacing:-.01em;"></span>
   <div style="flex:1;"></div>
-  <a href="/" style="font-size:13px;color:var(--muted);font-weight:500;padding:7px 14px;text-decoration:none;border-radius:6px;transition:background .15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''">← dosesafe.com</a>
+  <a href="/" style="font-size:13px;color:var(--muted);font-weight:500;padding:7px 14px;text-decoration:none;border-radius:6px;transition:all .15s;display:flex;align-items:center;gap:5px;" onmouseover="this.style.background='var(--surface)';this.style.color='var(--text)'" onmouseout="this.style.background='';this.style.color='var(--muted)'">← dosesafe.com</a>
 </nav>
 
 <!-- ══ FHIR PATIENT BAR ══ -->
@@ -626,10 +627,9 @@ canvas{display:block;}
 <div id="page-catalog" class="page">
   <div class="cat-hero">
     <div class="cat-hero-inner">
-      <div><div class="cat-hero-eyebrow">Clinical Calculator Library</div><div class="cat-hero-title">Dosing tools built by pharmacists,<br>for every clinician.</div><div class="cat-hero-sub">Accurate, weight-based calculators. Zero patient data stored. Works on any device alongside any EMR.</div></div>
+      <div><div class="cat-hero-eyebrow">Calculator Library</div><div class="cat-hero-title">Clinical Dosing Calculators</div><div class="cat-hero-sub">Weight-based dosing with PTT nomograms, AUC/MIC targeting, and FHIR patient integration. Always verify doses against your institution's current protocols.</div></div>
       <div class="cat-stats">
         <div style="text-align:right;"><div class="cs-num">8+</div><div class="cs-lbl">Calculators</div></div>
-        <div style="text-align:right;"><div class="cs-num">Free</div><div class="cs-lbl">To Start</div></div>
         <div style="text-align:right;"><div class="cs-num">0</div><div class="cs-lbl">PHI Stored</div></div>
       </div>
     </div>
@@ -645,7 +645,7 @@ canvas{display:block;}
     </div>
     <!-- Anticoagulation -->
     <div class="cat-section">
-      <div class="cat-sec-hdr"><div class="cat-sec-title">Anticoagulation</div><div class="cat-sec-count">2 available</div></div>
+      <div class="cat-sec-hdr"><div class="cat-sec-title">Anticoagulation</div><div class="cat-sec-count">2 available · 1 coming</div></div>
       <div class="cat-grid">
         <div class="cat-card featured" onclick="showPage('heparin')">
           <div class="cc-top"><div class="cc-icon cci-teal">💉</div><div class="cc-badges"><span class="cb cb-free">FREE</span><span class="cb cb-new">NEW</span></div></div>
@@ -654,7 +654,7 @@ canvas{display:block;}
           <div class="cc-tags"><span class="cc-tag">ACS</span><span class="cc-tag">DVT/VTE</span><span class="cc-tag">PTT Nomogram</span><span class="cc-tag">Bolus + Rate</span></div>
         </div>
         <div class="cat-card pro-card">
-          <div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-text">Pro Feature</div><div class="lock-btn">Sign Up to Unlock</div></div>
+          <div class="lock-overlay"><div class="lock-icon">🔒</div><div class="lock-text">Not yet available</div></div>
           <div class="cc-top"><div class="cc-icon cci-gold">🔄</div><div class="cc-badges"><span class="cb cb-pro">PRO</span></div></div>
           <div class="cc-name">Protamine Reversal</div>
           <div class="cc-desc">Heparin reversal dosing based on total dose given and time since last administration.</div>
@@ -1196,9 +1196,16 @@ function injectLogos() {
   document.getElementById('nav-logo').innerHTML = tpl;
   const inst = getInstName();
   const lbl = document.getElementById('inst-label');
+  const div = document.getElementById('inst-divider');
   if (lbl) {
-    if (inst) { lbl.textContent = inst; lbl.style.display = 'inline'; }
-    else { lbl.style.display = 'none'; }
+    if (inst) {
+      lbl.textContent = inst;
+      lbl.style.display = 'inline';
+      if (div) div.style.display = 'inline-block';
+    } else {
+      lbl.style.display = 'none';
+      if (div) div.style.display = 'none';
+    }
   }
 }
 
