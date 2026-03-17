@@ -588,6 +588,7 @@ canvas{display:block;}
 <!-- ══ SHARED NAV ══ -->
 <nav class="nav" id="main-nav">
   <div class="nav-brand" id="nav-logo" onclick="showPage('landing')"></div>
+  <span id="inst-label" style="display:none;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.04em;margin-left:10px;white-space:nowrap;"></span>
   <div class="nav-links">
     <div class="nav-link" onclick="showPage('landing');setTimeout(()=>document.getElementById('features')?.scrollIntoView({behavior:'smooth'}),100)">Features</div>
     <div class="nav-link" onclick="showPage('landing');setTimeout(()=>document.getElementById('hospitals')?.scrollIntoView({behavior:'smooth'}),100)">For Hospitals</div>
@@ -1332,6 +1333,12 @@ function injectLogos() {
   document.getElementById('nav-logo').innerHTML = tpl;
   const fl = document.getElementById('footer-logo-land');
   if (fl) fl.innerHTML = tpl;
+  const inst = getInstName();
+  const lbl = document.getElementById('inst-label');
+  if (lbl) {
+    if (inst) { lbl.textContent = '— ' + inst; lbl.style.display = 'inline'; }
+    else { lbl.style.display = 'none'; }
+  }
 }
 
 // ══ NAV ══
