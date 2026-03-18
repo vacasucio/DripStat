@@ -21,6 +21,11 @@ const LOINC = {
   PTT: '3173-2',         // aPTT in Blood by Coagulation assay
   VANCOMYCIN: '4084-1',  // Vancomycin [Mass/volume] in Serum or Plasma
   BUN: '3094-0',         // Urea nitrogen [Mass/volume] in Serum or Plasma
+  GLUCOSE: '2345-7',     // Glucose [Mass/volume] in Serum or Plasma
+  POTASSIUM: '2823-3',   // Potassium [Moles/volume] in Serum or Plasma
+  CO2: '2028-9',         // Carbon dioxide, total (bicarbonate) in Serum or Plasma
+  SODIUM: '2951-2',      // Sodium [Moles/volume] in Serum or Plasma
+  CHLORIDE: '2075-0',    // Chloride [Moles/volume] in Serum or Plasma
 };
 
 async function fetchObs(patientId, loincCode, count = 1, headers = { Accept: 'application/fhir+json' }) {
@@ -60,11 +65,16 @@ router.get('/:patientId', async (req, res) => {
   const { patientId } = req.params;
   if (patientId === TEST_PATIENT_ID) return res.json(mockLabs);
   try {
-    const [scrList, pttList, vancoList, bunList] = await Promise.all([
+    const [scrList, pttList, vancoList, bunList, glucoseList, potassiumList, co2List, sodiumList, chlorideList] = await Promise.all([
       fetchObs(patientId, LOINC.SCR, 1),
       fetchObs(patientId, LOINC.PTT, 1),
       fetchObs(patientId, LOINC.VANCOMYCIN, 5),
       fetchObs(patientId, LOINC.BUN, 1),
+      fetchObs(patientId, LOINC.GLUCOSE, 1),
+      fetchObs(patientId, LOINC.POTASSIUM, 1),
+      fetchObs(patientId, LOINC.CO2, 1),
+      fetchObs(patientId, LOINC.SODIUM, 1),
+      fetchObs(patientId, LOINC.CHLORIDE, 1),
     ]);
 
     res.json({
@@ -73,6 +83,11 @@ router.get('/:patientId', async (req, res) => {
       ptt: formatObs(pttList[0]),
       vancomycinTroughs: vancoList.map(formatObs),
       bun: formatObs(bunList[0]),
+      glucose: formatObs(glucoseList[0]),
+      potassium: formatObs(potassiumList[0]),
+      bicarbonate: formatObs(co2List[0]),
+      sodium: formatObs(sodiumList[0]),
+      chloride: formatObs(chlorideList[0]),
     });
   } catch (err) {
     const status = err.response?.status || 500;
