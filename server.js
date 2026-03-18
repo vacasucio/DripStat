@@ -54,6 +54,9 @@ app.get('/', (req, res) => {
 app.get('/app', (req, res) => {
   res.sendFile(path.join(__dirname, 'app.html'));
 });
+app.get('/app/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'app.html'));
+});
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin.html'));
 });
