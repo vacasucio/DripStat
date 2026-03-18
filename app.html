@@ -1170,6 +1170,8 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
   </div>
 
 </div>
+</div>
+</div>
 
 <!-- ══════════════════════════════════════
      PAGE 5: DKA 2-BAG PROTOCOL
@@ -1335,7 +1337,7 @@ function renderView(view, calc) {
 
   // FHIR bar
   const fhirBar = document.getElementById('fhir-bar');
-  if (fhirBar) fhirBar.style.display = view === 'calculator' ? '' : 'none';
+  if (fhirBar) fhirBar.style.display = view === 'calculator' ? 'block' : 'none';
 
   // App header: back button + title vs logo
   const backBtn = document.getElementById('app-header-back');
