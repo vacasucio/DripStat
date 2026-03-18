@@ -585,6 +585,11 @@ canvas{display:block;}
 .dka-recheck-item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:var(--text);}
 .dka-recheck-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
+/* ══ PANEL OVERRIDES — calc pages inside slide panel ══ */
+.in-panel{padding-top:0!important;min-height:unset!important;}
+#fhir-bar.in-panel-fhir{position:relative!important;top:auto!important;left:auto!important;right:auto!important;z-index:5!important;border-radius:0;}
+.slide-panel .fhir-bar-active .calc-page-header,.slide-panel .calc-page-header,.slide-panel .page-header{margin-top:0!important;}
+
 /* ══ SLIDE-IN PANEL ══ */
 .panel-overlay{position:fixed;inset:0;background:rgba(15,39,68,.35);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s;}
 .panel-overlay.open{opacity:1;pointer-events:all;}
@@ -620,21 +625,24 @@ canvas{display:block;}
 
 <!-- ══ LOGO DEF ══ -->
 <template id="logo-light-tpl">
-<svg width="240" height="52" viewBox="0 0 240 52" xmlns="http://www.w3.org/2000/svg">
-  <text x="97" y="32" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#0f2744" text-anchor="middle" letter-spacing="2">DoseDefender</text>
-  <line x1="14" y1="40" x2="184" y2="40" stroke="#0d7c6e" stroke-width="1.5"/>
-  <text x="97" y="50" font-family="Georgia,serif" font-size="8" fill="#0d7c6e" text-anchor="middle" letter-spacing="3">CLINICAL DOSING</text>
-  <rect x="191" y="6" width="30" height="36" rx="3" fill="#0d7c6e"/>
-  <rect x="194" y="9" width="24" height="10" rx="2" fill="white" opacity="0.92"/>
-  <text x="218" y="18" font-family="Georgia,serif" font-size="7" font-weight="700" fill="#0d7c6e" text-anchor="end">1000</text>
-  <rect x="194" y="22" width="6" height="6" rx="1" fill="white" opacity="0.85"/>
-  <rect x="202" y="22" width="6" height="6" rx="1" fill="white" opacity="0.85"/>
-  <rect x="210" y="22" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
-  <rect x="194" y="30" width="6" height="6" rx="1" fill="white" opacity="0.85"/>
-  <rect x="202" y="30" width="6" height="6" rx="1" fill="white" opacity="0.85"/>
-  <rect x="210" y="30" width="6" height="6" rx="1" fill="white" opacity="0.85"/>
-  <rect x="194" y="37" width="22" height="3" rx="1" fill="white" opacity="0.7"/>
-</svg>
+<div style="display:flex;align-items:center;gap:10px;">
+  <svg width="28" height="34" viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+    <rect x="0" y="0" width="28" height="34" rx="3" fill="#00a896"/>
+    <rect x="3" y="3" width="22" height="10" rx="2" fill="white" opacity="0.92"/>
+    <text x="22" y="12" font-family="monospace" font-size="7" font-weight="700" fill="#00a896" text-anchor="end">1000</text>
+    <rect x="3" y="16" width="6" height="6" rx="1" fill="white" opacity="0.85"/>
+    <rect x="11" y="16" width="6" height="6" rx="1" fill="white" opacity="0.85"/>
+    <rect x="19" y="16" width="6" height="6" rx="1" fill="white" opacity="0.6"/>
+    <rect x="3" y="24" width="6" height="6" rx="1" fill="white" opacity="0.85"/>
+    <rect x="11" y="24" width="6" height="6" rx="1" fill="white" opacity="0.85"/>
+    <rect x="19" y="24" width="6" height="6" rx="1" fill="white" opacity="0.85"/>
+    <rect x="3" y="31" width="22" height="3" rx="1" fill="white" opacity="0.7"/>
+  </svg>
+  <div>
+    <div style="font-family:'Sora',sans-serif;font-size:17px;font-weight:700;color:#0f2744;line-height:1.1;letter-spacing:-.02em;white-space:nowrap;">DoseDefender</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:#00a896;margin-top:2px;">Clinical Dosing</div>
+  </div>
+</div>
 </template>
 
 
@@ -656,6 +664,9 @@ canvas{display:block;}
   </div>
   <div class="panel-body" id="panel-body"></div>
 </div>
+
+<!-- placeholder to restore fhir-bar position after panel closes -->
+<div id="fhir-bar-anchor" style="display:none;"></div>
 
 <!-- ══ FHIR PATIENT BAR ══ -->
 <div id="fhir-bar" style="display:none;">
@@ -1358,16 +1369,67 @@ function showPage(id) {
 }
 
 // ══ SLIDE-IN PANEL ══
+let _panelCalcId = null;
+
 function openPanel(calcId) {
-  showPage(calcId);
+  const page = document.getElementById('page-' + calcId);
+  const panelBody = document.getElementById('panel-body');
+  const fhirBar = document.getElementById('fhir-bar');
+  if (!page || !panelBody) return;
+
+  _panelCalcId = calcId;
+
+  // Move FHIR bar into panel (makes it visible inside panel, not behind overlay)
+  fhirBar.classList.add('in-panel-fhir');
+  fhirBar.style.display = '';
+  panelBody.appendChild(fhirBar);
+
+  // Move calc page into panel, strip nav offset
+  page.classList.add('in-panel');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  page.classList.add('active');
+  panelBody.appendChild(page);
+
+  // Panel header title
+  const titles = {heparin:'Heparin Infusion Calculator', vancomycin:'Vancomycin AUC/MIC', dka:'DKA — 2-Bag Protocol'};
+  document.getElementById('panel-title').textContent = titles[calcId] || calcId;
+  document.getElementById('panel-subtitle').textContent = '';
+  document.body.classList.add('fhir-bar-active');
+
+  // Open overlay + panel
   document.getElementById('panel-overlay').classList.add('open');
   document.getElementById('slide-panel').classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  // Trigger calc re-renders
+  if (calcId === 'heparin') { syncFromInit(); renderPTTRanges(); }
+  if (calcId === 'dka') { calcDKA(); }
 }
+
 function closePanel() {
+  if (_panelCalcId) {
+    const page = document.getElementById('page-' + _panelCalcId);
+    const fhirBar = document.getElementById('fhir-bar');
+    const anchor = document.getElementById('fhir-bar-anchor');
+
+    // Restore FHIR bar to its original position
+    fhirBar.classList.remove('in-panel-fhir');
+    fhirBar.style.display = 'none';
+    if (anchor) anchor.after(fhirBar);
+
+    // Restore page to body
+    if (page) {
+      page.classList.remove('in-panel', 'active');
+      document.body.appendChild(page);
+    }
+    _panelCalcId = null;
+  }
+
   document.getElementById('panel-overlay').classList.remove('open');
   document.getElementById('slide-panel').classList.remove('open');
   document.body.style.overflow = '';
+  document.body.classList.remove('fhir-bar-active');
+  showPage('catalog');
 }
 
 function switchCalcTab(tab) {
