@@ -46,6 +46,18 @@ app.use(session({
   },
 }));
 
+// ── PWA: manifest and service worker (explicit routes for correct headers) ──
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json');
+  res.sendFile(path.join(__dirname, 'manifest.json'));
+});
+
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(__dirname, 'sw.js'));
+});
+
 // ── Static files and HTML routes ───────────────────────────────────────────
 app.use(express.static(path.join(__dirname)));
 app.get('/', (req, res) => {
