@@ -389,6 +389,50 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
       </div>
     </div>
 
+    <!-- ── Age-Friendly Audit Settings ── -->
+    <div class="section-card" id="af-admin-section">
+      <div class="section-hdr">
+        <span class="section-icon">🛡️</span>
+        <span class="section-title">Age-Friendly Audit Settings</span>
+      </div>
+      <div class="section-body">
+        <div class="disc-bar" style="margin-bottom:20px;">
+          📋 <span>Settings for the Beers Criteria Admission Audit tool. Changes apply immediately to the app.</span>
+        </div>
+        <div class="row2" style="margin-bottom:16px;">
+          <div class="field">
+            <label class="lbl">Enable Age-Friendly Audit</label>
+            <select id="af-enabled" class="inp">
+              <option value="true">Enabled</option>
+              <option value="false">Disabled</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Age Threshold (years)</label>
+            <input id="af-age-threshold" class="inp" type="number" min="1" max="120" value="65">
+          </div>
+        </div>
+        <div class="row2" style="margin-bottom:16px;">
+          <div class="field">
+            <label class="lbl">Require Audit Before Calculator Use</label>
+            <select id="af-require-audit" class="inp">
+              <option value="false">Not Required</option>
+              <option value="true">Required (warn clinicians)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px;">
+          <button class="btn-save" id="af-save-btn" onclick="saveAFSettings()">Save Age-Friendly Settings</button>
+          <span class="save-confirm-msg" id="af-save-msg" style="display:none;">✓ Settings saved</span>
+        </div>
+        <!-- Compliance summary -->
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Compliance Summary (this browser)</div>
+          <div id="af-compliance-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Save / Reset ── -->
     <div class="section-card">
       <div class="section-hdr">
@@ -813,11 +857,63 @@ function addRenalRule() {
   renderRenalRulesTable();
 }
 
+function saveAFSettings() {
+  const enabled = document.getElementById('af-enabled')?.value || 'true';
+  const threshold = document.getElementById('af-age-threshold')?.value || '65';
+  const require = document.getElementById('af-require-audit')?.value || 'false';
+  localStorage.setItem('dosedefender_af_enabled', enabled);
+  localStorage.setItem('dosedefender_af_age_threshold', threshold);
+  localStorage.setItem('dosedefender_af_require_audit', require);
+  const btn = document.getElementById('af-save-btn');
+  const msg = document.getElementById('af-save-msg');
+  if (btn) { btn.textContent = '✓ Saved'; btn.classList.add('saved'); }
+  if (msg) msg.style.display = 'inline';
+  setTimeout(() => {
+    if (btn) { btn.textContent = 'Save Age-Friendly Settings'; btn.classList.remove('saved'); }
+    if (msg) msg.style.display = 'none';
+  }, 3000);
+}
+
+function loadAFSettings() {
+  const enabled = localStorage.getItem('dosedefender_af_enabled') || 'true';
+  const threshold = localStorage.getItem('dosedefender_af_age_threshold') || '65';
+  const require = localStorage.getItem('dosedefender_af_require_audit') || 'false';
+  const enabledEl = document.getElementById('af-enabled');
+  const thresholdEl = document.getElementById('af-age-threshold');
+  const requireEl = document.getElementById('af-require-audit');
+  if (enabledEl) enabledEl.value = enabled;
+  if (thresholdEl) thresholdEl.value = threshold;
+  if (requireEl) requireEl.value = require;
+  renderAFComplianceSummary();
+}
+
+function renderAFComplianceSummary() {
+  const el = document.getElementById('af-compliance-summary');
+  if (!el) return;
+  try {
+    const log = JSON.parse(localStorage.getItem('dosedefender_agefriendly_audits') || '[]');
+    const auditsCompleted = log.length;
+    // Count unique patients who appeared (approximated by unique IDs in audits)
+    const uniquePatients = new Set(log.map(a => a.patientId)).size;
+    const pct = uniquePatients > 0 ? Math.round((auditsCompleted / uniquePatients) * 100) : 0;
+    const statStyle = 'background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;';
+    const numStyle = 'font-family:"Playfair Display",serif;font-size:28px;color:var(--navy);display:block;';
+    const lblStyle = 'font-size:10px;color:var(--muted);font-family:"DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase;margin-top:4px;display:block;';
+    el.innerHTML = `
+      <div style="${statStyle}"><span style="${numStyle}">${uniquePatients}</span><span style="${lblStyle}">65+ Patients Loaded</span></div>
+      <div style="${statStyle}"><span style="${numStyle}">${auditsCompleted}</span><span style="${lblStyle}">Audits Completed</span></div>
+      <div style="${statStyle}"><span style="${numStyle};color:${pct >= 90 ? 'var(--green)' : pct >= 70 ? 'var(--warn)' : 'var(--red)'};">${uniquePatients > 0 ? pct + '%' : '—'}</span><span style="${lblStyle}">Completion Rate</span></div>`;
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:12px;">Unable to load compliance data.</div>';
+  }
+}
+
 // Hook into showAdminPanel to also render renal rules
 const _origShowAdminPanel = showAdminPanel;
 showAdminPanel = function() {
   _origShowAdminPanel();
   renderRenalRulesTable();
+  loadAFSettings();
 };
 
 // ══ INIT ══
