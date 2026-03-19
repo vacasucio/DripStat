@@ -740,6 +740,14 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
           <div class="app-calc-tags"><span class="app-calc-tag">DKA</span><span class="app-calc-tag">2-Bag Method</span><span class="app-calc-tag">K+ Protocol</span><span class="app-calc-tag">Anion Gap</span></div>
         </div>
       </div>
+        <div class="app-calc-card featured" onclick="openCalcImmersive('/app/renal')">
+          <div class="app-calc-icon">🫘</div>
+          <div class="app-calc-badges"><span class="cb cb-free">FREE</span><span class="cb cb-new">NEW</span></div>
+          <div class="app-calc-name">Renal Dose Defender</div>
+          <div class="app-calc-desc">SCr trend monitoring, Cockcroft-Gault CrCl, KDIGO AKI staging, and real-time medication flag review for renally-cleared drugs.</div>
+          <div class="app-calc-tags"><span class="app-calc-tag">CrCl</span><span class="app-calc-tag">AKI Detection</span><span class="app-calc-tag">Dose Flags</span><span class="app-calc-tag">18 Drugs</span></div>
+        </div>
+      </div>
       <div class="app-coming-section">
         <div class="app-coming-title">Coming Soon</div>
         <div class="app-coming-grid">
@@ -1289,7 +1297,148 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
 </div>
 
 
+<!-- ══════════════════════════════════════════════════════════════
+     RENAL DOSE DEFENDER — Patient View
+══════════════════════════════════════════════════════════════ -->
+<div id="page-renal" class="page">
+  <div class="calc-page-header">
+    <div class="cph-inner">
+      <div class="cph-title">Renal Dose Defender</div>
+      <div class="cph-sub">Cockcroft-Gault CrCl · KDIGO AKI Detection · Active Medication Review</div>
+      <div class="cph-badges">
+        <span class="cph-badge free">FREE</span>
+        <span id="renal-crcl-badge" class="cph-badge" style="display:none;background:#1a3a5c;color:#fff;"></span>
+        <span id="renal-aki-badge" class="cph-badge" style="display:none;"></span>
+        <span class="cph-badge warn-badge">⚠ Educational Reference Only</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AKI Warning Banner (hidden until AKI detected) -->
+  <div id="renal-aki-banner" style="display:none;background:linear-gradient(135deg,#7f1d1d,#991b1b);color:white;padding:14px 32px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;">
+    <span style="font-size:18px;">⚠</span>
+    <span id="renal-aki-banner-msg"></span>
+  </div>
+
+  <div class="calc-body" style="padding:24px 32px;max-width:1200px;margin:0 auto;">
+
+    <!-- Demographics input form (for manual entry / override) -->
+    <div id="renal-demo-form" style="background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;">
+      <div class="form-section-title" style="margin-bottom:14px;">Patient Demographics <span style="font-size:11px;color:var(--muted);font-weight:normal;">(auto-filled from FHIR when patient loaded)</span></div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:end;">
+        <div class="form-field" style="margin:0;">
+          <label class="form-label">Age (yr)</label>
+          <input type="number" class="form-input" id="renal-age" placeholder="e.g. 74" min="1" max="120" oninput="calcRenal()">
+        </div>
+        <div class="form-field" style="margin:0;">
+          <label class="form-label">Sex</label>
+          <select class="form-select" id="renal-sex" onchange="calcRenal()">
+            <option value="">— Select —</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+          </select>
+        </div>
+        <div class="form-field" style="margin:0;">
+          <label class="form-label">Weight (kg)</label>
+          <input type="number" class="form-input" id="renal-weight" placeholder="e.g. 61" min="1" max="300" oninput="calcRenal()">
+        </div>
+        <div class="form-field" style="margin:0;">
+          <label class="form-label">Height (cm)</label>
+          <input type="number" class="form-input" id="renal-height" placeholder="e.g. 162" min="50" max="250" oninput="calcRenal()">
+        </div>
+        <div class="form-field" style="margin:0;">
+          <label class="form-label">Current SCr (mg/dL)</label>
+          <input type="number" class="form-input" id="renal-scr" placeholder="e.g. 2.4" step="0.1" min="0.1" max="20" oninput="calcRenal()">
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;">
+
+      <!-- LEFT: Renal Summary Card -->
+      <div>
+        <div id="renal-summary-card" style="background:white;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+          <div style="padding:14px 20px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+            <span>🫘</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);">Renal Summary</span>
+          </div>
+          <div style="padding:20px;" id="renal-summary-body">
+            <div style="text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;">
+              Load a patient to see renal summary
+            </div>
+          </div>
+        </div>
+
+        <!-- SCr Trend Sparkline -->
+        <div id="renal-sparkline-card" style="display:none;background:white;border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+          <div style="padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+            <span>📈</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);">SCr Trend</span>
+          </div>
+          <div style="padding:16px;" id="renal-sparkline-body"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Flag Cards -->
+      <div>
+        <div id="renal-flags-area">
+          <div style="text-align:center;padding:40px 16px;color:var(--muted);font-size:13px;" id="renal-flags-empty">
+            Load a patient to see medication flags
+          </div>
+        </div>
+
+        <!-- Acknowledge Panel -->
+        <div id="renal-ack-panel" style="display:none;background:white;border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;">📝 Acknowledge Medication Flags</div>
+          <div class="form-field">
+            <label class="form-label">Clinical Reason / Action Taken</label>
+            <input type="text" class="form-input" id="renal-ack-reason" placeholder="e.g. Metformin discontinued, enoxaparin dose reduced per pharmacy…">
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+            <button class="btn-primary" style="padding:10px 22px;font-size:13px;" onclick="acknowledgeRenalFlags()">Acknowledge All Flags</button>
+            <button class="btn-secondary" style="padding:10px 22px;font-size:13px;" onclick="markNoAction()">No Action Needed</button>
+          </div>
+          <div id="renal-ack-msg" style="display:none;margin-top:10px;font-size:12px;color:var(--green);font-family:'JetBrains Mono',monospace;"></div>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+  </div><!-- /calc-body -->
+</div><!-- /page-renal -->
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     RENAL DOSE DEFENDER — Census View
+══════════════════════════════════════════════════════════════ -->
+<div id="page-renal-census" class="page">
+  <div class="calc-page-header">
+    <div class="cph-inner">
+      <div class="cph-title">Renal Dose Defender — Census</div>
+      <div class="cph-sub">Unit-wide renal flag review · Ranked by severity</div>
+      <div class="cph-badges"><span class="cph-badge free">FREE</span><span class="cph-badge warn-badge">⚠ Educational Reference Only</span></div>
+    </div>
+  </div>
+  <div class="calc-body" style="padding:24px 32px;max-width:960px;margin:0 auto;">
+    <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:24px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px 24px;">
+      <div class="form-field" style="margin:0;flex:1;">
+        <label class="form-label">Location / Unit ID</label>
+        <input type="text" class="form-input" id="census-location" placeholder="e.g. TEST_UNIT or 4W-MED" style="max-width:320px;">
+      </div>
+      <button class="btn-primary" style="padding:10px 24px;font-size:13px;white-space:nowrap;" onclick="loadRenalCensus()">Load Census</button>
+    </div>
+    <div id="census-status" style="display:none;font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:16px;"></div>
+    <div id="census-list">
+      <div style="text-align:center;padding:48px 16px;color:var(--muted);font-size:13px;">
+        Enter a unit ID and click Load Census to see all patients with renal flag alerts.
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="/js/renalEngine.js"></script>
+<script src="/js/drugRules.js"></script>
 <script>
 // ══ LOGO ══
 function injectLogos() {
@@ -1335,7 +1484,9 @@ function exitCalcImmersive() {
 const CALC_TITLES = {
   heparin: 'Heparin Infusion',
   vancomycin: 'Vancomycin AUC/MIC',
-  dka: 'DKA — 2-Bag Protocol'
+  dka: 'DKA — 2-Bag Protocol',
+  renal: 'Renal Dose Defender',
+  'renal-census': 'Renal Dose Defender — Census',
 };
 
 function navigate(path, push) {
@@ -1389,6 +1540,8 @@ function renderView(view, calc) {
   if (calc === 'vancomycin' && typeof chartInstance !== 'undefined' && chartInstance) {
     requestAnimationFrame(() => chartInstance.resize());
   }
+  if (calc === 'renal') { calcRenal(); }
+  if (calc === 'renal-census') { loadRenalCensus(); }
 
   // Re-populate FHIR fields if patient is loaded
   if (view === 'calculator' && typeof _fhirPatient !== 'undefined' && _fhirPatient) {
@@ -1453,7 +1606,7 @@ const CONC=50;
 
 // ══ ADMIN PROTOCOL RESOLVER ══
 // Returns effective protocol: localStorage customization OR hardcoded defaults
-const _ADMIN_LS = { PIN:'dosedefender_admin_pin', INST:'dosedefender_admin_inst', ACS:'dosedefender_admin_heparin_acs', DVT:'dosedefender_admin_heparin_vte' };
+const _ADMIN_LS = { PIN:'dosedefender_admin_pin', INST:'dosedefender_admin_inst', ACS:'dosedefender_admin_heparin_acs', DVT:'dosedefender_admin_heparin_vte', RENAL_RULES:'dosedefender_renal_rules' };
 function getProtocol(ind){
   const key = _ADMIN_LS[ind];
   if(!key) return PROTOCOLS[ind];
@@ -3038,7 +3191,7 @@ function calcDKA() {
 }
 
 const FHIR_API = '';   // same origin — served by Express
-let _fhirPatient = null, _fhirLabs = null, _fhirMeds = null;
+let _fhirPatient = null, _fhirLabs = null, _fhirMeds = null, _renalScrTrend = null;
 
 async function loadFHIRPatient() {
   const pidInput = document.getElementById('fhir-pid-input');
@@ -3052,16 +3205,18 @@ async function loadFHIRPatient() {
   document.getElementById('fhir-meds-btn').style.display = 'none';
 
   try {
-    const [patient, labs, weightData, meds] = await Promise.all([
+    const [patient, labs, weightData, meds, scrTrendData] = await Promise.all([
       fetch(`${FHIR_API}/api/patient/${patientId}`).then(r => { if (!r.ok) throw new Error('Patient not found (HTTP ' + r.status + ')'); return r.json(); }),
       fetch(`${FHIR_API}/api/labs/${patientId}`).then(r => r.json()),
       fetch(`${FHIR_API}/api/vitals/${patientId}/weight`).then(r => r.json()),
       fetch(`${FHIR_API}/api/medications/${patientId}`).then(r => r.json()),
+      fetch(`${FHIR_API}/api/labs/${patientId}/scr-trend`).then(r => r.json()).catch(() => null),
     ]);
 
     _fhirPatient = patient;
     _fhirLabs = labs;
     _fhirMeds = meds;
+    _renalScrTrend = scrTrendData?.scrTrend || null;
 
     populateFHIRFields(patient, labs, weightData);
     renderFHIRSummary(patient, labs, meds);
@@ -3206,6 +3361,9 @@ function populateFHIRFields(patient, labs, weightData) {
   calcDKA();
   updateCrClBadge(1);
   updateCrClBadge(2);
+  // Renal form
+  if (typeof populateRenalFormFromFHIR === 'function') populateRenalFormFromFHIR();
+  if (document.getElementById('page-renal')?.classList.contains('active')) calcRenal();
 }
 
 // Set input value + FHIR highlight class
@@ -3325,6 +3483,358 @@ function setActiveTab(id) {
   const el = document.getElementById('btab-'+id);
   if(el) el.classList.add('active');
 }
+
+// ══════════════════════════════════════════════════════════════
+// RENAL DOSE DEFENDER — JavaScript
+// ══════════════════════════════════════════════════════════════
+
+// Severity display helpers
+const RENAL_SEVERITY_STYLES = {
+  contraindicated: { bg: '#fef2f2', border: '#fecaca', badge: '#dc2626', badgeBg: '#fee2e2', label: 'CONTRAINDICATED' },
+  high:            { bg: '#fffbeb', border: '#fde68a', badge: '#d97706', badgeBg: '#fef3c7', label: 'HIGH RISK' },
+  moderate:        { bg: '#fff7ed', border: '#fed7aa', badge: '#ea580c', badgeBg: '#ffedd5', label: 'MODERATE' },
+  low:             { bg: '#f0fdf4', border: '#bbf7d0', badge: '#16a34a', badgeBg: '#dcfce7', label: 'LOW' },
+  info:            { bg: '#f0f9ff', border: '#bae6fd', badge: '#0284c7', badgeBg: '#e0f2fe', label: 'INFO' },
+};
+
+function renalSeverityStyle(sev) {
+  return RENAL_SEVERITY_STYLES[sev] || RENAL_SEVERITY_STYLES.info;
+}
+
+// ── calcRenal ── main entry point for the renal patient view
+async function calcRenal() {
+  // Read demographics from form (pre-filled from FHIR or manually entered)
+  const age = parseFloat(document.getElementById('renal-age')?.value);
+  const sex = document.getElementById('renal-sex')?.value;
+  const weightKg = parseFloat(document.getElementById('renal-weight')?.value);
+  const heightCm = parseFloat(document.getElementById('renal-height')?.value);
+  const scrInput = parseFloat(document.getElementById('renal-scr')?.value);
+
+  // Use SCr trend from FHIR if available, otherwise build from single SCr
+  const scr = (_renalScrTrend && _renalScrTrend.length > 0)
+    ? _renalScrTrend
+    : (scrInput ? [{ value: scrInput, date: new Date().toISOString() }]
+       : (_fhirLabs?.serumCreatinine?.value ? [{ value: _fhirLabs.serumCreatinine.value, date: _fhirLabs.serumCreatinine.date || new Date().toISOString() }]
+          : null));
+
+  const currentScr = scr ? scr[0]?.value : scrInput || null;
+
+  if (!age || !sex || !weightKg || !heightCm || !currentScr) {
+    // Partial data — update summary card but don't calculate flags
+    const body = document.getElementById('renal-summary-body');
+    if (body) body.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Enter all demographics + SCr to calculate</div>';
+    return;
+  }
+
+  const { crcl, weightUsed, scrUsed, floorApplied, bmi } = RenalEngine.calcCrCl({ age, weightKg, heightCm, sex, scrMgDl: currentScr });
+  const aki = scr && scr.length >= 2 ? RenalEngine.detectAKI(scr) : { akiDetected: false, trend: 'stable' };
+  const meds = _fhirMeds?.medications || [];
+  const flags = typeof RenalDrugRules !== 'undefined'
+    ? RenalDrugRules.checkMedicationList(meds, crcl, aki.akiDetected, aki.akiStage)
+    : [];
+
+  renderRenalResults(crcl, aki, flags, { age, sex, weightKg, heightCm, weightUsed, bmi, scrUsed, floorApplied });
+}
+
+// ── renderRenalResults ──
+function renderRenalResults(crcl, aki, flags, meta) {
+  // Update header badges
+  const crclBadge = document.getElementById('renal-crcl-badge');
+  const akiBadge = document.getElementById('renal-aki-badge');
+  const akiBanner = document.getElementById('renal-aki-banner');
+  const akiBannerMsg = document.getElementById('renal-aki-banner-msg');
+
+  if (crclBadge) {
+    crclBadge.style.display = '';
+    crclBadge.textContent = `⬡ CrCl: ${crcl} mL/min`;
+    crclBadge.style.background = crcl < 30 ? '#7f1d1d' : crcl < 60 ? '#92400e' : '#1a3a5c';
+  }
+  if (akiBadge) {
+    if (aki.akiDetected) {
+      akiBadge.style.display = '';
+      akiBadge.textContent = `⚠ AKI Stage ${aki.akiStage} — ${aki.trend}`;
+      akiBadge.style.background = aki.akiStage >= 3 ? '#7f1d1d' : aki.akiStage === 2 ? '#92400e' : '#b45309';
+      akiBadge.style.color = '#fff';
+    } else {
+      akiBadge.style.display = 'none';
+    }
+  }
+  if (akiBanner) {
+    if (aki.akiDetected) {
+      akiBanner.style.display = 'flex';
+      if (akiBannerMsg) akiBannerMsg.textContent = `AKI Stage ${aki.akiStage} detected — ${aki.message || ''}. Verify all renally-cleared medications immediately.`;
+    } else {
+      akiBanner.style.display = 'none';
+    }
+  }
+
+  // Renal Summary Card
+  const crclColor = crcl < 15 ? '#dc2626' : crcl < 30 ? '#d97706' : crcl < 60 ? '#ca8a04' : '#16a34a';
+  const crclLabel = crcl < 15 ? 'Kidney Failure' : crcl < 30 ? 'Severe CKD' : crcl < 60 ? 'Moderate CKD' : crcl < 90 ? 'Mild CKD' : 'Normal';
+  const summaryBody = document.getElementById('renal-summary-body');
+  if (summaryBody) {
+    summaryBody.innerHTML = `
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase;">Creatinine Clearance</div>
+        <div style="font-size:52px;font-weight:700;color:${crclColor};line-height:1;margin-bottom:4px;">${crcl}</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">mL/min · Cockcroft-Gault</div>
+        <div style="margin-top:6px;font-size:11px;font-weight:600;color:${crclColor};background:${crclColor}18;border:1px solid ${crclColor}33;border-radius:100px;display:inline-block;padding:2px 12px;">${crclLabel}</div>
+      </div>
+      ${meta ? `
+      <div style="background:var(--bg);border-radius:10px;padding:12px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);line-height:1.8;">
+        <div>Weight used: ${meta.weightUsed} kg${meta.bmi > 30 ? ' (ABW — BMI ' + meta.bmi + ')' : ' (actual — BMI ' + meta.bmi + ')'}</div>
+        ${meta.floorApplied ? '<div style="color:#d97706;">⚠ SCr floored: ' + meta.scrUsed + ' mg/dL (was ' + meta.scrUsed + ')</div>' : '<div>SCr: ' + meta.scrUsed + ' mg/dL</div>'}
+      </div>` : ''}
+      ${aki.akiDetected ? `
+      <div style="margin-top:14px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;font-size:12px;color:#dc2626;">
+        <div style="font-weight:700;margin-bottom:4px;">⚠ AKI Stage ${aki.akiStage}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;">
+          Baseline: ${aki.baselineScr} → Current: ${aki.currentScr} mg/dL<br>
+          Δ: +${aki.scrDeltaAbsolute} mg/dL (+${aki.scrDeltaPercent}%) over ${aki.deltaTimeHours}h<br>
+          Trend: ${aki.trend}
+        </div>
+      </div>` : '<div style="margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 12px;font-size:12px;color:#16a34a;text-align:center;">✓ No AKI detected — SCr stable</div>'}
+      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Medication Review</div>
+        <div style="display:flex;gap:8px;">
+          <div style="text-align:center;flex:1;background:${flags.length > 0 ? '#fef2f2' : '#f0fdf4'};border-radius:8px;padding:10px 6px;">
+            <div style="font-size:22px;font-weight:700;color:${flags.length > 0 ? '#dc2626' : '#16a34a'};">${flags.length}</div>
+            <div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Flag${flags.length !== 1 ? 's' : ''}</div>
+          </div>
+          <div style="text-align:center;flex:1;background:var(--bg);border-radius:8px;padding:10px 6px;">
+            <div style="font-size:22px;font-weight:700;color:var(--navy);">${(_fhirMeds?.medications?.length || 0)}</div>
+            <div style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Reviewed</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Render SCr trend sparkline
+  if (_renalScrTrend && _renalScrTrend.length >= 2) {
+    renderScrSparkline(_renalScrTrend);
+  }
+
+  // Flag cards
+  renderRenalFlags(flags, crcl, aki);
+}
+
+// ── renderScrSparkline ── simple SVG sparkline for SCr trend
+function renderScrSparkline(scrTrend) {
+  const card = document.getElementById('renal-sparkline-card');
+  const body = document.getElementById('renal-sparkline-body');
+  if (!card || !body || !scrTrend || scrTrend.length < 2) return;
+  card.style.display = '';
+
+  const vals = scrTrend.map(r => r.value).reverse(); // oldest first
+  const minVal = Math.min(...vals);
+  const maxVal = Math.max(...vals);
+  const range = maxVal - minVal || 0.1;
+  const W = 280, H = 80, pad = 12;
+  const xStep = (W - pad * 2) / (vals.length - 1);
+
+  const points = vals.map((v, i) => {
+    const x = pad + i * xStep;
+    const y = pad + (1 - (v - minVal) / range) * (H - pad * 2);
+    return `${x},${y}`;
+  }).join(' ');
+
+  const lastColor = aki_global_trend === 'worsening' ? '#dc2626' : aki_global_trend === 'improving' ? '#16a34a' : '#0f2744';
+
+  body.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;display:block;">
+      <polyline points="${points}" fill="none" stroke="${lastColor}" stroke-width="2" stroke-linejoin="round"/>
+      ${vals.map((v, i) => {
+        const x = pad + i * xStep;
+        const y = pad + (1 - (v - minVal) / range) * (H - pad * 2);
+        return `<circle cx="${x}" cy="${y}" r="3" fill="${i === vals.length - 1 ? lastColor : '#94a3b8'}"/>
+                <text x="${x}" y="${y - 5}" text-anchor="middle" font-size="8" fill="#64748b" font-family="monospace">${v}</text>`;
+      }).join('')}
+    </svg>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:4px;">
+      <span>${scrTrend.length > 1 ? new Date(scrTrend[scrTrend.length - 1].date).toLocaleDateString() : ''}</span>
+      <span>Now: ${scrTrend[0]?.value} mg/dL</span>
+    </div>`;
+}
+
+let aki_global_trend = 'stable'; // tracked for sparkline color
+
+// ── renderRenalFlags ──
+function renderRenalFlags(flags, crcl, aki) {
+  aki_global_trend = aki.trend || 'stable';
+  const area = document.getElementById('renal-flags-area');
+  const emptyEl = document.getElementById('renal-flags-empty');
+  const ackPanel = document.getElementById('renal-ack-panel');
+  if (!area) return;
+
+  if (flags.length === 0) {
+    area.innerHTML = '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:16px;padding:32px;text-align:center;">' +
+      '<div style="font-size:32px;margin-bottom:12px;">✅</div>' +
+      '<div style="font-size:15px;font-weight:600;color:#16a34a;margin-bottom:6px;">No Renal Dose Flags</div>' +
+      '<div style="font-size:12px;color:var(--muted);">All active medications appear appropriate for CrCl ' + crcl + ' mL/min</div>' +
+      '</div>';
+    if (ackPanel) ackPanel.style.display = 'none';
+    return;
+  }
+
+  area.innerHTML = flags.map(flag => renderFlagCard(flag)).join('');
+  if (ackPanel) ackPanel.style.display = '';
+}
+
+// ── renderFlagCard ──
+function renderFlagCard(flag) {
+  const s = renalSeverityStyle(flag.severity);
+  return `<div style="background:${s.bg};border:1.5px solid ${s.border};border-radius:14px;padding:18px 20px;margin-bottom:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;">
+      <div style="font-size:15px;font-weight:700;color:var(--navy);">${flag.medicationName || 'Unknown'}</div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        ${flag.akiUpgraded ? '<span style="font-family:\'JetBrains Mono\',monospace;font-size:8px;padding:3px 8px;border-radius:100px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;">AKI↑</span>' : ''}
+        <span style="font-family:\'JetBrains Mono\',monospace;font-size:8px;padding:3px 10px;border-radius:100px;background:${s.badgeBg};color:${s.badge};border:1px solid ${s.border};font-weight:700;">${s.label}</span>
+      </div>
+    </div>
+    ${flag.orderedDose ? `<div style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:10px;background:rgba(255,255,255,.5);border-radius:6px;padding:6px 10px;">Ordered: ${flag.orderedDose}</div>` : ''}
+    <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:10px;">${flag.recommendation}</div>
+    ${flag.akiNote ? `<div style="font-size:12px;color:#92400e;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;margin-bottom:8px;">🔶 AKI Note: ${flag.akiNote}</div>` : ''}
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,.5);border:1px solid rgba(0,0,0,.08);color:var(--muted);">${flag.category}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,.5);border:1px solid rgba(0,0,0,.08);color:var(--muted);">CrCl: ${flag.currentCrCl} mL/min</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,.5);border:1px solid rgba(0,0,0,.08);color:var(--muted);">Action: ${flag.action}</span>
+    </div>
+  </div>`;
+}
+
+// ── acknowledgeRenalFlags ── write-back observation to FHIR
+async function acknowledgeRenalFlags() {
+  const reason = (document.getElementById('renal-ack-reason')?.value || '').trim();
+  if (!reason) { alert('Please enter a clinical reason before acknowledging.'); return; }
+  const msg = document.getElementById('renal-ack-msg');
+
+  const obs = {
+    resourceType: 'Observation',
+    status: 'final',
+    code: { coding: [{ system: 'http://loinc.org', code: '74080-3', display: 'Medication clinical decision support acknowledgment' }] },
+    subject: _fhirPatient ? { reference: `Patient/${_fhirPatient.patientId}` } : undefined,
+    effectiveDateTime: new Date().toISOString(),
+    valueString: reason,
+    note: [{ text: 'Renal Dose Defender — flags acknowledged by pharmacist' }],
+  };
+
+  if (msg) { msg.style.display = ''; msg.textContent = 'Sending acknowledgement…'; msg.style.color = 'var(--muted)'; }
+
+  try {
+    const fhirBase = (typeof FHIR_API !== 'undefined' && FHIR_API) ? FHIR_API : '';
+    const pid = _fhirPatient?.patientId;
+    // POST to FHIR if session has access token (SMART launch), else mock success
+    const resp = await fetch(`${fhirBase}/api/labs/${pid || 'TEST001'}/acknowledge`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ observation: obs, reason }),
+    }).catch(() => null);
+    if (msg) { msg.style.display = ''; msg.textContent = '✓ Flags acknowledged and logged'; msg.style.color = 'var(--green)'; }
+    if (document.getElementById('renal-ack-reason')) document.getElementById('renal-ack-reason').value = '';
+  } catch (err) {
+    if (msg) { msg.textContent = 'Note: FHIR write-back requires active session. Acknowledgement noted locally.'; }
+  }
+}
+
+function markNoAction() {
+  const msg = document.getElementById('renal-ack-msg');
+  if (msg) { msg.style.display = ''; msg.textContent = '✓ Marked as no action needed.'; msg.style.color = 'var(--green)'; }
+}
+
+// ── Auto-populate renal form from FHIR patient ──
+function populateRenalFormFromFHIR() {
+  if (!_fhirPatient) return;
+  const age = _fhirPatient.age;
+  const sex = _fhirPatient.gender === 'male' ? 'M' : _fhirPatient.gender === 'female' ? 'F' : '';
+  const weightKg = _fhirPatient.weight?.value;
+  const heightCm = _fhirPatient.height?.value;
+  let scrMgDl = null;
+  if (_fhirLabs?.serumCreatinine?.value != null) {
+    const unit = (_fhirLabs.serumCreatinine.unit || '').toLowerCase();
+    scrMgDl = (unit.includes('mcmol') || unit.includes('µmol') || unit.includes('umol'))
+      ? parseFloat((_fhirLabs.serumCreatinine.value / 88.4).toFixed(2))
+      : _fhirLabs.serumCreatinine.value;
+  }
+  if (age) fhirFill('renal-age', age);
+  if (sex) fhirFillSelect('renal-sex', sex);
+  if (weightKg) fhirFill('renal-weight', Math.round(weightKg));
+  if (heightCm) fhirFill('renal-height', Math.round(heightCm));
+  if (scrMgDl != null) fhirFill('renal-scr', scrMgDl);
+}
+
+// ── loadRenalCensus ── census view
+async function loadRenalCensus() {
+  const locInput = document.getElementById('census-location');
+  const locationId = locInput ? locInput.value.trim() : '';
+  if (!locationId) { alert('Enter a location ID.'); return; }
+
+  const statusEl = document.getElementById('census-status');
+  const listEl = document.getElementById('census-list');
+  if (statusEl) { statusEl.style.display = ''; statusEl.textContent = 'Loading census…'; }
+  if (listEl) listEl.innerHTML = '';
+
+  try {
+    const resp = await fetch(`${FHIR_API}/api/census/${locationId}`);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    renderRenalCensus(data);
+    if (statusEl) statusEl.style.display = 'none';
+  } catch (err) {
+    if (statusEl) { statusEl.textContent = '⚠ ' + err.message; }
+  }
+}
+
+function renderRenalCensus(data) {
+  const listEl = document.getElementById('census-list');
+  if (!listEl) return;
+  const patients = data.patients || [];
+
+  if (patients.length === 0) {
+    listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">No patients with renal flags in this unit.</div>';
+    return;
+  }
+
+  const locName = data.locationName || data.locationId;
+  listEl.innerHTML = `
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;">${locName} · ${patients.length} patient${patients.length !== 1 ? 's' : ''}</div>
+    ${patients.map(pt => {
+      const s = pt.severestFlag ? renalSeverityStyle(pt.severestFlag) : null;
+      const crclColor = pt.crcl < 30 ? '#dc2626' : pt.crcl < 60 ? '#d97706' : '#16a34a';
+      return `<div onclick="navigateRenalPatient('${pt.patientId}')"
+        style="background:white;border:1.5px solid ${s ? s.border : 'var(--border)'};border-radius:14px;padding:16px 20px;margin-bottom:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:16px;"
+        onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 14px rgba(0,0,0,.08)'"
+        onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:15px;color:var(--navy);">${pt.name}</div>
+          <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-top:2px;">
+            ${pt.age}${pt.sex} · CrCl <span style="color:${crclColor};font-weight:700;">${pt.crcl != null ? pt.crcl + ' mL/min' : '—'}</span>
+            ${pt.akiDetected ? ` · <span style="color:#dc2626;">AKI Stage ${pt.akiStage} (${pt.trend})</span>` : ''}
+          </div>
+          ${pt.flags && pt.flags.length ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;">${pt.flags.slice(0, 2).join(' · ')}${pt.flags.length > 2 ? ' · +' + (pt.flags.length - 2) + ' more' : ''}</div>` : ''}
+        </div>
+        <div style="text-align:center;flex-shrink:0;">
+          ${pt.flagCount > 0 ? `
+            <div style="font-size:24px;font-weight:700;color:${s ? s.badge : 'var(--muted)'};">${pt.flagCount}</div>
+            <div style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--muted);">flag${pt.flagCount !== 1 ? 's' : ''}</div>
+            <div style="margin-top:4px;font-size:8px;padding:2px 8px;border-radius:100px;background:${s ? s.badgeBg : 'var(--bg)'};color:${s ? s.badge : 'var(--muted)'};border:1px solid ${s ? s.border : 'var(--border)'};font-family:'JetBrains Mono',monospace;font-weight:700;">${s ? s.label : ''}</div>
+          ` : '<div style="font-size:11px;color:#16a34a;font-family:\'JetBrains Mono\',monospace;">✓ Clear</div>'}
+        </div>
+        <div style="color:var(--muted);font-size:16px;flex-shrink:0;">›</div>
+      </div>`;
+    }).join('')}`;
+}
+
+function navigateRenalPatient(patientId) {
+  // Load that patient and navigate to the renal view
+  const pidInput = document.getElementById('fhir-pid-input');
+  if (pidInput) { pidInput.value = patientId; }
+  navigate('/app/renal');
+  loadFHIRPatient();
+}
+
+// ── Init hook: populate renal form when FHIR patient loads ──
+// Called from populateFHIRFields
+const _origPopulateFHIR = typeof populateFHIRFields === 'function' ? populateFHIRFields : null;
 
 // ── Init ──
 injectLogos();

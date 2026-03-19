@@ -10,7 +10,8 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { TEST_PATIENT_ID, labs: mockLabs } = require('../testData');
+const { TEST_PATIENT_ID, labs: mockLabs, RENAL_PATIENT_ID, renalLabs, renalScrTrend, scrTrend: mockScrTrend } = require('../testData');
+const { getFloorPatient } = require('../js/floorSandbox');
 const { getFhirHeaders } = require('../lib/fhirHeaders');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
@@ -64,6 +65,17 @@ function formatObs(obs) {
 router.get('/:patientId', async (req, res) => {
   const { patientId } = req.params;
   if (patientId === TEST_PATIENT_ID) return res.json(mockLabs);
+  if (patientId === RENAL_PATIENT_ID) return res.json(renalLabs);
+  if (patientId.startsWith('FL')) {
+    const flPt = getFloorPatient(patientId);
+    if (!flPt) return res.status(404).json({ error: `Floor patient ${patientId} not found` });
+    const latest = flPt.scrTrend[0];
+    return res.json({
+      patientId,
+      serumCreatinine: { value: latest.value, unit: 'mg/dL', date: latest.date },
+      scrTrend: flPt.scrTrend,
+    });
+  }
   try {
     const [scrList, pttList, vancoList, bunList, glucoseList, potassiumList, co2List, sodiumList, chlorideList] = await Promise.all([
       fetchObs(patientId, LOINC.SCR, 1),
@@ -136,9 +148,36 @@ router.get('/:patientId/vancomycin', async (req, res) => {
 router.get('/:patientId/bun', async (req, res) => {
   const { patientId } = req.params;
   if (patientId === TEST_PATIENT_ID) return res.json({ patientId, bun: [mockLabs.bun] });
+  if (patientId === RENAL_PATIENT_ID) return res.json({ patientId, bun: [renalLabs.bun] });
   try {
     const list = await fetchObs(patientId, LOINC.BUN, 5);
     res.json({ patientId, bun: list.map(formatObs) });
+  } catch (err) {
+    res.status(err.response?.status || 500).json({ error: err.message });
+  }
+});
+
+// GET /api/labs/:patientId/scr-trend — last 10 SCr values for AKI detection
+router.get('/:patientId/scr-trend', async (req, res) => {
+  const { patientId } = req.params;
+  if (patientId === TEST_PATIENT_ID) {
+    return res.json({ patientId, scrTrend: mockScrTrend });
+  }
+  if (patientId === RENAL_PATIENT_ID) {
+    return res.json({ patientId, scrTrend: renalScrTrend });
+  }
+  if (patientId.startsWith('FL')) {
+    const flPt = getFloorPatient(patientId);
+    if (!flPt) return res.status(404).json({ error: `Floor patient ${patientId} not found` });
+    return res.json({
+      patientId,
+      serumCreatinine: flPt.scrTrend[0].value,
+      scrTrend: flPt.scrTrend,
+    });
+  }
+  try {
+    const list = await fetchObs(patientId, LOINC.SCR, 10, getFhirHeaders(req));
+    res.json({ patientId, scrTrend: list.map(formatObs) });
   } catch (err) {
     res.status(err.response?.status || 500).json({ error: err.message });
   }

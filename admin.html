@@ -351,6 +351,44 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
       </div>
     </div>
 
+    <!-- ── Renal Drug Rules ── -->
+    <div class="section-card">
+      <div class="section-hdr">
+        <span class="section-icon">🫘</span>
+        <span class="section-title">Renal Drug Rules</span>
+      </div>
+      <div class="section-body">
+        <div class="disc-bar" style="margin-bottom:20px;">
+          ⚠️ <span>Changes to renal drug rules apply immediately when clinicians use the Renal Dose Defender. Rules are stored in this browser's localStorage and override the built-in defaults.</span>
+        </div>
+        <div id="renal-rules-status" class="proto-status default" style="margin-bottom:16px;">✓ Using published defaults — no customizations saved</div>
+
+        <div id="renal-rules-table-wrap" style="overflow-x:auto;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;">
+          <table class="nomo-tbl" id="renal-rules-tbl">
+            <thead>
+              <tr>
+                <th style="min-width:130px;">Drug</th>
+                <th>Category</th>
+                <th style="min-width:60px;">CrCl Max</th>
+                <th style="min-width:60px;">CrCl Min</th>
+                <th>Severity</th>
+                <th style="min-width:220px;">Recommendation</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="renal-rules-tbody"></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <button class="btn-save" id="renal-save-btn" onclick="saveRenalRules()">Save Renal Rules</button>
+          <button class="btn-reset" onclick="resetRenalRules()">↺ Reset to Defaults</button>
+          <button class="btn-secondary" style="padding:12px 20px;font-size:13px;" onclick="addRenalRule()">＋ Add Drug</button>
+          <span class="save-confirm-msg" id="renal-save-msg">✓ Renal rules saved</span>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Save / Reset ── -->
     <div class="section-card">
       <div class="section-hdr">
@@ -381,10 +419,11 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
 <script>
 // ══ localStorage KEYS (must match DoseDefender.html getProtocol() / _ADMIN_LS) ══
 const LS = {
-  PIN:  'dosedefender_admin_pin',
-  INST: 'dosedefender_admin_inst',
-  ACS:  'dosedefender_admin_heparin_acs',
-  DVT:  'dosedefender_admin_heparin_vte',
+  PIN:         'dosedefender_admin_pin',
+  INST:        'dosedefender_admin_inst',
+  ACS:         'dosedefender_admin_heparin_acs',
+  DVT:         'dosedefender_admin_heparin_vte',
+  RENAL_RULES: 'dosedefender_renal_rules',
 };
 const SESSION_KEY = 'dosedefender_admin_auth';
 
@@ -664,6 +703,122 @@ function doReset(){
   hideResetConfirm();
   loadProtocol(currentProto);
 }
+
+// ══ RENAL DRUG RULES ══
+
+// Built-in renal rule defaults (abbreviated for admin editing — full rules in drugRules.js)
+const RENAL_DEFAULTS = [
+  { id:'metformin',      name:'Metformin',                  category:'Antidiabetic',          thresholds:[{crcl_max:30,severity:'contraindicated',recommendation:'Contraindicated — lactic acidosis risk. Discontinue.',action:'DISCONTINUE'},{crcl_max:45,crcl_min:30,severity:'high',recommendation:'eGFR 30–45: not recommended (ADA). Consider discontinuation.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'enoxaparin',     name:'Enoxaparin',                 category:'Anticoagulant',         thresholds:[{crcl_max:15,severity:'contraindicated',recommendation:'Avoid — switch to UFH.',action:'SWITCH-AGENT'},{crcl_max:30,crcl_min:15,severity:'high',recommendation:'CrCl 15–30: reduce to 1 mg/kg q24h for treatment; 30 mg q24h prophylaxis.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'apixaban',       name:'Apixaban',                   category:'Anticoagulant',         thresholds:[{crcl_max:25,severity:'high',recommendation:'Avoid — insufficient data in severe renal impairment.',action:'AVOID'},{crcl_max:50,crcl_min:25,severity:'moderate',recommendation:'Reduce to 2.5 mg BID if ≥2 criteria met (age≥80, wt≤60, SCr≥1.5).',action:'DOSE-ADJUSTMENT'}] },
+  { id:'rivaroxaban',    name:'Rivaroxaban',                category:'Anticoagulant',         thresholds:[{crcl_max:15,severity:'high',recommendation:'Avoid.',action:'AVOID'},{crcl_max:30,crcl_min:15,severity:'moderate',recommendation:'Use with extreme caution.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'dabigatran',     name:'Dabigatran',                 category:'Anticoagulant',         thresholds:[{crcl_max:15,severity:'contraindicated',recommendation:'Contraindicated.',action:'DISCONTINUE'},{crcl_max:30,crcl_min:15,severity:'high',recommendation:'Avoid — high bleeding risk.',action:'AVOID'},{crcl_max:50,crcl_min:30,severity:'moderate',recommendation:'Reduce to 75 mg BID for AF.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'gabapentin',     name:'Gabapentin',                 category:'Analgesic',             thresholds:[{crcl_max:15,severity:'moderate',recommendation:'100–300 mg daily.',action:'DOSE-ADJUSTMENT'},{crcl_max:30,crcl_min:15,severity:'moderate',recommendation:'200–700 mg daily.',action:'DOSE-ADJUSTMENT'},{crcl_max:60,crcl_min:30,severity:'low',recommendation:'200–700 mg BID.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'pregabalin',     name:'Pregabalin',                 category:'Analgesic',             thresholds:[{crcl_max:15,severity:'moderate',recommendation:'25–75 mg daily.',action:'DOSE-ADJUSTMENT'},{crcl_max:30,crcl_min:15,severity:'moderate',recommendation:'25–150 mg/day.',action:'DOSE-ADJUSTMENT'},{crcl_max:60,crcl_min:30,severity:'low',recommendation:'75–300 mg/day.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'vancomycin',     name:'Vancomycin',                 category:'Antibiotic',            thresholds:[{crcl_max:50,severity:'moderate',recommendation:'AUC-guided dosing, extended intervals. Target AUC/MIC 400–600.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'piptazo',        name:'Piperacillin-Tazobactam',   category:'Antibiotic',            thresholds:[{crcl_max:20,severity:'moderate',recommendation:'2.25 g q6h.',action:'DOSE-ADJUSTMENT'},{crcl_max:40,crcl_min:20,severity:'low',recommendation:'3.375 g q8h.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'meropenem',      name:'Meropenem',                  category:'Antibiotic',            thresholds:[{crcl_max:10,severity:'high',recommendation:'0.5 g q24h.',action:'DOSE-ADJUSTMENT'},{crcl_max:25,crcl_min:10,severity:'moderate',recommendation:'0.5 g q12h.',action:'DOSE-ADJUSTMENT'},{crcl_max:50,crcl_min:25,severity:'low',recommendation:'1 g q12h.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'ciprofloxacin',  name:'Ciprofloxacin',             category:'Antibiotic',            thresholds:[{crcl_max:30,severity:'moderate',recommendation:'PO 250–500 mg q18h or IV 200–400 mg q18–24h.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'digoxin',        name:'Digoxin',                    category:'Cardiac Glycoside',     thresholds:[{crcl_max:10,severity:'high',recommendation:'0.0625 mg every other day or avoid.',action:'DOSE-ADJUSTMENT'},{crcl_max:50,crcl_min:10,severity:'moderate',recommendation:'Reduce 25–75%. Monitor levels (target 0.5–0.9 ng/mL).',action:'DOSE-ADJUSTMENT'}] },
+  { id:'methotrexate',   name:'Methotrexate',              category:'DMARD',                 thresholds:[{crcl_max:10,severity:'contraindicated',recommendation:'Contraindicated.',action:'DISCONTINUE'},{crcl_max:30,crcl_min:10,severity:'high',recommendation:'Avoid.',action:'AVOID'},{crcl_max:60,crcl_min:30,severity:'moderate',recommendation:'Reduce 50%, monitor CBC/LFT.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'colchicine',     name:'Colchicine',                 category:'Antigout',              thresholds:[{crcl_max:10,severity:'contraindicated',recommendation:'Contraindicated.',action:'DISCONTINUE'},{crcl_max:30,crcl_min:10,severity:'high',recommendation:'Max 0.5 mg/day. Avoid prolonged use.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'acyclovir',      name:'Acyclovir',                  category:'Antiviral',             thresholds:[{crcl_max:10,severity:'high',recommendation:'IV 5 mg/kg q24h; PO 200 mg q12h.',action:'DOSE-ADJUSTMENT'},{crcl_max:25,crcl_min:10,severity:'moderate',recommendation:'IV q24h; PO 800 mg q8h.',action:'DOSE-ADJUSTMENT'},{crcl_max:50,crcl_min:25,severity:'low',recommendation:'IV q12h; PO 800 mg q12h.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'tramadol',       name:'Tramadol',                   category:'Analgesic/Opioid',      thresholds:[{crcl_max:30,severity:'moderate',recommendation:'Max 200 mg/day q12h.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'spironolactone', name:'Spironolactone',             category:'Diuretic',              thresholds:[{crcl_max:30,severity:'high',recommendation:'Avoid — severe hyperkalemia risk.',action:'AVOID'},{crcl_max:50,crcl_min:30,severity:'moderate',recommendation:'Use with caution, monitor K+ closely.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'nitrofurantoin', name:'Nitrofurantoin',             category:'Antibiotic/Urinary',    thresholds:[{crcl_max:45,severity:'contraindicated',recommendation:'Contraindicated — inadequate levels + toxic metabolite accumulation.',action:'DISCONTINUE'}] },
+];
+
+function getRenalAdminRules() {
+  try {
+    const stored = localStorage.getItem(LS.RENAL_RULES);
+    if(stored) return JSON.parse(stored);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(RENAL_DEFAULTS));
+}
+
+function renderRenalRulesTable() {
+  const rules = getRenalAdminRules();
+  const isCustom = !!localStorage.getItem(LS.RENAL_RULES);
+  const statusEl = document.getElementById('renal-rules-status');
+  if(statusEl) {
+    statusEl.className = 'proto-status ' + (isCustom ? 'custom' : 'default');
+    statusEl.textContent = isCustom ? '⚙ Custom renal rules active' : '✓ Using published defaults';
+  }
+  const tbody = document.getElementById('renal-rules-tbody');
+  if(!tbody) return;
+  const SEVS = ['info','low','moderate','high','contraindicated'];
+  let rows = '';
+  rules.forEach((drug, di) => {
+    drug.thresholds.forEach((t, ti) => {
+      rows += `<tr>
+        <td>${ti === 0 ? `<span class="nomo-lbl">${drug.name}</span>` : ''}</td>
+        <td>${ti === 0 ? `<span class="type-chip" style="background:var(--surface);">${drug.category}</span>` : ''}</td>
+        <td><input class="nomo-inp" data-di="${di}" data-ti="${ti}" data-f="crcl_max" type="number" min="0" max="200" value="${t.crcl_max ?? ''}"></td>
+        <td><input class="nomo-inp" data-di="${di}" data-ti="${ti}" data-f="crcl_min" type="number" min="0" max="200" value="${t.crcl_min ?? ''}"></td>
+        <td>
+          <select class="nomo-inp" data-di="${di}" data-ti="${ti}" data-f="severity" style="min-width:120px;">
+            ${SEVS.map(s => `<option value="${s}" ${t.severity===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td><input class="nomo-inp inp-text" data-di="${di}" data-ti="${ti}" data-f="recommendation" type="text" style="min-width:220px;" value="${(t.recommendation||'').replace(/"/g,'&quot;')}"></td>
+        <td><input class="nomo-inp" data-di="${di}" data-ti="${ti}" data-f="action" type="text" style="min-width:100px;" value="${t.action||''}"></td>
+      </tr>`;
+    });
+  });
+  tbody.innerHTML = rows;
+}
+
+function saveRenalRules() {
+  const rules = getRenalAdminRules();
+  document.querySelectorAll('#renal-rules-tbody [data-di]').forEach(inp => {
+    const di = parseInt(inp.dataset.di);
+    const ti = parseInt(inp.dataset.ti);
+    const f  = inp.dataset.f;
+    if(!rules[di] || !rules[di].thresholds[ti]) return;
+    const raw = inp.value;
+    if(f === 'crcl_max' || f === 'crcl_min') {
+      rules[di].thresholds[ti][f] = raw === '' ? undefined : parseInt(raw);
+    } else {
+      rules[di].thresholds[ti][f] = raw;
+    }
+  });
+  localStorage.setItem(LS.RENAL_RULES, JSON.stringify(rules));
+  const btn = document.getElementById('renal-save-btn');
+  const msg = document.getElementById('renal-save-msg');
+  if(btn) { btn.textContent = '✓ Saved'; btn.classList.add('saved'); }
+  if(msg) msg.style.display = 'inline';
+  renderRenalRulesTable();
+  setTimeout(() => {
+    if(btn) { btn.textContent = 'Save Renal Rules'; btn.classList.remove('saved'); }
+    if(msg) msg.style.display = 'none';
+  }, 3000);
+}
+
+function resetRenalRules() {
+  if(!confirm('Reset renal drug rules to published defaults? All customizations will be removed.')) return;
+  localStorage.removeItem(LS.RENAL_RULES);
+  renderRenalRulesTable();
+}
+
+function addRenalRule() {
+  const rules = getRenalAdminRules();
+  rules.push({
+    id: 'new-drug-' + Date.now(),
+    name: 'New Drug',
+    category: 'Other',
+    thresholds: [{ crcl_max: 30, severity: 'moderate', recommendation: 'Dose adjustment required.', action: 'DOSE-ADJUSTMENT' }],
+  });
+  // Save temporarily so table re-renders
+  localStorage.setItem(LS.RENAL_RULES, JSON.stringify(rules));
+  renderRenalRulesTable();
+}
+
+// Hook into showAdminPanel to also render renal rules
+const _origShowAdminPanel = showAdminPanel;
+showAdminPanel = function() {
+  _origShowAdminPanel();
+  renderRenalRulesTable();
+};
 
 // ══ INIT ══
 if(sessionStorage.getItem(SESSION_KEY) === '1'){

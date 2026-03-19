@@ -10,6 +10,7 @@ const patientRoutes = require('./routes/patient');
 const labRoutes = require('./routes/labs');
 const medicationRoutes = require('./routes/medications');
 const vitalRoutes = require('./routes/vitals');
+const censusRoutes = require('./routes/census');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -59,6 +60,8 @@ app.get('/sw.js', (req, res) => {
 });
 
 // ── Static files and HTML routes ───────────────────────────────────────────
+// Serve /js directory explicitly (renalEngine.js, drugRules.js)
+app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use(express.static(path.join(__dirname)));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -236,6 +239,7 @@ app.use('/api/patient', patientRoutes);
 app.use('/api/labs', labRoutes);
 app.use('/api/medications', medicationRoutes);
 app.use('/api/vitals', vitalRoutes);
+app.use('/api/census', censusRoutes);
 
 // ── Health check ───────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

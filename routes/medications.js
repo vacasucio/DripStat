@@ -7,7 +7,8 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { TEST_PATIENT_ID, medications: mockMeds } = require('../testData');
+const { TEST_PATIENT_ID, medications: mockMeds, RENAL_PATIENT_ID, renalMedications: mockRenalMeds } = require('../testData');
+const { getFloorPatient } = require('../js/floorSandbox');
 const { getFhirHeaders } = require('../lib/fhirHeaders');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
@@ -52,11 +53,17 @@ function formatMedRequest(mr) {
     };
   });
 
+  // RxNorm codes (used for drug rule matching)
+  const rxnormCodes = (mr.medicationCodeableConcept?.coding || [])
+    .filter(c => c.system && (c.system.toLowerCase().includes('rxnorm') || c.system.includes('2.16.840')))
+    .map(c => c.code);
+
   return {
     id: mr.id,
     status: mr.status,
     intent: mr.intent,
     medicationName,
+    rxnormCodes,
     authoredOn: mr.authoredOn || null,
     requester: mr.requester?.display || null,
     dosages,
@@ -68,6 +75,17 @@ function formatMedRequest(mr) {
 router.get('/:patientId', async (req, res) => {
   const { patientId } = req.params;
   if (patientId === TEST_PATIENT_ID) return res.json(mockMeds);
+  if (patientId === RENAL_PATIENT_ID) return res.json(mockRenalMeds);
+  if (patientId.startsWith('FL')) {
+    const flPt = getFloorPatient(patientId);
+    if (!flPt) return res.status(404).json({ error: `Floor patient ${patientId} not found` });
+    return res.json({
+      patientId,
+      total: flPt.medications.length,
+      status: 'active',
+      medications: flPt.medications,
+    });
+  }
   const status = req.query.status || 'active';
   const count = Math.min(parseInt(req.query.count) || 50, 100);
 

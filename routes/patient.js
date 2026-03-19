@@ -9,7 +9,8 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { TEST_PATIENT_ID, patient: mockPatient } = require('../testData');
+const { TEST_PATIENT_ID, patient: mockPatient, RENAL_PATIENT_ID, renalPatient: mockRenalPatient } = require('../testData');
+const { getFloorPatient } = require('../js/floorSandbox');
 const { getFhirHeaders } = require('../lib/fhirHeaders');
 
 const FHIR_BASE = process.env.FHIR_BASE_URL;
@@ -56,6 +57,20 @@ function extractQuantity(obs) {
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   if (id === TEST_PATIENT_ID) return res.json(mockPatient);
+  if (id === RENAL_PATIENT_ID) return res.json(mockRenalPatient);
+
+  if (id.startsWith('FL')) {
+    const flPt = getFloorPatient(id);
+    if (!flPt) return res.status(404).json({ error: `Floor patient ${id} not found` });
+    return res.json({
+      patientId: flPt.id,
+      name: flPt.name,
+      gender: flPt.sex === 'M' ? 'male' : 'female',
+      age: flPt.age,
+      weight: { value: flPt.weightKg, unit: 'kg' },
+      height: { value: flPt.heightCm, unit: 'cm' },
+    });
+  }
   const headers = getFhirHeaders(req);
   try {
     const [patientRes, weightObs, heightObs] = await Promise.all([
