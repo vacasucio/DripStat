@@ -670,7 +670,7 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
 
 <!-- ══ APP NAV ══ -->
 <nav class="nav" id="main-nav">
-  <button id="app-header-back" onclick="navigate('/app')">← Calculators</button>
+  <button id="app-header-back" onclick="exitCalcImmersive()">← Calculators</button>
   <div class="nav-brand" id="nav-logo" onclick="navigate('/app')" style="cursor:pointer;flex-shrink:0;"></div>
   <span id="inst-divider" style="display:none;width:1px;height:22px;background:var(--border);margin:0 14px;flex-shrink:0;align-self:center;"></span>
   <span id="inst-label" style="display:none;font-size:13px;color:var(--navy);font-weight:600;white-space:nowrap;font-family:'Sora',sans-serif;letter-spacing:-.01em;"></span>
@@ -715,21 +715,21 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
         <div class="app-dash-sub">Weight-based dosing with PTT nomograms, AUC/MIC targeting, and FHIR patient integration.<br>Always verify doses against your institution's current protocols.</div>
       </div>
       <div class="app-calc-grid">
-        <div class="app-calc-card featured" onclick="navigate('/app/heparin')">
+        <div class="app-calc-card featured" onclick="openCalcImmersive('/app/heparin')">
           <div class="app-calc-icon">💉</div>
           <div class="app-calc-badges"><span class="cb cb-free">FREE</span><span class="cb cb-new">NEW</span></div>
           <div class="app-calc-name">Heparin Infusion Calculator</div>
           <div class="app-calc-desc">Weight-based IV heparin for ACS and DVT/VTE with full PTT nomogram, hold instructions, and pump rate output.</div>
           <div class="app-calc-tags"><span class="app-calc-tag">ACS</span><span class="app-calc-tag">DVT/VTE</span><span class="app-calc-tag">PTT Nomogram</span><span class="app-calc-tag">Bolus + Rate</span></div>
         </div>
-        <div class="app-calc-card featured" onclick="navigate('/app/vancomycin')">
+        <div class="app-calc-card featured" onclick="openCalcImmersive('/app/vancomycin')">
           <div class="app-calc-icon">📈</div>
           <div class="app-calc-badges"><span class="cb cb-pro">PRO</span><span class="cb cb-new">NEW</span></div>
           <div class="app-calc-name">Vancomycin AUC/MIC</div>
           <div class="app-calc-desc">Bayesian-guided vancomycin dosing using two serum levels. Targets AUC/MIC 400–600 per ASHP/IDSA 2020 guidelines.</div>
           <div class="app-calc-tags"><span class="app-calc-tag">Bayesian</span><span class="app-calc-tag">AUC/MIC 400–600</span><span class="app-calc-tag">Renal adjusted</span></div>
         </div>
-        <div class="app-calc-card featured" onclick="navigate('/app/dka')">
+        <div class="app-calc-card featured" onclick="openCalcImmersive('/app/dka')">
           <div class="app-calc-icon">🩸</div>
           <div class="app-calc-badges"><span class="cb cb-free">FREE</span><span class="cb cb-new">NEW</span></div>
           <div class="app-calc-name">DKA — 2-Bag Protocol</div>
@@ -1314,6 +1314,31 @@ function injectLogos() {
       lbl.style.display = 'none';
       if (div) div.style.display = 'none';
     }
+  }
+}
+
+// ══ IMMERSIVE CALCULATOR ══
+function openCalcImmersive(path) {
+  const inApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (inApp) {
+    navigate(path);
+    return;
+  }
+  const w = 1140, h = 860;
+  const left = Math.round((screen.width  - w) / 2);
+  const top  = Math.round((screen.height - h) / 2);
+  window.open(
+    path,
+    '_blank',
+    `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no`
+  );
+}
+
+function exitCalcImmersive() {
+  if (window.opener) {
+    window.close();
+  } else {
+    navigate('/app');
   }
 }
 
