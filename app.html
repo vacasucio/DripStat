@@ -218,6 +218,13 @@ body{font-family:'Sora',sans-serif;color:var(--text);background:var(--white);ove
 .calc-tab-badge{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--teal-light);color:var(--teal);padding:2px 6px;border-radius:4px;}
 .calc-tab-panel{display:none;}
 .calc-tab-panel.active{display:block;animation:fadeIn .25s ease;}
+.renal-mode-bar{background:var(--bg);border-bottom:1px solid var(--border);padding:10px 32px;}
+.renal-mode-switcher{display:inline-flex;background:white;border:1.5px solid var(--border);border-radius:10px;padding:3px;gap:2px;}
+.renal-mode-btn{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:7px 20px;border-radius:7px;cursor:pointer;transition:all .15s;user-select:none;}
+.renal-mode-btn:hover{color:var(--text);background:var(--bg);}
+.renal-mode-btn.active{background:var(--navy);color:white;}
+.renal-mode-panel{display:none;}
+.renal-mode-panel.active{display:block;}
 .calc-body{max-width:1080px;margin:0 auto;padding:10px 20px 14px;}
 .calc-layout{display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start;}
 .form-section-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px;}
@@ -744,15 +751,8 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
           <div class="app-calc-icon">🫘</div>
           <div class="app-calc-badges"><span class="cb cb-free">FREE</span><span class="cb cb-new">NEW</span></div>
           <div class="app-calc-name">Renal Dose Defender</div>
-          <div class="app-calc-desc">SCr trend monitoring, Cockcroft-Gault CrCl, KDIGO AKI staging, and real-time medication flag review for renally-cleared drugs.</div>
-          <div class="app-calc-tags"><span class="app-calc-tag">CrCl</span><span class="app-calc-tag">AKI Detection</span><span class="app-calc-tag">Dose Flags</span><span class="app-calc-tag">18 Drugs</span></div>
-        </div>
-        <div class="app-calc-card featured" onclick="openCalcImmersive('/app/renal-census')">
-          <div class="app-calc-icon">🏥</div>
-          <div class="app-calc-badges"><span class="cb cb-free">FREE</span><span class="cb cb-new">NEW</span></div>
-          <div class="app-calc-name">Floor Census — Renal Flags</div>
-          <div class="app-calc-desc">Whole-floor renal dose review. Enter a unit ID to see every patient's AKI status, CrCl, and flagged medications ranked by severity.</div>
-          <div class="app-calc-tags"><span class="app-calc-tag">Floor View</span><span class="app-calc-tag">Census</span><span class="app-calc-tag">AKI</span><span class="app-calc-tag">Batch Review</span></div>
+          <div class="app-calc-desc">CrCl, KDIGO AKI staging, and active medication flags — with a built-in Floor Census for unit-wide renal review.</div>
+          <div class="app-calc-tags"><span class="app-calc-tag">CrCl</span><span class="app-calc-tag">AKI Detection</span><span class="app-calc-tag">Dose Flags</span><span class="app-calc-tag">Floor Census</span></div>
         </div>
       </div>
       <div class="app-coming-section">
@@ -1321,126 +1321,128 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
     </div>
   </div>
 
-  <!-- AKI Warning Banner (hidden until AKI detected) -->
-  <div id="renal-aki-banner" style="display:none;background:linear-gradient(135deg,#7f1d1d,#991b1b);color:white;padding:14px 32px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;">
-    <span style="font-size:18px;">⚠</span>
-    <span id="renal-aki-banner-msg"></span>
+  <!-- Mode Switcher Bar -->
+  <div class="renal-mode-bar">
+    <div class="renal-mode-switcher">
+      <div class="renal-mode-btn active" id="renal-mode-btn-patient" onclick="switchRenalMode('patient')">🫘 Patient Lookup</div>
+      <div class="renal-mode-btn" id="renal-mode-btn-floor" onclick="switchRenalMode('floor')">🏥 Floor Census</div>
+    </div>
   </div>
 
-  <div class="calc-body" style="padding:24px 32px;max-width:1200px;margin:0 auto;">
-
-    <!-- Demographics input form (for manual entry / override) -->
-    <div id="renal-demo-form" style="background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;">
-      <div class="form-section-title" style="margin-bottom:14px;">Patient Demographics <span style="font-size:11px;color:var(--muted);font-weight:normal;">(auto-filled from FHIR when patient loaded)</span></div>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:end;">
-        <div class="form-field" style="margin:0;">
-          <label class="form-label">Age (yr)</label>
-          <input type="number" class="form-input" id="renal-age" placeholder="e.g. 74" min="1" max="120" oninput="calcRenal()">
-        </div>
-        <div class="form-field" style="margin:0;">
-          <label class="form-label">Sex</label>
-          <select class="form-select" id="renal-sex" onchange="calcRenal()">
-            <option value="">— Select —</option>
-            <option value="M">Male</option>
-            <option value="F">Female</option>
-          </select>
-        </div>
-        <div class="form-field" style="margin:0;">
-          <label class="form-label">Weight (kg)</label>
-          <input type="number" class="form-input" id="renal-weight" placeholder="e.g. 61" min="1" max="300" oninput="calcRenal()">
-        </div>
-        <div class="form-field" style="margin:0;">
-          <label class="form-label">Height (cm)</label>
-          <input type="number" class="form-input" id="renal-height" placeholder="e.g. 162" min="50" max="250" oninput="calcRenal()">
-        </div>
-        <div class="form-field" style="margin:0;">
-          <label class="form-label">Current SCr (mg/dL)</label>
-          <input type="number" class="form-input" id="renal-scr" placeholder="e.g. 2.4" step="0.1" min="0.1" max="20" oninput="calcRenal()">
-        </div>
-      </div>
+  <!-- Patient Lookup Panel -->
+  <div id="renal-panel-patient" class="renal-mode-panel active">
+    <!-- AKI Warning Banner (hidden until AKI detected) -->
+    <div id="renal-aki-banner" style="display:none;background:linear-gradient(135deg,#7f1d1d,#991b1b);color:white;padding:14px 32px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">⚠</span>
+      <span id="renal-aki-banner-msg"></span>
     </div>
 
-    <div style="display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;">
+    <div class="calc-body" style="padding:24px 32px;max-width:1200px;margin:0 auto;">
 
-      <!-- LEFT: Renal Summary Card -->
-      <div>
-        <div id="renal-summary-card" style="background:white;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);">
-          <div style="padding:14px 20px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
-            <span>🫘</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);">Renal Summary</span>
+      <!-- Demographics input form (for manual entry / override) -->
+      <div id="renal-demo-form" style="background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px;">
+        <div class="form-section-title" style="margin-bottom:14px;">Patient Demographics <span style="font-size:11px;color:var(--muted);font-weight:normal;">(auto-filled from FHIR when patient loaded)</span></div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:end;">
+          <div class="form-field" style="margin:0;">
+            <label class="form-label">Age (yr)</label>
+            <input type="number" class="form-input" id="renal-age" placeholder="e.g. 74" min="1" max="120" oninput="calcRenal()">
           </div>
-          <div style="padding:20px;" id="renal-summary-body">
-            <div style="text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;">
-              Load a patient to see renal summary
+          <div class="form-field" style="margin:0;">
+            <label class="form-label">Sex</label>
+            <select class="form-select" id="renal-sex" onchange="calcRenal()">
+              <option value="">— Select —</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+            </select>
+          </div>
+          <div class="form-field" style="margin:0;">
+            <label class="form-label">Weight (kg)</label>
+            <input type="number" class="form-input" id="renal-weight" placeholder="e.g. 61" min="1" max="300" oninput="calcRenal()">
+          </div>
+          <div class="form-field" style="margin:0;">
+            <label class="form-label">Height (cm)</label>
+            <input type="number" class="form-input" id="renal-height" placeholder="e.g. 162" min="50" max="250" oninput="calcRenal()">
+          </div>
+          <div class="form-field" style="margin:0;">
+            <label class="form-label">Current SCr (mg/dL)</label>
+            <input type="number" class="form-input" id="renal-scr" placeholder="e.g. 2.4" step="0.1" min="0.1" max="20" oninput="calcRenal()">
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;">
+
+        <!-- LEFT: Renal Summary Card -->
+        <div>
+          <div id="renal-summary-card" style="background:white;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+            <div style="padding:14px 20px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+              <span>🫘</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);">Renal Summary</span>
+            </div>
+            <div style="padding:20px;" id="renal-summary-body">
+              <div style="text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;">
+                Load a patient to see renal summary
+              </div>
             </div>
           </div>
+
+          <!-- SCr Trend Sparkline -->
+          <div id="renal-sparkline-card" style="display:none;background:white;border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+            <div style="padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+              <span>📈</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);">SCr Trend</span>
+            </div>
+            <div style="padding:16px;" id="renal-sparkline-body"></div>
+          </div>
         </div>
 
-        <!-- SCr Trend Sparkline -->
-        <div id="renal-sparkline-card" style="display:none;background:white;border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
-          <div style="padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
-            <span>📈</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);">SCr Trend</span>
+        <!-- RIGHT: Flag Cards -->
+        <div>
+          <div id="renal-flags-area">
+            <div style="text-align:center;padding:40px 16px;color:var(--muted);font-size:13px;" id="renal-flags-empty">
+              Load a patient to see medication flags
+            </div>
           </div>
-          <div style="padding:16px;" id="renal-sparkline-body"></div>
+
+          <!-- Acknowledge Panel -->
+          <div id="renal-ack-panel" style="display:none;background:white;border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+            <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;">📝 Acknowledge Medication Flags</div>
+            <div class="form-field">
+              <label class="form-label">Clinical Reason / Action Taken</label>
+              <input type="text" class="form-input" id="renal-ack-reason" placeholder="e.g. Metformin discontinued, enoxaparin dose reduced per pharmacy…">
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+              <button class="btn-primary" style="padding:10px 22px;font-size:13px;" onclick="acknowledgeRenalFlags()">Acknowledge All Flags</button>
+              <button class="btn-secondary" style="padding:10px 22px;font-size:13px;" onclick="markNoAction()">No Action Needed</button>
+            </div>
+            <div id="renal-ack-msg" style="display:none;margin-top:10px;font-size:12px;color:var(--green);font-family:'JetBrains Mono',monospace;"></div>
+          </div>
+        </div>
+
+      </div><!-- /grid -->
+    </div><!-- /calc-body -->
+  </div><!-- /renal-panel-patient -->
+
+  <!-- Floor Census Panel -->
+  <div id="renal-panel-floor" class="renal-mode-panel">
+    <div class="calc-body" style="padding:24px 32px;max-width:960px;margin:0 auto;">
+      <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:24px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px 24px;">
+        <div class="form-field" style="margin:0;flex:1;">
+          <label class="form-label">Location / Unit ID</label>
+          <input type="text" class="form-input" id="census-location" placeholder="e.g. TEST_UNIT or 4W-MED" style="max-width:320px;">
+        </div>
+        <button class="btn-primary" style="padding:10px 24px;font-size:13px;white-space:nowrap;" onclick="loadRenalCensus()">Load Census</button>
+      </div>
+      <div id="census-status" style="display:none;font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:16px;"></div>
+      <div id="census-list">
+        <div style="text-align:center;padding:48px 16px;color:var(--muted);font-size:13px;">
+          Enter a unit ID and click Load Census to see all patients with renal flag alerts.
         </div>
       </div>
+    </div>
+  </div><!-- /renal-panel-floor -->
 
-      <!-- RIGHT: Flag Cards -->
-      <div>
-        <div id="renal-flags-area">
-          <div style="text-align:center;padding:40px 16px;color:var(--muted);font-size:13px;" id="renal-flags-empty">
-            Load a patient to see medication flags
-          </div>
-        </div>
-
-        <!-- Acknowledge Panel -->
-        <div id="renal-ack-panel" style="display:none;background:white;border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-top:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
-          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;">📝 Acknowledge Medication Flags</div>
-          <div class="form-field">
-            <label class="form-label">Clinical Reason / Action Taken</label>
-            <input type="text" class="form-input" id="renal-ack-reason" placeholder="e.g. Metformin discontinued, enoxaparin dose reduced per pharmacy…">
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-            <button class="btn-primary" style="padding:10px 22px;font-size:13px;" onclick="acknowledgeRenalFlags()">Acknowledge All Flags</button>
-            <button class="btn-secondary" style="padding:10px 22px;font-size:13px;" onclick="markNoAction()">No Action Needed</button>
-          </div>
-          <div id="renal-ack-msg" style="display:none;margin-top:10px;font-size:12px;color:var(--green);font-family:'JetBrains Mono',monospace;"></div>
-        </div>
-      </div>
-
-    </div><!-- /grid -->
-  </div><!-- /calc-body -->
 </div><!-- /page-renal -->
-
-
-<!-- ══════════════════════════════════════════════════════════════
-     RENAL DOSE DEFENDER — Census View
-══════════════════════════════════════════════════════════════ -->
-<div id="page-renal-census" class="page">
-  <div class="calc-page-header">
-    <div class="cph-inner">
-      <div class="cph-title">Renal Dose Defender — Census</div>
-      <div class="cph-sub">Unit-wide renal flag review · Ranked by severity</div>
-      <div class="cph-badges"><span class="cph-badge free">FREE</span><span class="cph-badge warn-badge">⚠ Educational Reference Only</span></div>
-    </div>
-  </div>
-  <div class="calc-body" style="padding:24px 32px;max-width:960px;margin:0 auto;">
-    <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:24px;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px 24px;">
-      <div class="form-field" style="margin:0;flex:1;">
-        <label class="form-label">Location / Unit ID</label>
-        <input type="text" class="form-input" id="census-location" placeholder="e.g. TEST_UNIT or 4W-MED" style="max-width:320px;">
-      </div>
-      <button class="btn-primary" style="padding:10px 24px;font-size:13px;white-space:nowrap;" onclick="loadRenalCensus()">Load Census</button>
-    </div>
-    <div id="census-status" style="display:none;font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:16px;"></div>
-    <div id="census-list">
-      <div style="text-align:center;padding:48px 16px;color:var(--muted);font-size:13px;">
-        Enter a unit ID and click Load Census to see all patients with renal flag alerts.
-      </div>
-    </div>
-  </div>
-</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
@@ -1493,8 +1495,9 @@ const CALC_TITLES = {
   vancomycin: 'Vancomycin AUC/MIC',
   dka: 'DKA — 2-Bag Protocol',
   renal: 'Renal Dose Defender',
-  'renal-census': 'Renal Dose Defender — Census',
 };
+
+let _renalMode = 'patient'; // 'patient' | 'floor'
 
 function navigate(path, push) {
   if (push === undefined) push = true;
@@ -1547,8 +1550,16 @@ function renderView(view, calc) {
   if (calc === 'vancomycin' && typeof chartInstance !== 'undefined' && chartInstance) {
     requestAnimationFrame(() => chartInstance.resize());
   }
-  if (calc === 'renal') { calcRenal(); }
-  if (calc === 'renal-census') { loadRenalCensus(); }
+  if (calc === 'renal') {
+    switchRenalMode(_renalMode);
+    if (_renalMode === 'patient') calcRenal();
+  }
+  if (calc === 'renal-census') {
+    _renalMode = 'floor';
+    history.replaceState({path: '/app/renal'}, '', '/app/renal');
+    renderView('calculator', 'renal');
+    return;
+  }
 
   // Re-populate FHIR fields if patient is loaded
   if (view === 'calculator' && typeof _fhirPatient !== 'undefined' && _fhirPatient) {
@@ -1557,6 +1568,18 @@ function renderView(view, calc) {
 
   // Sync bottom tab active state
   setActiveTab(view === 'calculator' ? 'calc' : 'calc');
+}
+
+function switchRenalMode(mode) {
+  _renalMode = mode;
+  document.getElementById('renal-panel-patient').classList.toggle('active', mode === 'patient');
+  document.getElementById('renal-panel-floor').classList.toggle('active', mode === 'floor');
+  document.getElementById('renal-mode-btn-patient').classList.toggle('active', mode === 'patient');
+  document.getElementById('renal-mode-btn-floor').classList.toggle('active', mode === 'floor');
+  if (mode !== 'patient') {
+    const b = document.getElementById('renal-aki-banner');
+    if (b) b.style.display = 'none';
+  }
 }
 
 window.addEventListener('popstate', function(e) {
@@ -3835,6 +3858,7 @@ function navigateRenalPatient(patientId) {
   // Load that patient and navigate to the renal view
   const pidInput = document.getElementById('fhir-pid-input');
   if (pidInput) { pidInput.value = patientId; }
+  _renalMode = 'patient';
   navigate('/app/renal');
   loadFHIRPatient();
 }
