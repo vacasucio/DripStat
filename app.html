@@ -4489,6 +4489,8 @@ function updateAFGlobalBanner() {
   if (!banner) return;
   const threshold = parseInt(localStorage.getItem('dosedefender_af_age_threshold') || '65');
   const patient = (typeof _fhirPatient !== 'undefined') ? _fhirPatient : null;
+  // Always sync the dashboard card from here (runs on every view)
+  updateAgeFriendlyCard();
   if (!patient || patient.age < threshold) {
     banner.style.display = 'none';
     document.body.classList.remove('af-audit-pending','af-audit-done');
