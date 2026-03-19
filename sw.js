@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dosedefender-v1';
+const CACHE_NAME = 'dosedefender-v2';
 const PRECACHE_URLS = [
   '/app',
   '/',
@@ -36,13 +36,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigation requests: cache first, fallback to /app
+  // Navigation requests: network first, fallback to cache
   if (request.mode === 'navigate') {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).catch(() => caches.match('/app'));
-      })
+      fetch(request).catch(() => caches.match(request).then((cached) => cached || caches.match('/app')))
     );
     return;
   }

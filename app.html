@@ -19,7 +19,7 @@
   --gold:#c9943a;--text:#1a2332;--muted:#64748b;
   --border:#e2e8f0;--bg:#f0f4f8;--white:#ffffff;--surface:#f1f5f9;
   --red:#dc2626;--red-light:#fef2f2;--warn:#f59e0b;--warn-light:#fffbeb;
-  --green:#16a34a;--green-light:#f0fdf4;--nav-h:66px;
+  --green:#16a34a;--green-light:#f0fdf4;--nav-h:54px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Sora',sans-serif;color:var(--text);background:var(--white);overflow-x:hidden;}
@@ -29,7 +29,7 @@ body{font-family:'Sora',sans-serif;color:var(--text);background:var(--white);ove
 .logo-dark svg text.wordmark{fill:white;}
 
 /* ══ NAV ══ */
-.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--nav-h);background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 48px;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--nav-h);background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
 .nav-brand{cursor:pointer;display:flex;align-items:center;}
 .nav-links{display:flex;gap:4px;}
 .nav-link{padding:7px 14px;font-size:13px;color:var(--muted);cursor:pointer;border-radius:6px;transition:all .15s;font-weight:500;}
@@ -195,40 +195,40 @@ body{font-family:'Sora',sans-serif;color:var(--text);background:var(--white);ove
 /* ══════════════════════════
    CALC PAGE SHARED
 ══════════════════════════ */
-.calc-page-header{background:var(--bg);padding:36px 48px;position:relative;overflow:hidden;}
+.calc-page-header{background:var(--bg);padding:10px 32px;position:relative;overflow:hidden;}
 .calc-page-header::before{content:'';position:absolute;right:-80px;top:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,168,150,.1) 0%,transparent 70%);pointer-events:none;}
 .cph-inner{max-width:1080px;margin:0 auto;position:relative;z-index:1;}
 .cph-breadcrumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:12px;font-family:'JetBrains Mono',monospace;}
 .cph-breadcrumb span{cursor:pointer;transition:color .15s;}
 .cph-breadcrumb span:hover{color:var(--text);}
 .cph-breadcrumb .sep{opacity:.3;}
-.cph-title{font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,34px);color:var(--navy);margin-bottom:6px;}
-.cph-sub{font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
-.cph-badges{display:flex;gap:8px;margin-top:14px;}
-.cph-badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 10px;border-radius:100px;letter-spacing:.05em;}
+.cph-title{font-family:'Playfair Display',serif;font-size:clamp(14px,2vw,20px);color:var(--navy);margin-bottom:4px;}
+.cph-sub{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.cph-badges{display:flex;gap:8px;margin-top:4px;}
+.cph-badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:100px;letter-spacing:.05em;}
 .cph-badge.free{background:var(--teal-light);color:var(--teal);border:1px solid var(--teal-mid);}
 .cph-badge.pro-badge{background:rgba(201,148,58,.2);color:#f0c070;border:1px solid rgba(201,148,58,.3);}
 .cph-badge.warn-badge{background:var(--warn-light);color:#92400e;border:1px solid #fde68a;}
 
 .calc-tabs-wrap{background:var(--bg);border-bottom:1px solid var(--border);}
 .calc-tabs{max-width:1080px;margin:0 auto;padding:0 24px;display:flex;gap:0;}
-.calc-tab{padding:16px 24px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:7px;white-space:nowrap;}
+.calc-tab{padding:8px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:7px;white-space:nowrap;}
 .calc-tab:hover{color:var(--text);}
 .calc-tab.active{color:var(--teal);border-bottom-color:var(--teal);}
 .calc-tab-badge{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--teal-light);color:var(--teal);padding:2px 6px;border-radius:4px;}
 .calc-tab-panel{display:none;}
 .calc-tab-panel.active{display:block;animation:fadeIn .25s ease;}
-.calc-body{max-width:1080px;margin:0 auto;padding:36px 24px 80px;}
-.calc-layout{display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start;}
-.form-section-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.calc-body{max-width:1080px;margin:0 auto;padding:10px 20px 14px;}
+.calc-layout{display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start;}
+.form-section-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:8px;}
 .form-section-title::after{content:'';flex:1;height:1px;background:var(--border);}
-.form-field{margin-bottom:18px;}
+.form-field{margin-bottom:8px;}
 .form-field:last-child{margin-bottom:0;}
-.form-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:7px;font-family:'JetBrains Mono',monospace;letter-spacing:.05em;text-transform:uppercase;}
-.form-input{background:var(--bg);border:1.5px solid var(--border);color:var(--text);border-radius:10px;padding:12px 14px;font-size:15px;font-family:'Sora',sans-serif;width:100%;outline:none;transition:border-color .2s,box-shadow .2s;}
+.form-label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:3px;font-family:'JetBrains Mono',monospace;letter-spacing:.05em;text-transform:uppercase;}
+.form-input{background:var(--bg);border:1.5px solid var(--border);color:var(--text);border-radius:10px;padding:7px 10px;font-size:13px;font-family:'Sora',sans-serif;width:100%;outline:none;transition:border-color .2s,box-shadow .2s;}
 .form-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,124,110,.1);background:white;}
 .form-input::placeholder{color:#a0aec0;}
-.form-select{background:var(--bg);border:1.5px solid var(--border);color:var(--text);border-radius:10px;padding:12px 36px 12px 14px;font-size:15px;font-family:'Sora',sans-serif;width:100%;outline:none;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;transition:border-color .2s;}
+.form-select{background:var(--bg);border:1.5px solid var(--border);color:var(--text);border-radius:10px;padding:7px 32px 7px 10px;font-size:13px;font-family:'Sora',sans-serif;width:100%;outline:none;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;transition:border-color .2s;}
 .form-select:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,124,110,.1);background-color:white;}
 .form-select option{background:white;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -236,9 +236,9 @@ body{font-family:'Sora',sans-serif;color:var(--text);background:var(--white);ove
 
 .result-empty{background:white;border:1px solid var(--border);border-radius:14px;padding:48px 24px;text-align:center;color:var(--muted);font-size:14px;}
 .result-empty-icon{font-size:32px;margin-bottom:12px;opacity:.4;}
-.result-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
-.result-card-header{background:linear-gradient(135deg,var(--navy),var(--navy3));padding:14px 20px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:8px;}
-.result-row{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.result-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.result-card-header{background:linear-gradient(135deg,var(--navy),var(--navy3));padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:8px;}
+.result-row{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:16px;}
 .result-row:last-child{border-bottom:none;}
 .result-row.primary-row{background:var(--green-light);}
 .result-row.secondary-row{background:var(--teal-light);}
@@ -246,7 +246,7 @@ body{font-family:'Sora',sans-serif;color:var(--text);background:var(--white);ove
 .result-meta{flex:1;}
 .result-name{font-size:13px;color:var(--muted);font-weight:500;margin-bottom:3px;}
 .result-formula{font-family:'JetBrains Mono',monospace;font-size:10px;color:#b0bec5;}
-.result-value{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;text-align:right;white-space:nowrap;}
+.result-value{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;text-align:right;white-space:nowrap;}
 .result-value.teal{color:var(--teal);}
 .result-value.navy{color:var(--navy);}
 .result-value.green{color:var(--green);}
@@ -255,54 +255,54 @@ body{font-family:'Sora',sans-serif;color:var(--text);background:var(--white);ove
 .result-unit{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-align:right;margin-top:2px;}
 .error-card{background:var(--red-light);border:1px solid #fecaca;border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:12px;color:var(--red);font-weight:600;font-size:14px;}
 .lookup-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-.lookup-card-hdr{padding:12px 20px;background:var(--bg);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.lookup-card-hdr{padding:8px 16px;background:var(--bg);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
 .lookup-tbl{width:100%;border-collapse:collapse;font-size:12px;}
-.lookup-tbl thead th{padding:10px 16px;text-align:left;background:white;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);font-weight:500;}
+.lookup-tbl thead th{padding:7px 12px;text-align:left;background:white;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);font-weight:500;}
 .lookup-tbl thead th:not(:first-child){text-align:right;}
-.lookup-tbl tbody td{padding:11px 16px;border-bottom:1px solid rgba(226,232,240,.6);}
+.lookup-tbl tbody td{padding:7px 12px;border-bottom:1px solid rgba(226,232,240,.6);}
 .lookup-tbl tbody td:not(:first-child){text-align:right;font-family:'JetBrains Mono',monospace;}
 .lookup-tbl tbody tr:last-child td{border-bottom:none;}
 .lookup-tbl tbody tr.active-row{background:var(--teal-light);}
 .lookup-tbl tbody tr.active-row td:first-child{color:var(--teal);font-weight:700;}
 
 /* ── PTT ── */
-.ptt-layout{display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start;}
-.ptt-ranges{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:16px;}
-.ptt-ranges-hdr{padding:12px 16px;background:var(--bg);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
-.ptt-range-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(226,232,240,.5);font-size:12px;transition:background .15s;}
+.ptt-layout{display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start;}
+.ptt-ranges{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:10px;}
+.ptt-ranges-hdr{padding:8px 12px;background:var(--bg);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.ptt-range-row{display:flex;align-items:center;gap:10px;padding:6px 12px;border-bottom:1px solid rgba(226,232,240,.5);font-size:12px;transition:background .15s;}
 .ptt-range-row:last-child{border-bottom:none;}
 .ptt-range-row.active{background:var(--teal-light);}
 .ptt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .ptt-range-lbl{flex:1;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;}
 .ptt-range-action{color:var(--text);font-size:11px;font-weight:600;}
 .ptt-result-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
-.ptt-result-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.ptt-result-header{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
 .ptt-result-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
 .hold-badge{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:4px 12px;border-radius:100px;}
 .hold-none{background:var(--green-light);color:var(--green);border:1px solid #bbf7d0;}
 .hold-30{background:var(--warn-light);color:#92400e;border:1px solid #fde68a;}
 .hold-60{background:var(--red-light);color:var(--red);border:1px solid #fecaca;}
 .ptt-action-rows{}
-.ptt-action-row{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border-bottom:1px solid var(--border);}
+.ptt-action-row{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);}
 .ptt-action-row:last-child{border-bottom:none;}
-.ptt-action-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+.ptt-action-icon{font-size:16px;flex-shrink:0;margin-top:2px;}
 .ptt-action-content{flex:1;}
-.ptt-action-label{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;}
-.ptt-action-value{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--navy);}
+.ptt-action-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.05em;text-transform:uppercase;margin-bottom:2px;}
+.ptt-action-value{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--navy);}
 .ptt-action-value.red{color:var(--red);}
 .ptt-action-value.green{color:var(--green);}
 .ptt-action-value.warn{color:#92400e;}
-.ptt-action-sub{font-size:11px;color:var(--muted);margin-top:3px;font-family:'JetBrains Mono',monospace;}
+.ptt-action-sub{font-size:10px;color:var(--muted);margin-top:1px;font-family:'JetBrains Mono',monospace;}
 .therapeutic-card{background:var(--green-light);border:1px solid #bbf7d0;border-radius:14px;padding:28px;text-align:center;}
 .therapeutic-icon{font-size:40px;margin-bottom:12px;}
 .therapeutic-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--green);margin-bottom:8px;}
 .therapeutic-sub{font-size:13px;color:#166534;}
-.notify-banner{background:var(--red-light);border:1px solid #fecaca;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:10px;margin:0 20px 16px;}
+.notify-banner{background:var(--red-light);border:1px solid #fecaca;border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:10px;margin:0 20px 16px;}
 .notify-text{font-size:13px;font-weight:700;color:var(--red);}
 
 /* ── Rounding accordion ── */
-.rounding-accordion{margin-bottom:24px;background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.rounding-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;cursor:pointer;user-select:none;}
+.rounding-accordion{margin-bottom:8px;background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.rounding-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none;}
 .rounding-header:hover{background:var(--bg);}
 .rounding-body{display:none;border-top:1px solid var(--border);padding:20px;background:var(--bg);}
 .rounding-body.open{display:block;}
@@ -345,7 +345,7 @@ body{font-family:'Sora',sans-serif;color:var(--text);background:var(--white);ove
 .pump-disclaimer{background:var(--warn-light);border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:11px;color:#92400e;margin-top:8px;line-height:1.6;}
 
 /* ── Program Pump button ── */
-.program-pump-btn{display:flex;align-items:center;gap:8px;background:var(--navy);color:white;font-size:12px;font-weight:600;padding:10px 18px;border-radius:9px;cursor:pointer;transition:all .2s;border:none;margin-top:12px;font-family:'Sora',sans-serif;}
+.program-pump-btn{display:flex;align-items:center;gap:8px;background:var(--navy);color:white;font-size:12px;font-weight:600;padding:8px 16px;border-radius:9px;cursor:pointer;transition:all .2s;border:none;margin-top:8px;font-family:'Sora',sans-serif;}
 .program-pump-btn:hover{background:var(--teal);transform:translateY(-1px);}
 
 
@@ -598,7 +598,7 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
 .app-disc{background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:10px;font-size:12px;color:#92400e;margin-top:32px;}
 
 /* ── Calc page: FHIR bar flows inline below nav ── */
-.calc-inputs-card{background:white;border:1px solid var(--border);border-radius:16px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.04);position:sticky;top:calc(var(--nav-h) + 52px + 16px);}
+.calc-inputs-card{background:white;border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.04);position:sticky;top:calc(var(--nav-h) + 52px + 8px);}
 
 /* ── Mobile: calculator view hides bottom tabs ── */
 @media(max-width:768px){
@@ -607,26 +607,29 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
 }
 
 /* ══ DKA CALCULATOR ══ */
-.dka-hold-alert{background:#fef2f2;border:2px solid var(--red);border-radius:12px;padding:18px 22px;margin-bottom:16px;}
-.dka-hold-title{font-size:15px;font-weight:700;color:var(--red);margin-bottom:8px;}
-.dka-hold-body{font-size:13px;color:#7f1d1d;line-height:1.8;font-family:'JetBrains Mono',monospace;}
-.dka-2bag-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
-.dka-2bag-header{background:linear-gradient(135deg,var(--teal),#007a6e);padding:14px 20px;color:white;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;}
-.dka-bag-row{display:grid;grid-template-columns:1fr auto 100px;padding:16px 20px;border-bottom:1px solid var(--border);align-items:center;gap:16px;}
-.dka-bag-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
-.dka-bag-name{font-size:14px;font-weight:700;color:var(--navy);}
-.dka-bag-rate{font-size:28px;font-weight:700;color:var(--teal);text-align:right;}
+.dka-hold-alert{background:#fef2f2;border:2px solid var(--red);border-radius:12px;padding:12px 16px;margin-bottom:12px;}
+.dka-hold-title{font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px;}
+.dka-hold-body{font-size:12px;color:#7f1d1d;line-height:1.6;font-family:'JetBrains Mono',monospace;}
+.dka-2bag-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;}
+.dka-2bag-header{background:linear-gradient(135deg,var(--teal),#007a6e);padding:8px 14px;color:white;font-weight:700;font-size:11px;display:flex;align-items:center;gap:8px;}
+.dka-bag-row{display:grid;grid-template-columns:1fr auto 80px;padding:9px 14px;border-bottom:1px solid var(--border);align-items:center;gap:10px;}
+.dka-bag-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+.dka-bag-name{font-size:13px;font-weight:700;color:var(--navy);}
+.dka-bag-rate{font-size:22px;font-weight:700;color:var(--teal);text-align:right;}
 .dka-bag-unit{font-size:10px;color:var(--muted);text-align:right;font-family:'JetBrains Mono',monospace;}
-.dka-k-table{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
-.dka-k-row{display:grid;grid-template-columns:130px 1fr 80px;padding:11px 16px;border-bottom:1px solid var(--border);align-items:center;font-size:13px;}
+.dka-k-table{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;}
+.dka-k-row{display:grid;grid-template-columns:110px 1fr 60px;padding:7px 12px;border-bottom:1px solid var(--border);align-items:center;font-size:12px;}
 .dka-k-row:last-child{border-bottom:none;}
 .dka-k-row.active-k{background:var(--green-light);}
 .dka-k-row.warn-k{background:var(--warn-light);font-weight:600;}
 .dka-k-row.crit-k{background:#fef2f2;font-weight:700;}
-.dka-recheck{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;}
-.dka-recheck-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
-.dka-recheck-item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:var(--text);}
-.dka-recheck-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dka-recheck{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:10px;}
+.dka-recheck-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.dka-recheck-item{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px;color:var(--text);}
+.dka-recheck-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+/* DKA results 2-column grid */
+.dka-results-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;margin-bottom:10px;}
+.dka-results-full{}
 
 /* ══ BOTTOM TAB BAR (mobile only) ══ */
 .bottom-tabs{display:none;position:fixed;bottom:0;left:0;right:0;z-index:400;background:white;border-top:1px solid var(--border);height:60px;}
@@ -818,16 +821,6 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
             <option value="100">⬡ 25,000 units / 250 mL (100 units/mL)</option>
           </select>
           </div>
-          <div class="form-section-title" style="margin-top:24px;">Protocol Reference</div>
-          <div class="lookup-card">
-            <table class="lookup-tbl">
-              <thead><tr><th>Indication</th><th>Bolus /kg</th><th>Rate /kg/hr</th></tr></thead>
-              <tbody>
-                <tr id="lrow-ACS"><td>ACS</td><td>60 units</td><td>12 units</td></tr>
-                <tr id="lrow-DVT"><td>DVT/VTE</td><td>80 units</td><td>18 units</td></tr>
-              </tbody>
-            </table>
-          </div>
         </div>
         <div class="calc-results-area" id="init-results">
           <div class="result-empty"><div class="result-empty-icon">💉</div>Select an indication and enter patient weight to calculate initial dosing</div>
@@ -884,7 +877,7 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
             <div class="form-field">
               <label class="form-label">Current Infusion Rate (units/hr)</label>
               <input type="number" class="form-input" id="ptt-current-rate" placeholder="e.g. 1000" min="0" oninput="calcPTT()">
-              <div style="margin-top:6px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Auto-filled from Initial Dosing tab if completed</div>
+              <div id="ptt-drip-fhir-hint" style="margin-top:6px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Auto-populated when heparin drip was started</div>
             </div>
             <div class="form-field">
               <label class="form-label">Heparin Concentration</label>
@@ -1205,7 +1198,7 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
             <option value="150">150 mL/hr (maintenance phase)</option>
           </select>
         </div>
-        <div class="form-section-title" style="margin-top:24px;">Lab Values</div>
+        <div class="form-section-title" style="margin-top:12px;">Lab Values</div>
         <div class="form-row">
           <div class="form-field">
             <label class="form-label">Blood Glucose (mg/dL)</label>
@@ -1319,19 +1312,15 @@ function injectLogos() {
 
 // ══ IMMERSIVE CALCULATOR ══
 function openCalcImmersive(path) {
-  const inApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (inApp) {
-    navigate(path);
-    return;
-  }
   const w = 1140, h = 860;
   const left = Math.round((screen.width  - w) / 2);
   const top  = Math.round((screen.height - h) / 2);
-  window.open(
+  const popup = window.open(
     path,
     '_blank',
-    `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no`
+    `popup,width=${w},height=${h},left=${left},top=${top},resizable=yes`
   );
+  if (!popup) navigate(path);
 }
 
 function exitCalcImmersive() {
@@ -1524,18 +1513,8 @@ function calcInitial(){
         <div><div class="result-value navy" style="font-size:22px;">${bolus.toLocaleString()}</div><div class="result-unit">units</div></div>
       </div>
     </div>
-    <div class="lookup-card">
-      <div class="lookup-card-hdr">⬡ Full Protocol Reference</div>
-      <table class="lookup-tbl">
-        <thead><tr><th>Indication</th><th>Bolus (units/kg)</th><th>Max Bolus</th><th>Infusion (units/kg/hr)</th><th>Max Infusion</th></tr></thead>
-        <tbody>
-          <tr class="${ind==='ACS'?'active-row':''}"><td>ACS</td><td>${getProtocol('ACS').bolus_per_kg}</td><td>${getProtocol('ACS').max_bolus.toLocaleString()} units</td><td>${getProtocol('ACS').inf_per_kg_hr}</td><td>${getProtocol('ACS').max_inf.toLocaleString()} units/hr</td></tr>
-          <tr class="${ind==='DVT'?'active-row':''}"><td>DVT/VTE</td><td>${getProtocol('DVT').bolus_per_kg}</td><td>${getProtocol('DVT').max_bolus.toLocaleString()} units</td><td>${getProtocol('DVT').inf_per_kg_hr}</td><td>${getProtocol('DVT').max_inf.toLocaleString()} units/hr</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:8px;margin-top:4px;">
-      ⚠️ For educational & reference use only. Draw PTT in 4 hours then follow PTT adjustment nomogram.
+<div style="background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;padding:8px 12px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:8px;margin-top:6px;">
+      ⚠️ Educational use only. Draw PTT in 4 hours then follow PTT nomogram.
     </div>
     <button class="program-pump-btn" onclick="openPumpModal('${infMl}','${infUnits}','${drugLabel}','${conc}',${vtbi})">
       🖥️ How to Program the Pump
@@ -1554,10 +1533,6 @@ function syncFromInit(){
   if(initWKg&&!pttWEl.value) pttWEl.value=initWKg;
   const ind=pttIndEl.value||initInd;
   const wKg=parseFloat(pttWEl.value)||initWKg;
-  if(ind&&wKg&&!pttRateEl.value){
-    const p=getProtocol(ind);
-    if(p){const autoRate=Math.min(mround(p.inf_per_kg_hr*Math.round(wKg),p.round_inc||50),p.max_inf);pttRateEl.value=autoRate;}
-  }
 }
 
 function roundPTTWeight(){const el=document.getElementById('ptt-weight');const v=parseFloat(el.value);if(!isNaN(v)&&v>0){el.value=Math.round(v);calcPTT();}}
@@ -1665,25 +1640,17 @@ function calcPTT(){
 
   let html = warnHtml + `<div class="ptt-result-card"><div class="ptt-result-header"><div class="ptt-result-title">◈ Adjustments · PTT ${pttVal} sec · ${ind} · ${wKg} kg</div><div class="hold-badge ${holdClass}">${holdText}</div></div>`;
   if(isCritSubtherapeutic) html+=`
-    <div style="background:#fef2f2;border-bottom:2px solid var(--red);padding:14px 20px;">
-      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px;">🚨 CRITICALLY SUBTHERAPEUTIC PTT</div>
-      <div style="font-size:12px;color:#7f1d1d;line-height:1.7;font-family:'JetBrains Mono',monospace;">
-        1. Verify IV line patency and that infusion is running<br>
-        2. Confirm pump rate matches the last ordered rate<br>
-        3. Administer adjustment bolus and increase rate per below<br>
-        4. Notify physician immediately — two consecutive critical lows require MD re-evaluation<br>
-        5. Recheck PTT in 6 hours
+    <div style="background:#fef2f2;border-bottom:2px solid var(--red);padding:10px 16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:4px;">🚨 CRITICALLY SUBTHERAPEUTIC PTT</div>
+      <div style="font-size:11px;color:#7f1d1d;line-height:1.6;font-family:'JetBrains Mono',monospace;">
+        1. Verify IV patency · 2. Confirm pump rate · 3. Give bolus + ↑ rate below · 4. Notify MD immediately · 5. Recheck PTT in 6 hours
       </div>
     </div>`;
   if(isCritSupratherapeutic) html+=`
-    <div style="background:#fef2f2;border-bottom:2px solid var(--red);padding:14px 20px;">
-      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px;">🚨 CRITICALLY SUPRATHERAPEUTIC PTT</div>
-      <div style="font-size:12px;color:#7f1d1d;line-height:1.7;font-family:'JetBrains Mono',monospace;">
-        1. HOLD infusion immediately per hold duration below<br>
-        2. Assess patient for signs of bleeding: hematuria, neurological changes, hematoma, GI bleeding<br>
-        3. Notify physician immediately<br>
-        4. Do NOT restart infusion without physician order<br>
-        5. Recheck PTT in 6 hours after infusion resumes
+    <div style="background:#fef2f2;border-bottom:2px solid var(--red);padding:10px 16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:4px;">🚨 CRITICALLY SUPRATHERAPEUTIC PTT</div>
+      <div style="font-size:11px;color:#7f1d1d;line-height:1.6;font-family:'JetBrains Mono',monospace;">
+        1. HOLD infusion now · 2. Assess for bleeding signs · 3. Notify MD immediately · 4. Do NOT restart without MD order · 5. Recheck in 6 hrs
       </div>
     </div>`;
   if(range.notify&&!isCritSubtherapeutic&&!isCritSupratherapeutic) html+=`<div class="notify-banner"><div class="notify-text">📞 Notify Physician</div></div>`;
@@ -1694,9 +1661,9 @@ function calcPTT(){
   <div class="ptt-action-row" style="background:${rateExceedsCap?'#fef2f2':'var(--teal-light)'};${rateExceedsCap?'border-left:3px solid var(--red);':''}"><div class="ptt-action-icon">🔧</div><div class="ptt-action-content"><div class="ptt-action-label">New Pump Rate${rateExceedsCap?' — capped at protocol max':''}</div><div class="ptt-action-value ${rateExceedsCap?'red':'teal'}">${newRateMl} mL/hr</div><div class="ptt-action-sub">${newRateUnits.toLocaleString()} units/hr ÷ ${conc} units/mL · rounded to nearest ${roundInc}${rateExceedsCap?' · capped at '+protocolMaxRate.toLocaleString()+' ('+ind+' protocol max)':' · (from '+currentRate.toLocaleString()+' '+(rateSign>0?'+':'−')+' '+cappedRateChange.toLocaleString()+')'}</div></div></div>
   <div class="ptt-action-row"><div class="ptt-action-icon">🕐</div><div class="ptt-action-content"><div class="ptt-action-label">Next PTT Draw</div><div class="ptt-action-value navy" style="font-size:15px;font-family:'Sora',sans-serif;font-weight:600;">${pttDrawMsg}</div></div></div>`;
   html+=`</div></div>
-  <div style="background:var(--teal-light);border:2px solid var(--teal);border-radius:12px;padding:18px 22px;margin-top:14px;line-height:1.6;">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;font-weight:700;">💬 Nurse Instruction</div>
-    <div style="font-size:15px;color:var(--navy);font-weight:600;line-height:1.65;">${nurseSentence}</div>
+  <div style="background:var(--teal-light);border:2px solid var(--teal);border-radius:12px;padding:12px 16px;margin-top:10px;line-height:1.5;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;font-weight:700;">💬 Nurse Instruction</div>
+    <div style="font-size:13px;color:var(--navy);font-weight:600;line-height:1.55;">${nurseSentence}</div>
   </div>
   <button class="program-pump-btn" onclick="openPumpModal('${newRateMl}','${newRateUnits}','${drugLabel}','${conc}',${vtbi})">
     🖥️ How to Program the Pump
@@ -2995,59 +2962,60 @@ function calcDKA() {
   }
 
   // Insulin drip card
-  const insLabel = insConc === 1 ? 'Regular Insulin 100 units/100 mL (1 unit/mL)' : 'Regular Insulin 50 units/100 mL (0.5 unit/mL)';
-  html += `<div class="result-card" style="margin-bottom:16px;">
-    <div class="result-card-header">💉 Insulin Drip · ${insLabel}</div>
+  const insLabel = insConc === 1 ? '1 unit/mL' : '0.5 unit/mL';
+  const insulinCard = `<div class="result-card" style="margin-bottom:10px;">
+    <div class="result-card-header">💉 Insulin · ${insLabel}</div>
     <div class="result-row primary-row">
-      <div class="result-meta"><div class="result-name">Pump Rate</div><div class="result-formula">0.1 u/kg/hr × ${wKg} kg = ${insulinUnitsHr} u/hr ÷ ${insConc} u/mL</div></div>
-      <div><div class="result-value ${holdInsulin?'warn':'teal'}">${holdInsulin?'HOLD':insulinMlHr}</div><div class="result-unit">${holdInsulin?'K+ < 3.5':' mL / hr'}</div></div>
+      <div class="result-meta"><div class="result-name">Pump Rate</div><div class="result-formula">0.1 u/kg/hr × ${wKg} kg ÷ ${insConc} u/mL</div></div>
+      <div><div class="result-value ${holdInsulin?'warn':'teal'}">${holdInsulin?'HOLD':insulinMlHr}</div><div class="result-unit">${holdInsulin?'K+ < 3.5':'mL / hr'}</div></div>
     </div>
     <div class="result-row">
-      <div class="result-meta"><div class="result-name">Insulin Rate</div><div class="result-formula">0.1 units/kg/hr × ${wKg} kg</div></div>
-      <div><div class="result-value navy" style="font-size:22px;">${insulinUnitsHr}</div><div class="result-unit">units / hr</div></div>
+      <div class="result-meta"><div class="result-name">Insulin Rate</div><div class="result-formula">0.1 u/kg/hr × ${wKg} kg</div></div>
+      <div><div class="result-value navy" style="font-size:18px;">${insulinUnitsHr}</div><div class="result-unit">units / hr</div></div>
     </div>
   </div>`;
 
   // 2-bag card
-  html += `<div class="dka-2bag-card">
-    <div class="dka-2bag-header">⬡ 2-Bag Protocol · Total ${totalRate} mL/hr · ${bgTierLabel}</div>
+  const bagCard = `<div class="dka-2bag-card">
+    <div class="dka-2bag-header">⬡ 2-Bag · ${totalRate} mL/hr · ${bgTierLabel}</div>
     <div class="dka-bag-row">
-      <div><div class="dka-bag-label">Bag 1</div><div class="dka-bag-name">0.9% Normal Saline</div><div style="font-size:11px;color:var(--muted);margin-top:3px;">No dextrose + KCl per protocol</div></div>
-      <div style="text-align:center;font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${bag1Pct}%</div>
+      <div><div class="dka-bag-label">Bag 1</div><div class="dka-bag-name">0.9% NS</div></div>
+      <div style="text-align:center;font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${bag1Pct}%</div>
       <div><div class="dka-bag-rate">${bag1Rate}</div><div class="dka-bag-unit">mL / hr</div></div>
     </div>
     <div class="dka-bag-row">
-      <div><div class="dka-bag-label">Bag 2</div><div class="dka-bag-name">D10 0.9% Normal Saline</div><div style="font-size:11px;color:var(--muted);margin-top:3px;">10% dextrose + KCl per protocol</div></div>
-      <div style="text-align:center;font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${bag2Pct}%</div>
+      <div><div class="dka-bag-label">Bag 2</div><div class="dka-bag-name">D10 0.9% NS</div></div>
+      <div style="text-align:center;font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${bag2Pct}%</div>
       <div><div class="dka-bag-rate">${bag2Rate}</div><div class="dka-bag-unit">mL / hr</div></div>
     </div>
-    <div style="padding:12px 20px;background:var(--bg);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Total fluid rate</span>
-      <span style="font-weight:700;font-size:14px;color:var(--navy);">${bag1Rate} + ${bag2Rate} = ${totalRate} mL/hr</span>
+    <div style="padding:8px 14px;background:var(--bg);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Total</span>
+      <span style="font-weight:700;font-size:13px;color:var(--navy);">${bag1Rate} + ${bag2Rate} = ${totalRate} mL/hr</span>
     </div>
   </div>`;
 
   // Metabolic status
+  let metaCard = '';
   if (ag !== null || corrNa !== null) {
     const agClass = ag > 12 ? 'warn' : ag < 8 ? 'red' : 'teal';
-    const agLabel = ag > 12 ? 'Elevated (normal 8–12)' : ag < 8 ? 'Low — verify labs' : 'Normal range';
-    html += `<div class="result-card" style="margin-bottom:16px;"><div class="result-card-header">🧮 Metabolic Status</div>`;
-    if (ag !== null) html += `<div class="result-row${ag>12?' warn-row':''}"><div class="result-meta"><div class="result-name">Anion Gap</div><div class="result-formula">Na ${na} − Cl ${cl} − HCO₃ ${bicarb} = ${ag} &nbsp;(normal 8–12)</div></div><div><div class="result-value ${agClass}">${ag}</div><div class="result-unit">${agLabel}</div></div></div>`;
-    if (corrNa !== null) html += `<div class="result-row"><div class="result-meta"><div class="result-name">Corrected Na⁺</div><div class="result-formula">Na + 0.016 × (BG ${bg} − 100)</div></div><div><div class="result-value navy" style="font-size:22px;">${corrNa}</div><div class="result-unit">mEq / L</div></div></div>`;
-    html += `</div>`;
+    const agLabel = ag > 12 ? 'Elevated' : ag < 8 ? 'Low' : 'Normal';
+    metaCard = `<div class="result-card" style="margin-bottom:10px;"><div class="result-card-header">🧮 Metabolic</div>`;
+    if (ag !== null) metaCard += `<div class="result-row${ag>12?' warn-row':''}"><div class="result-meta"><div class="result-name">Anion Gap</div><div class="result-formula">Na−Cl−HCO₃ = ${ag} (nl 8–12)</div></div><div><div class="result-value ${agClass}">${ag}</div><div class="result-unit">${agLabel}</div></div></div>`;
+    if (corrNa !== null) metaCard += `<div class="result-row"><div class="result-meta"><div class="result-name">Corrected Na⁺</div><div class="result-formula">Na + 0.016×(BG−100)</div></div><div><div class="result-value navy" style="font-size:18px;">${corrNa}</div><div class="result-unit">mEq / L</div></div></div>`;
+    metaCard += `</div>`;
   }
 
   // Potassium table
   const kRows = [
-    {range:'< 2.5 mEq/L', min:-Infinity, max:2.49, action:'40 mEq/hr IV × 2h · Call MD STAT', ins:'HOLD', cls:'crit-k'},
-    {range:'2.5–3.4 mEq/L', min:2.5, max:3.39, action:'20–40 mEq/hr IV · Call MD', ins:'HOLD', cls:'warn-k'},
-    {range:'3.5–5.5 mEq/L', min:3.5, max:5.5, action:'20 mEq/L in each bag', ins:'RUN', cls:'active-k'},
-    {range:'> 5.5 mEq/L', min:5.51, max:Infinity, action:'No KCl — monitor K+ q2h', ins:'RUN', cls:''},
+    {range:'< 2.5', min:-Infinity, max:2.49, action:'40 mEq/hr × 2h · MD STAT', ins:'HOLD', cls:'crit-k'},
+    {range:'2.5–3.4', min:2.5, max:3.39, action:'20–40 mEq/hr · Call MD', ins:'HOLD', cls:'warn-k'},
+    {range:'3.5–5.5', min:3.5, max:5.5, action:'20 mEq/L in each bag', ins:'RUN', cls:'active-k'},
+    {range:'> 5.5', min:5.51, max:Infinity, action:'No KCl · monitor q2h', ins:'RUN', cls:''},
   ];
-  html += `<div class="dka-k-table">
-    <div class="result-card-header">🧂 Potassium Replacement Protocol</div>
+  const kTable = `<div class="dka-k-table">
+    <div class="result-card-header">🧂 K⁺ Protocol</div>
     <div class="dka-k-row" style="background:var(--bg);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">
-      <div>K+ Level</div><div>Action</div><div>Insulin</div>
+      <div>K+ (mEq/L)</div><div>Action</div><div>Insulin</div>
     </div>
     ${kRows.map(r => {
       const isActive = !isNaN(k) && k >= r.min && k <= r.max;
@@ -3057,17 +3025,13 @@ function calcDKA() {
     }).join('')}
   </div>`;
 
-  // Monitoring schedule
-  html += `<div class="dka-recheck">
-    <div class="dka-recheck-title">🕐 Monitoring Schedule</div>
-    <div class="dka-recheck-item"><div class="dka-recheck-dot" style="background:var(--teal);"></div>Blood glucose — every 1 hour</div>
-    <div class="dka-recheck-item"><div class="dka-recheck-dot" style="background:var(--gold);"></div>Basic metabolic panel (Na, K, Cl, CO₂, BUN, Cr) — every 2–4 hours</div>
-    <div class="dka-recheck-item"><div class="dka-recheck-dot" style="background:var(--gold);"></div>Anion gap — every 2–4 hours until closed (AG < 12) × 2 draws</div>
-    <div class="dka-recheck-item"><div class="dka-recheck-dot" style="background:var(--navy);"></div>Urine ketones — every 4 hours until negative × 2 consecutive</div>
-    <div class="dka-recheck-item"><div class="dka-recheck-dot" style="background:var(--navy);"></div>Fluid balance (I/O) — every 2 hours</div>
+  // Assemble 2-column layout
+  html += `<div class="dka-results-grid">
+    <div>${insulinCard}${bagCard}</div>
+    <div>${metaCard}${kTable}</div>
   </div>
-  <div style="background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:8px;">
-    ⚠️ Educational reference only — Always confirm DKA protocol with your institution's current guidelines. Bag compositions, insulin doses, and fluid rates vary by institution.
+  <div style="background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:8px;">
+    ⚠️ Educational reference only — Always confirm with your institution's DKA protocol.
   </div>`;
 
   el.innerHTML = html;
@@ -3111,6 +3075,11 @@ async function loadFHIRPatient() {
 }
 
 function populateFHIRFields(patient, labs, weightData) {
+  patient = patient || _fhirPatient;
+  labs = labs || _fhirLabs || {};
+  weightData = weightData || {};
+  if (!patient) return;
+
   // Demographics
   const age = patient.age;
   const sex = patient.gender === 'male' ? 'M' : patient.gender === 'female' ? 'F' : '';
@@ -3156,7 +3125,7 @@ function populateFHIRFields(patient, labs, weightData) {
     }
   }
 
-  // Heparin drip rate from active medications
+  // Heparin drip rate + indication from active medications
   if (_fhirMeds?.medications) {
     const heparinDrip = _fhirMeds.medications.find(m => {
       const name = (m.medicationName || '').toLowerCase();
@@ -3173,6 +3142,31 @@ function populateFHIRFields(patient, labs, weightData) {
       );
       if (dripDose?.doseQuantity?.value != null) {
         fhirFill('ptt-current-rate', dripDose.doseQuantity.value);
+        const hintEl = document.getElementById('ptt-drip-fhir-hint');
+        if (hintEl && heparinDrip.authoredOn) {
+          const d = new Date(heparinDrip.authoredOn);
+          const label = d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+          hintEl.style.color = 'var(--teal)';
+          hintEl.textContent = 'Drip started: ' + label;
+        }
+      }
+
+      // Infer indication from medication text, dosage text, and notes
+      const searchText = [
+        heparinDrip.medicationName || '',
+        ...(heparinDrip.dosages || []).map(d => d.text || ''),
+        ...(heparinDrip.note || []),
+      ].join(' ').toLowerCase();
+
+      let inferredInd = null;
+      if (/acs|nstemi|stemi|coronary|acute coronary/.test(searchText)) {
+        inferredInd = 'ACS';
+      } else if (/dvt|vte|pe\b|pulmonary embolism|deep vein|venous thrombos/.test(searchText)) {
+        inferredInd = 'DVT';
+      }
+      if (inferredInd) {
+        fhirFillSelect('indication', inferredInd);
+        fhirFillSelect('ptt-indication', inferredInd);
       }
     }
   }
