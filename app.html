@@ -663,26 +663,6 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
 .af-unflagged-list{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:8px;}
 .af-unflagged-title{font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
 .af-unflagged-item{font-size:12px;color:var(--text);padding:3px 0;display:flex;align-items:center;gap:6px;}
-.af-flag-card.high-risk{border-color:#fed7aa;background:#fff7ed;}
-.af-note-input{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;font-family:'Sora',sans-serif;color:var(--text);background:rgba(255,255,255,.7);resize:vertical;min-height:54px;margin-top:8px;outline:none;transition:border-color .2s;}
-.af-note-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,168,150,.1);}
-
-/* ══ AF GLOBAL BANNER (fixed, below nav or fhir-bar) ══ */
-#af-global-banner{position:fixed;left:0;right:0;z-index:148;display:none;align-items:center;gap:10px;padding:10px 32px;font-size:12px;font-weight:600;line-height:1.4;}
-body.view--dashboard #af-global-banner{top:var(--nav-h);}
-body.view--calculator #af-global-banner{top:calc(var(--nav-h) + 52px);}
-#af-global-banner.af-banner-pending{background:#fffbeb;border-bottom:1px solid #fde68a;color:#92400e;}
-#af-global-banner.af-banner-done{background:var(--green-light);border-bottom:1px solid #bbf7d0;color:#166534;}
-#af-global-banner a{font-weight:700;text-decoration:underline;cursor:pointer;white-space:nowrap;color:inherit;}
-body.af-audit-pending.view--dashboard .app-dashboard{padding-top:calc(var(--nav-h) + 46px);}
-body.af-audit-pending.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px + 46px);}
-body.af-audit-done.view--dashboard .app-dashboard{padding-top:calc(var(--nav-h) + 42px);}
-body.af-audit-done.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px + 42px);}
-
-/* ══ AF CARD in grid ══ */
-#af-calc-card{display:none;order:999;}
-#af-calc-card.af-card-active{display:block;order:-1;border-color:var(--teal) !important;box-shadow:0 0 0 3px rgba(0,168,150,.1),0 12px 36px rgba(13,124,110,.12) !important;}
-#af-calc-card.af-card-active::after{content:'👆 REVIEW NOW';position:absolute;top:14px;right:14px;font-size:9px;font-weight:700;letter-spacing:.1em;background:var(--teal);color:white;padding:2px 8px;border-radius:4px;}
 
 /* ══ BOTTOM TAB BAR (mobile only) ══ */
 .bottom-tabs{display:none;position:fixed;bottom:0;left:0;right:0;z-index:400;background:white;border-top:1px solid var(--border);height:60px;}
@@ -762,9 +742,22 @@ body.af-audit-done.view--calculator .page.active{padding-top:calc(var(--nav-h) +
   </div>
 </div>
 
+<!-- ══ AGE-FRIENDLY ADMISSION ALERT MODAL ══ -->
+<div id="af-admission-modal" style="display:none;">
+  <div class="pump-modal-overlay" onclick="if(event.target===this)closeAFAdmissionModal()">
+    <div class="pump-modal" onclick="event.stopPropagation()" style="max-width:520px;">
+      <div class="pump-modal-header">
+        <div>
+          <div class="pump-modal-title">🛡️ Admission Audit Required</div>
+          <div class="pump-modal-sub" id="af-modal-sub">Age-Friendly · CMS Domain 2</div>
+        </div>
+        <div class="pump-modal-close" onclick="closeAFAdmissionModal()">✕</div>
+      </div>
+      <div id="af-modal-content" style="padding:0 24px 24px;"></div>
+    </div>
+  </div>
+</div>
 
-<!-- ══ AF GLOBAL BANNER ══ -->
-<div id="af-global-banner"></div>
 
 <div id="page-catalog" class="page">
   <div class="app-dashboard">
@@ -1259,7 +1252,6 @@ body.af-audit-done.view--calculator .page.active{padding-top:calc(var(--nav-h) +
       <div class="cph-badges"><span class="cph-badge free">FREE</span><span class="cph-badge warn-badge">⚠ Educational Reference Only</span></div>
     </div>
   </div>
-  <div id="af-alert-dka" style="display:none;margin:0 24px;"></div>
   <div class="calc-body">
     <div class="calc-layout">
       <div class="calc-inputs-card">
@@ -1627,15 +1619,11 @@ function renderView(view, calc) {
   if (calc === 'agefriendly') renderAgeFriendlyAudit();
   if (calc === 'heparin') updateAFIntegrationBanner('heparin');
   if (calc === 'vancomycin') updateAFIntegrationBanner('vancomycin');
-  if (calc === 'dka') updateAFIntegrationBanner('dka');
 
   // Re-populate FHIR fields if patient is loaded
   if (view === 'calculator' && typeof _fhirPatient !== 'undefined' && _fhirPatient) {
     populateFHIRFields();
   }
-
-  // Global AF banner (dashboard + all calc pages)
-  if (typeof updateAFGlobalBanner === 'function') updateAFGlobalBanner();
 
   // Sync bottom tab active state
   setActiveTab(view === 'calculator' ? 'calc' : 'calc');
@@ -3470,8 +3458,7 @@ function populateFHIRFields(patient, labs, weightData) {
   if (document.getElementById('page-agefriendly')?.classList.contains('active')) renderAgeFriendlyAudit();
   updateAFIntegrationBanner('heparin');
   updateAFIntegrationBanner('vancomycin');
-  updateAFIntegrationBanner('dka');
-  if (typeof updateAFGlobalBanner === 'function') updateAFGlobalBanner();
+  if (typeof triggerAFAdmissionAlert === 'function') triggerAFAdmissionAlert();
 }
 
 // Set input value + FHIR highlight class
@@ -3945,172 +3932,141 @@ function navigateRenalPatient(patientId) {
 // AGE-FRIENDLY ADMISSION AUDIT — JavaScript
 // ══════════════════════════════════════════════════════════════
 
-// Per-patient key (one audit per patient admission)
-const AF_LS_LOG = 'dosedefender_agefriendly_audits'; // global log array for admin compliance summary
-function afPatientKey(patientId) { return 'dosedefender_agefriendly_' + (patientId || 'unknown'); }
-function getAFPatientAudit(patientId) {
-  try { return JSON.parse(localStorage.getItem(afPatientKey(patientId)) || 'null'); } catch(e) { return null; }
-}
-function saveAFPatientAudit(patientId, audit) {
-  localStorage.setItem(afPatientKey(patientId), JSON.stringify(audit));
-  // Also append to global log for admin compliance summary
-  try {
-    const log = JSON.parse(localStorage.getItem(AF_LS_LOG) || '[]');
-    const idx = log.findIndex(a => a.patientId === patientId);
-    if (idx >= 0) log[idx] = audit; else log.push(audit);
-    localStorage.setItem(AF_LS_LOG, JSON.stringify(log));
-  } catch(e) {}
-}
+const AF_LS_KEY = 'dosedefender_agefriendly_audits';
+let _afActiveTab = 'single';
 
 const AF_RISK_STYLES = {
   HIGH_ALERT: { bg:'#fef2f2', border:'#fecaca', badgeBg:'#fee2e2', badgeColor:'#991b1b', label:'HIGH ALERT', cardClass:'high-alert' },
-  HIGH:       { bg:'#fff7ed', border:'#fed7aa', badgeBg:'#ffedd5', badgeColor:'#c2410c', label:'HIGH RISK',  cardClass:'high-risk' },
   CAUTION:    { bg:'#fffbeb', border:'#fde68a', badgeBg:'#fef3c7', badgeColor:'#92400e', label:'CAUTION',    cardClass:'caution' },
   MONITOR:    { bg:'#fefce8', border:'#fef08a', badgeBg:'#fef9c3', badgeColor:'#713f12', label:'MONITOR',    cardClass:'monitor' },
 };
 
 const BEERS_CRITERIA = [
-  // ── HIGH ALERT (match before generic opioids catch meperidine) ──
-  {
-    drugClass: 'Meperidine — AVOID in All Elderly',
-    drugs: ['meperidine','pethidine','demerol'],
-    riskLevel: 'HIGH_ALERT',
-    risk: 'Neurotoxic metabolite normeperidine accumulates in elderly causing seizures, delirium, and CNS toxicity. Avoid in all elderly patients regardless of dose or duration.',
-    alternative: 'Any other opioid analgesic. Morphine, hydromorphone, or oxycodone preferred.',
-    beersAssociated: true,
-  },
-  // ── HIGH RISK (orange) ──
   {
     drugClass: 'Benzodiazepines',
-    drugs: ['diazepam','lorazepam','alprazolam','clonazepam','temazepam','oxazepam','chlordiazepoxide','flurazepam','triazolam','quazepam','estazolam','clorazepate','midazolam'],
-    riskLevel: 'HIGH',
-    risk: 'Sedation, fall risk, cognitive impairment, dependence. Older adults have increased sensitivity and slower metabolism of benzodiazepines.',
-    alternative: 'Non-pharmacologic sleep/anxiety protocol; buspirone for anxiety; melatonin or CBT-I for insomnia.',
+    drugs: ['lorazepam','diazepam','clonazepam','alprazolam','temazepam','triazolam','oxazepam','chlordiazepoxide','flurazepam','midazolam','quazepam','estazolam'],
+    riskLevel: 'HIGH_ALERT',
+    risk: 'Increased risk of cognitive impairment, delirium, falls, fractures, and MVAs in older adults.',
+    alternative: 'Non-pharmacologic therapy; if needed, buspirone for anxiety or CBT for insomnia.',
     beersAssociated: true,
   },
   {
-    drugClass: 'Sedative Hypnotics (Z-drugs)',
+    drugClass: 'Non-Benzodiazepine Hypnotics (Z-drugs)',
     drugs: ['zolpidem','zaleplon','eszopiclone'],
-    riskLevel: 'HIGH',
-    risk: 'Fall risk, cognitive impairment, next-day sedation, motor incoordination. FDA warnings specifically for elderly patients.',
-    alternative: 'Sleep hygiene education, melatonin, cognitive behavioral therapy for insomnia (CBT-I).',
+    riskLevel: 'HIGH_ALERT',
+    risk: 'Adverse events similar to benzodiazepines in older adults; increased ER visits and falls.',
+    alternative: 'Cognitive behavioral therapy for insomnia (CBT-I); melatonin if pharmacotherapy needed.',
     beersAssociated: true,
   },
   {
-    drugClass: 'Anticholinergics',
-    drugs: ['dicyclomine','oxybutynin','tolterodine','benztropine','trihexyphenidyl','scopolamine','solifenacin','darifenacin','fesoterodine','trospium','promethazine','hydroxyzine'],
-    riskLevel: 'HIGH',
-    risk: 'Confusion, urinary retention, constipation, blurred vision, fall risk. High anticholinergic burden in elderly leads to cognitive impairment and delirium.',
-    alternative: 'Mirabegron for overactive bladder (beta-3 agonist); non-pharmacologic alternatives for others.',
+    drugClass: 'First-Generation Antihistamines',
+    drugs: ['diphenhydramine','hydroxyzine','promethazine','brompheniramine','carbinoxamine','clemastine','cyproheptadine','dexbrompheniramine','dexchlorpheniramine','dimenhydrinate','doxylamine','meclizine','triprolidine','chlorpheniramine'],
+    riskLevel: 'HIGH_ALERT',
+    risk: 'Highly anticholinergic; increased risk of confusion, delirium, urinary retention, constipation.',
+    alternative: 'Loratadine or cetirizine for allergies; avoid for insomnia.',
+    beersAssociated: true,
+  },
+  {
+    drugClass: 'Sulfonylureas (long-acting)',
+    drugs: ['glyburide','glibenclamide','chlorpropamide'],
+    riskLevel: 'HIGH_ALERT',
+    risk: 'Prolonged hypoglycemia; chlorpropamide causes SIADH.',
+    alternative: 'Short-acting sulfonylureas (glipizide) or other antidiabetics with lower hypoglycemia risk.',
+    beersAssociated: true,
+  },
+  {
+    drugClass: 'Meperidine (Pethidine)',
+    drugs: ['meperidine','pethidine'],
+    riskLevel: 'HIGH_ALERT',
+    risk: 'Neurotoxic metabolite normeperidine accumulates; seizure risk, delirium.',
+    alternative: 'Morphine, oxycodone, or hydromorphone with appropriate dosing.',
+    beersAssociated: true,
+    alwaysHighAlert: true,
+  },
+  {
+    drugClass: 'Muscle Relaxants',
+    drugs: ['carisoprodol','chlorzoxazone','cyclobenzaprine','metaxalone','methocarbamol','orphenadrine'],
+    riskLevel: 'CAUTION',
+    risk: 'Poorly tolerated in older adults; anticholinergic effects, sedation, increased fracture risk.',
+    alternative: 'Physical therapy; methocarbamol has lower anticholinergic burden.',
+    beersAssociated: true,
+  },
+  {
+    drugClass: 'Digoxin (dose-dependent)',
+    drugs: ['digoxin'],
+    riskLevel: 'CAUTION',
+    risk: 'Narrow therapeutic index; doses >0.125 mg/day increase risk of toxicity in elderly.',
+    alternative: 'Use lowest effective dose (≤0.125 mg/day); monitor levels and renal function.',
+    beersAssociated: true,
+    specialDoseCheck: true,
+    doseThreshold: 0.125,
+  },
+  {
+    drugClass: 'Antipsychotics',
+    drugs: ['haloperidol','quetiapine','risperidone','olanzapine','aripiprazole','ziprasidone','clozapine','fluphenazine','perphenazine','thioridazine','chlorpromazine','asenapine','lurasidone','iloperidone','cariprazine','brexpiprazole','pimavanserin'],
+    riskLevel: 'CAUTION',
+    risk: 'Increased risk of stroke and mortality in elderly with dementia; EPS risk.',
+    alternative: 'Non-pharmacologic interventions for behavioral symptoms of dementia.',
+    beersAssociated: true,
+  },
+  {
+    drugClass: 'NSAIDs',
+    drugs: ['ibuprofen','naproxen','indomethacin','ketorolac','meloxicam','piroxicam','diclofenac','celecoxib','etodolac','fenoprofen','flurbiprofen','ketoprofen','mefenamic acid','nabumetone','oxaprozin','sulindac','tolmetin'],
+    riskLevel: 'CAUTION',
+    risk: 'Increased risk of GI bleeding/peptic ulcer disease, acute kidney injury, and fluid retention.',
+    alternative: 'Acetaminophen for pain; topical NSAIDs for localized pain.',
     beersAssociated: true,
   },
   {
     drugClass: 'Tricyclic Antidepressants',
-    drugs: ['amitriptyline','nortriptyline','imipramine','doxepin','clomipramine','desipramine','trimipramine','protriptyline'],
-    riskLevel: 'HIGH',
-    risk: 'Orthostatic hypotension, anticholinergic effects, cardiac arrhythmia, sedation, fall risk. Among the most anticholinergic medications available.',
-    alternative: 'SSRIs (sertraline, escitalopram) or SNRIs. Low-dose doxepin (≤6 mg/day) acceptable for insomnia.',
-    beersAssociated: true,
-  },
-  // ── Glyburide specifically HIGH (before generic sulfonylureas CAUTION) ──
-  {
-    drugClass: 'Sulfonylurea — Glyburide (Highest Risk)',
-    drugs: ['glyburide','glibenclamide'],
-    riskLevel: 'HIGH',
-    risk: 'Highest hypoglycemia risk among sulfonylureas due to long duration of action and active metabolites. Significantly increased risk of severe, prolonged hypoglycemia in elderly.',
-    alternative: 'Shorter-acting agents (glipizide); GLP-1 agonists, SGLT2 inhibitors, or DPP-4 inhibitors.',
-    beersAssociated: true,
-  },
-  // ── CAUTION ──
-  {
-    drugClass: 'First-Generation Antihistamines',
-    drugs: ['diphenhydramine','chlorpheniramine','brompheniramine','clemastine','meclizine','dimenhydrinate','carbinoxamine','doxylamine','cyproheptadine','triprolidine'],
+    drugs: ['amitriptyline','clomipramine','doxepin','imipramine','trimipramine','nortriptyline','desipramine','protriptyline'],
     riskLevel: 'CAUTION',
-    risk: 'Sedation, anticholinergic effects, fall risk. Highly sedating; accumulate in elderly due to reduced clearance.',
-    alternative: 'Loratadine, cetirizine, or fexofenadine for allergies. Avoid for insomnia.',
+    risk: 'Highly anticholinergic, sedating; orthostatic hypotension risk.',
+    alternative: 'SSRIs or SNRIs; low-dose doxepin (≤6 mg) acceptable for insomnia.',
     beersAssociated: true,
   },
   {
-    drugClass: 'Opioids',
-    drugs: ['morphine','oxycodone','hydrocodone','fentanyl','codeine','tramadol','hydromorphone','oxymorphone','tapentadol','buprenorphine'],
+    drugClass: 'Anticholinergic Bladder Medications',
+    drugs: ['oxybutynin','solifenacin','tolterodine','trospium','darifenacin','fesoterodine'],
     riskLevel: 'CAUTION',
-    risk: 'Sedation, constipation, fall risk, respiratory depression. Increased sensitivity in elderly. Use lowest effective dose with close monitoring.',
-    alternative: 'Acetaminophen for mild-moderate pain. If opioid necessary, use lowest effective dose. Avoid meperidine entirely.',
+    risk: 'Highly anticholinergic; may worsen cognitive impairment, cause urinary retention.',
+    alternative: 'Mirabegron (beta-3 agonist) has less cognitive impact.',
+    beersAssociated: true,
+  },
+  {
+    drugClass: 'Sliding Scale Insulin',
+    drugs: ['sliding scale insulin','insulin sliding scale','regular insulin sliding'],
+    riskLevel: 'MONITOR',
+    risk: 'Increased hypoglycemia risk without improved glycemic control.',
+    alternative: 'Basal-bolus insulin regimen with careful monitoring.',
     beersAssociated: false,
-    note: 'If opioid therapy is necessary, use lowest effective dose and monitor closely. Avoid meperidine.',
   },
   {
-    drugClass: 'NSAIDs',
-    drugs: ['ibuprofen','naproxen','ketorolac','indomethacin','meloxicam','diclofenac','piroxicam','celecoxib','sulindac','etodolac','nabumetone','oxaprozin','fenoprofen','flurbiprofen','mefenamic','tolmetin'],
-    riskLevel: 'CAUTION',
-    risk: 'GI bleeding, renal impairment, fluid retention, worsening hypertension and heart failure. Risk increased with age and concurrent anticoagulation.',
-    alternative: 'Acetaminophen for pain. Topical NSAIDs or capsaicin for localized pain.',
-    beersAssociated: true,
-  },
-  {
-    drugClass: 'Antipsychotics',
-    drugs: ['haloperidol','quetiapine','olanzapine','risperidone','aripiprazole','chlorpromazine','ziprasidone','lurasidone','perphenazine','fluphenazine','thioridazine','loxapine','asenapine','iloperidone','cariprazine','brexpiprazole','pimavanserin'],
-    riskLevel: 'CAUTION',
-    risk: 'Sedation, extrapyramidal symptoms, increased stroke and mortality risk in elderly with dementia.',
-    alternative: 'Non-pharmacologic behavioral interventions first. Use only when benefits outweigh risks.',
-    beersAssociated: true,
-    note: 'Quetiapine, clozapine, and pimavanserin are relatively lower risk for patients with Parkinson disease.',
-  },
-  {
-    drugClass: 'Sulfonylureas',
-    drugs: ['glipizide','glimepiride','chlorpropamide','tolbutamide','tolazamide','acetohexamide'],
-    riskLevel: 'CAUTION',
-    risk: 'Hypoglycemia risk. Elderly patients especially vulnerable to prolonged hypoglycemia.',
-    alternative: 'GLP-1 agonists, SGLT2 inhibitors, or DPP-4 inhibitors; shorter-acting agents preferred.',
-    beersAssociated: true,
-  },
-  {
-    drugClass: 'Muscle Relaxants',
-    drugs: ['cyclobenzaprine','carisoprodol','methocarbamol','baclofen','chlorzoxazone','metaxalone','orphenadrine','tizanidine'],
-    riskLevel: 'CAUTION',
-    risk: 'Sedation, anticholinergic effects, fall risk. Poorly tolerated in elderly; effectiveness questionable.',
-    alternative: 'Physical therapy, acetaminophen, or topical agents for musculoskeletal pain.',
-    beersAssociated: true,
-  },
-  {
-    drugClass: 'Digoxin',
-    drugs: ['digoxin','digitalis','digitoxin'],
-    riskLevel: 'CAUTION',
-    risk: 'Narrow therapeutic index. Toxicity risk increases with age-related renal decline. Doses above 0.125 mg/day carry significantly increased toxicity risk.',
-    alternative: 'Rate control alternatives for AF (beta-blockers, calcium channel blockers); other agents for heart failure.',
-    beersAssociated: true,
-    specialDoseCheck: true,
-    doseThreshold: 0.125,
-    note: 'Flag at any dose. Doses above 0.125 mg/day increase toxicity risk significantly.',
-  },
-  {
-    drugClass: 'Warfarin',
-    drugs: ['warfarin','coumadin'],
-    riskLevel: 'CAUTION',
-    risk: 'Significant bleeding risk requiring intensive monitoring. Drug-drug and drug-food interactions are common in elderly patients.',
-    alternative: 'DOACs (apixaban, rivaroxaban, dabigatran) preferred over warfarin for most indications in elderly per current guidelines.',
+    drugClass: 'Proton Pump Inhibitors (prolonged)',
+    drugs: ['omeprazole','esomeprazole','pantoprazole','lansoprazole','rabeprazole','dexlansoprazole'],
+    riskLevel: 'MONITOR',
+    risk: 'Prolonged use associated with C. diff, fractures, hypomagnesemia, and B12 deficiency.',
+    alternative: 'Limit to ≤8 weeks unless high-risk GI bleed or documented GERD; reassess indication.',
     beersAssociated: false,
-    note: 'DOACs preferred where clinically appropriate. Clinical judgment required.',
+    note: 'Monitor: reassess indication for prolonged use',
   },
   {
-    drugClass: 'Insulin — Sliding Scale Risk',
-    drugs: ['insulin'],
-    riskLevel: 'CAUTION',
-    risk: 'Hypoglycemia risk; sliding scale insulin provides reactive rather than proactive glucose management without basal coverage.',
-    alternative: 'Basal-bolus insulin regimen with glucose monitoring preferred for inpatient glycemic control.',
-    beersAssociated: true,
-    note: 'Verify whether sliding scale protocol is in use — basal-bolus regimen preferred.',
+    drugClass: 'Skeletal Muscle Relaxants (general)',
+    drugs: ['baclofen','tizanidine','dantrolene'],
+    riskLevel: 'MONITOR',
+    risk: 'CNS depression, sedation, weakness; baclofen renally cleared with narrow TI.',
+    alternative: 'Physical therapy; careful dose adjustment in renal impairment for baclofen.',
+    beersAssociated: false,
   },
 ];
 
 function checkBeersMedications(medications) {
   const flags = [];
-  const flaggedMedNames = new Set(); // dedup: one flag per med name (first matching class wins)
+  const flaggedNames = new Set();
 
   for (const med of medications) {
     const name = (med.medicationName || '').toLowerCase();
     if (!name) continue;
-    if (flaggedMedNames.has(name)) continue; // already flagged by a higher-priority class
 
     for (const criteria of BEERS_CRITERIA) {
       let matched = false;
@@ -4120,7 +4076,10 @@ function checkBeersMedications(medications) {
       }
       if (!matched) continue;
 
-      flaggedMedNames.add(name);
+      // Dedup: one flag per medication entry
+      const dedupKey = name + '|' + criteria.drugClass;
+      if (flaggedNames.has(dedupKey)) continue;
+      flaggedNames.add(dedupKey);
 
       // Digoxin special dose check
       let riskLevel = criteria.riskLevel;
@@ -4183,11 +4142,32 @@ function renderAgeFriendlyAudit() {
     return;
   }
 
+  // Inject tab bar + content areas
+  container.innerHTML = `
+    <div class="renal-mode-bar" style="margin:-24px -24px 20px;padding:10px 24px;">
+      <div class="renal-mode-switcher">
+        <div id="af-tab-single" class="renal-mode-btn active" onclick="setAFTab('single')">🛡️ Single Patient</div>
+        <div id="af-tab-ward"   class="renal-mode-btn"        onclick="setAFTab('ward')">🏥 Ward Audit</div>
+      </div>
+    </div>
+    <div id="af-tab-single-content"></div>
+    <div id="af-tab-ward-content" style="display:none;">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;">
+        <input id="af-ward-location" placeholder="Unit / Location ID (e.g. 3N, ICU)" style="flex:1;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:inherit;">
+        <button onclick="loadAFWardCensus()" class="btn-primary" style="white-space:nowrap;">Load Ward</button>
+      </div>
+      <div id="af-ward-status"></div>
+      <div id="af-ward-list"></div>
+    </div>
+  `;
+  setAFTab(_afActiveTab);
+
+  const singleEl = document.getElementById('af-tab-single-content');
   const threshold = parseInt(localStorage.getItem('dosedefender_af_age_threshold') || '65');
   const patient = (typeof _fhirPatient !== 'undefined') ? _fhirPatient : null;
 
   if (!patient || patient.age < threshold) {
-    container.innerHTML = `<div style="text-align:center;padding:60px 24px;color:var(--muted);">
+    singleEl.innerHTML = `<div style="text-align:center;padding:60px 24px;color:var(--muted);">
       <div style="font-size:48px;margin-bottom:16px;">🛡️</div>
       <div style="font-size:16px;font-weight:600;color:var(--navy);margin-bottom:8px;">Load a patient aged ${threshold}+ to begin</div>
       <div style="font-size:13px;">Enter a patient ID in the FHIR bar above and click Load</div>
@@ -4195,132 +4175,121 @@ function renderAgeFriendlyAudit() {
     return;
   }
 
-  const patientId = patient.id || patient.mrn || '';
   const meds = (typeof _fhirMeds !== 'undefined' && _fhirMeds?.medications) ? _fhirMeds.medications : [];
   const flags = checkBeersMedications(meds);
-  const existingAudit = getAFPatientAudit(patientId);
 
-  const highAlertCount = flags.filter(f => f.riskLevel === 'HIGH_ALERT').length;
-  const highCount      = flags.filter(f => f.riskLevel === 'HIGH').length;
-  const cautionCount   = flags.filter(f => f.riskLevel === 'CAUTION').length;
-  const immediateCount = highAlertCount + highCount;
+  // Check if today's audit is already completed for this patient
+  const todayKey = new Date().toISOString().split('T')[0];
+  const allAudits = JSON.parse(localStorage.getItem(AF_LS_KEY) || '[]');
+  const todayAudit = allAudits.find(a => a.patientId === (patient.patientId || patient.mrn || '') && a.timestamp?.startsWith(todayKey));
 
-  const patientName = patient.name || patient.fullName || patientId || 'Unknown';
-  const patientMRN = patient.mrn || patientId || '—';
+  const highCount = flags.filter(f => f.riskLevel === 'HIGH_ALERT').length;
+  const cautionCount = flags.filter(f => f.riskLevel === 'CAUTION').length;
+  const monitorCount = flags.filter(f => f.riskLevel === 'MONITOR').length;
+
+  const patientName = patient.name || patient.fullName || patient.id || 'Unknown';
+  const patientMRN = patient.mrn || patient.id || '—';
   const dateStr = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-  const completedTs = existingAudit ? new Date(existingAudit.timestamp) : null;
 
-  container.innerHTML = `
+  singleEl.innerHTML = `
     <!-- Patient header -->
-    <div style="background:white;border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:16px;display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
-      <div><div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">Patient</div><div style="font-weight:700;font-size:16px;color:var(--navy);">${patientName}</div></div>
-      <div><div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">Age</div><div style="font-weight:700;font-size:16px;color:var(--navy);">${patient.age} yrs</div></div>
-      <div><div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">MRN</div><div style="font-weight:700;font-size:15px;color:var(--navy);font-family:'JetBrains Mono',monospace;">${patientMRN}</div></div>
-      <div><div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">Audit Date</div><div style="font-weight:600;font-size:13px;color:var(--text);">${dateStr}</div></div>
-      <div style="margin-left:auto;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:right;">Audit required once per admission</div>
+    <div style="background:white;border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
+      <div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;">Patient</div>
+        <div style="font-weight:700;font-size:16px;color:var(--navy);">${patientName}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;">Age</div>
+        <div style="font-weight:700;font-size:16px;color:var(--navy);">${patient.age} yrs</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;">MRN</div>
+        <div style="font-weight:700;font-size:15px;color:var(--navy);font-family:'JetBrains Mono',monospace;">${patientMRN}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;">Audit Date</div>
+        <div style="font-weight:600;font-size:13px;color:var(--text);">${dateStr}</div>
+      </div>
     </div>
 
     <!-- Summary bar -->
-    <div style="background:white;border:1px solid var(--border);border-radius:14px;padding:16px 24px;margin-bottom:16px;display:flex;gap:28px;flex-wrap:wrap;align-items:center;">
-      <div class="af-summary-stat"><span class="af-stat-num">${meds.length}</span><span class="af-stat-lbl">Active Meds</span></div>
-      <div class="af-summary-stat"><span class="af-stat-num" style="color:${flags.length > 0 ? 'var(--red)' : 'var(--green)'};">${flags.length}</span><span class="af-stat-lbl">Flags Found</span></div>
-      ${immediateCount > 0 ? `<div class="af-summary-stat"><span class="af-stat-num" style="color:#dc2626;">${immediateCount}</span><span class="af-stat-lbl">Need Attention</span></div>` : ''}
+    <div class="af-summary-bar" style="background:white;border:1px solid var(--border);border-radius:14px;margin-bottom:16px;">
+      <div class="af-summary-stat">
+        <span class="af-stat-num">${meds.length}</span>
+        <span class="af-stat-lbl">Meds Reviewed</span>
+      </div>
+      <div class="af-summary-stat">
+        <span class="af-stat-num" style="color:${flags.length > 0 ? 'var(--red)' : 'var(--green)'};">${flags.length}</span>
+        <span class="af-stat-lbl">Beers Flags</span>
+      </div>
+      ${highCount > 0 ? `<div class="af-summary-stat"><span class="af-stat-num" style="color:#dc2626;">${highCount}</span><span class="af-stat-lbl">High Alert</span></div>` : ''}
       ${cautionCount > 0 ? `<div class="af-summary-stat"><span class="af-stat-num" style="color:#d97706;">${cautionCount}</span><span class="af-stat-lbl">Caution</span></div>` : ''}
-      ${flags.length === 0 ? `<span style="color:var(--green);font-size:13px;font-weight:600;">✓ No potentially inappropriate medications identified</span>` : ''}
+      ${monitorCount > 0 ? `<div class="af-summary-stat"><span class="af-stat-num" style="color:#a16207;">${monitorCount}</span><span class="af-stat-lbl">Monitor</span></div>` : ''}
     </div>
 
-    ${existingAudit ? `
-    <!-- Completed audit banner -->
-    <div style="background:var(--green-light);border:1.5px solid #bbf7d0;border-radius:12px;padding:16px 20px;margin-bottom:16px;">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <span style="font-size:22px;">✅</span>
-        <div style="flex:1;">
-          <div style="font-weight:700;font-size:14px;color:#166534;">Admission Audit Documented</div>
-          <div style="font-size:12px;color:#16a34a;margin-top:2px;">Completed ${completedTs.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} at ${completedTs.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})} · Audit ID: ${existingAudit.auditId} · ${existingAudit.flagCount} flag(s) found</div>
-          <div style="font-size:11px;color:#16a34a;margin-top:4px;">✓ This supports CMS Age-Friendly Hospital Measure Domain 2 attestation.</div>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button onclick="printAgeFriendlyAudit('${existingAudit.auditId}')" style="background:white;border:1.5px solid #bbf7d0;color:#166534;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">🖨 Print Report</button>
-          <button onclick="resetAdmissionAudit('${patientId}','${patientName.replace(/'/g,"\\'")}')}" style="background:transparent;border:1.5px solid #d1d5db;color:var(--muted);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">↺ New Admission</button>
-        </div>
+    ${todayAudit ? `<div style="background:var(--green-light);border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:22px;">✅</span>
+      <div>
+        <div style="font-weight:700;font-size:14px;color:#166534;">Audit Completed</div>
+        <div style="font-size:12px;color:#166534;">Completed at ${new Date(todayAudit.timestamp).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})} · Audit ID: ${todayAudit.auditId}</div>
       </div>
+      <button onclick="printAgeFriendlyAudit('${todayAudit.auditId}')" style="margin-left:auto;background:white;border:1.5px solid #bbf7d0;color:#166534;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">🖨 Print Summary</button>
     </div>` : ''}
 
-    <!-- Medication flags with pharmacist notes -->
+    <!-- Medication flags -->
     <div id="af-medications-list">
-      ${renderAFMedicationList(flags, meds, !!existingAudit, existingAudit)}
+      ${renderAFMedicationList(flags, meds)}
     </div>
 
-    ${!existingAudit ? `
-    <!-- Complete audit CTA -->
-    <div style="background:white;border:1.5px solid var(--teal);border-radius:14px;padding:22px 24px;margin-top:16px;">
-      <div style="font-size:13px;color:var(--muted);margin-bottom:6px;line-height:1.6;">
-        By completing this audit you attest that all active medications have been reviewed against the AGS Beers Criteria® for this admission.
-        ${flags.length > 0 ? `<strong style="color:var(--text)"> ${flags.length} potentially inappropriate medication(s) identified — pharmacist review recommended.</strong>` : ''}
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px;">
-        <button class="btn-primary" onclick="completeAgeFriendlyAudit()" style="background:var(--teal);font-size:14px;">✅ Complete &amp; Document Audit</button>
-      </div>
+    <!-- Audit action -->
+    ${!todayAudit ? `<div id="af-audit-actions" style="background:white;border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-top:16px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;">By completing this audit you attest that the medication list has been reviewed against the Beers Criteria for this patient.</div>
+      <button class="btn-primary" onclick="completeAgeFriendlyAudit()" style="font-size:14px;">✅ Complete Admission Audit</button>
     </div>` : ''}
   `;
 }
 
-function renderAFMedicationList(flags, allMeds, isCompleted, existingAudit) {
+function renderAFMedicationList(flags, allMeds) {
   let html = '';
-  const existingNotes = {};
-  if (existingAudit && existingAudit.flags) {
-    existingAudit.flags.forEach((f, i) => { existingNotes[f.drugName] = f.pharmacistNote || ''; });
-  }
 
   if (flags.length === 0) {
     html += `<div style="background:var(--green-light);border:1px solid #bbf7d0;border-radius:14px;padding:24px;text-align:center;margin-bottom:16px;">
       <div style="font-size:32px;margin-bottom:10px;">✅</div>
-      <div style="font-weight:700;font-size:15px;color:#166534;">No Potentially Inappropriate Medications Identified</div>
-      <div style="font-size:13px;color:#16a34a;margin-top:6px;">All ${allMeds.length} active medication(s) reviewed — none match the AGS Beers Criteria for patients aged 65+.</div>
+      <div style="font-weight:700;font-size:15px;color:#166534;">No Beers Criteria Flags Identified</div>
+      <div style="font-size:13px;color:#16a34a;margin-top:6px;">All ${allMeds.length} active medication(s) reviewed — none match the AGS Beers Criteria for this patient.</div>
     </div>`;
   } else {
-    const order = { HIGH_ALERT: 0, HIGH: 1, CAUTION: 2, MONITOR: 3 };
+    const order = { HIGH_ALERT: 0, CAUTION: 1, MONITOR: 2 };
     const sorted = [...flags].sort((a, b) => (order[a.riskLevel] ?? 9) - (order[b.riskLevel] ?? 9));
-    sorted.forEach((f, idx) => {
-      const st = AF_RISK_STYLES[f.riskLevel] || AF_RISK_STYLES.CAUTION;
-      const savedNote = existingNotes[f.drugName] || '';
-      html += `<div class="af-flag-card ${st.cardClass}" id="af-flag-${idx}">
+    for (const f of sorted) {
+      const st = AF_RISK_STYLES[f.riskLevel] || AF_RISK_STYLES.MONITOR;
+      html += `<div class="af-flag-card ${st.cardClass}">
         <div class="af-flag-card-header">
-          <div style="flex:1;min-width:0;">
+          <div>
             <div class="af-flag-drug-name">${f.drugName}</div>
-            <div class="af-flag-drug-class">${f.drugClass}${f.dose ? ' · <strong>' + f.dose + '</strong>' : ''}</div>
+            <div class="af-flag-drug-class">${f.drugClass}${f.dose ? ' · ' + f.dose : ''}</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
             <span class="af-risk-badge" style="background:${st.badgeBg};color:${st.badgeColor};">${st.label}</span>
-            ${f.beersAssociated ? '<span class="af-beers-tag">Beers&#x2011;Associated</span>' : ''}
+            ${f.beersAssociated ? '<span class="af-beers-tag">Beers-Associated</span>' : ''}
           </div>
         </div>
         <div class="af-flag-card-body">
           <div class="af-flag-row"><span class="af-flag-row-lbl">Risk:</span><span class="af-flag-row-val">${f.risk}</span></div>
           <div class="af-flag-row"><span class="af-flag-row-lbl">Alternative:</span><span class="af-flag-row-val">${f.alternative}</span></div>
           ${f.note ? `<div class="af-flag-row"><span class="af-flag-row-lbl">Note:</span><span class="af-flag-row-val" style="color:var(--gold);font-weight:600;">${f.note}</span></div>` : ''}
-          ${isCompleted
-            ? (savedNote ? `<div class="af-flag-row" style="margin-top:6px;"><span class="af-flag-row-lbl">Rx Note:</span><span class="af-flag-row-val" style="color:var(--teal);font-style:italic;">${savedNote}</span></div>` : '')
-            : `<div style="margin-top:8px;">
-                <label style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px;">Pharmacist Note (optional)</label>
-                <textarea class="af-note-input" id="af-note-${idx}" placeholder="Add clinical note, action taken, or rationale for continuation...">${savedNote}</textarea>
-              </div>`
-          }
         </div>
       </div>`;
-    });
+    }
   }
 
-  // Unflagged meds list
-  const flaggedLower = new Set(flags.map(f => (f.drugName || '').toLowerCase()));
-  const unflagged = allMeds.filter(m => {
-    const n = (m.medicationName || '').toLowerCase();
-    return !flaggedLower.has(n) && !flags.some(f => n.includes((f.drugName || '').split(' ')[0].toLowerCase()) && (f.drugName||'').length > 3);
-  });
+  // Unflagged meds
+  const flaggedNames = new Set(flags.map(f => f.drugName.toLowerCase()));
+  const unflagged = allMeds.filter(m => !flaggedNames.has((m.medicationName || '').toLowerCase()) && !flags.some(f => (m.medicationName||'').toLowerCase().includes(f.drugName.split(' ')[0].toLowerCase())));
   if (unflagged.length > 0) {
-    html += `<div class="af-unflagged-list" style="margin-top:8px;">
-      <div class="af-unflagged-title">✓ No Flags — ${unflagged.length} medication(s) reviewed</div>
-      ${unflagged.map(m => `<div class="af-unflagged-item"><span style="color:var(--green);font-size:14px;">✓</span> ${m.medicationName || '—'}</div>`).join('')}
+    html += `<div class="af-unflagged-list">
+      <div class="af-unflagged-title">✓ No Flags — ${unflagged.length} medication(s)</div>
+      ${unflagged.map(m => `<div class="af-unflagged-item"><span style="color:var(--green);">✓</span>${m.medicationName || '—'}</div>`).join('')}
     </div>`;
   }
   return html;
@@ -4329,194 +4298,248 @@ function renderAFMedicationList(flags, allMeds, isCompleted, existingAudit) {
 function completeAgeFriendlyAudit() {
   const patient = (typeof _fhirPatient !== 'undefined') ? _fhirPatient : null;
   if (!patient) return;
-  const patientId = patient.id || patient.mrn || '';
   const meds = (typeof _fhirMeds !== 'undefined' && _fhirMeds?.medications) ? _fhirMeds.medications : [];
   const flags = checkBeersMedications(meds);
-
-  // Capture per-flag pharmacist notes from textarea inputs
-  const order = { HIGH_ALERT: 0, HIGH: 1, CAUTION: 2, MONITOR: 3 };
-  const sorted = [...flags].sort((a, b) => (order[a.riskLevel] ?? 9) - (order[b.riskLevel] ?? 9));
-  sorted.forEach((f, idx) => {
-    const noteEl = document.getElementById('af-note-' + idx);
-    f.pharmacistNote = noteEl ? noteEl.value.trim() : '';
-  });
-
-  const highAlertCount = flags.filter(f => f.riskLevel === 'HIGH_ALERT').length;
-  const highCount      = flags.filter(f => f.riskLevel === 'HIGH').length;
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const auditId = 'AF-' + Array.from({length:8}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
-
+  const auditId = 'AF-' + Date.now();
   const audit = {
     auditId,
     timestamp: new Date().toISOString(),
-    patientId,
+    patientId: patient.patientId || patient.mrn || '',
     patientAge: patient.age,
-    patientName: patient.name || patient.fullName || patientId || '',
-    patientMRN: patient.mrn || patientId || '',
+    patientName: patient.name || patient.fullName || patient.id || '',
     medsReviewed: meds.length,
     flagCount: flags.length,
-    highAlertCount,
-    highRiskCount: highCount,
-    allMedications: meds.map(m => m.medicationName || ''),
-    flags: sorted,
+    flags,
   };
-
-  saveAFPatientAudit(patientId, audit);
-  updateAFGlobalBanner();
-  updateAFIntegrationBanner('heparin');
-  updateAFIntegrationBanner('vancomycin');
-  updateAFIntegrationBanner('dka');
+  const existing = JSON.parse(localStorage.getItem(AF_LS_KEY) || '[]');
+  existing.push(audit);
+  localStorage.setItem(AF_LS_KEY, JSON.stringify(existing));
   renderAgeFriendlyAudit();
 }
 
 function printAgeFriendlyAudit(auditId) {
-  // Look up audit from per-patient key or global log
-  let audit = null;
-  const log = JSON.parse(localStorage.getItem(AF_LS_LOG) || '[]');
-  audit = log.find(a => a.auditId === auditId);
-  if (!audit) { alert('Audit record not found.'); return; }
-
+  const audits = JSON.parse(localStorage.getItem(AF_LS_KEY) || '[]');
+  const audit = audits.find(a => a.auditId === auditId);
+  if (!audit) { alert('Audit not found.'); return; }
   const inst = (typeof getInstName === 'function' && getInstName()) ? getInstName() : 'DoseDefender';
   const ts = new Date(audit.timestamp);
   const dateStr = ts.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
   const timeStr = ts.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
 
-  const allMedsHtml = (audit.allMedications || []).map(name => {
-    const flagged = (audit.flags || []).some(f => f.drugName === name);
-    return `<tr><td style="padding:7px 12px;${flagged ? 'font-weight:600;' : ''}">${name}</td><td style="padding:7px 12px;font-size:11px;text-align:center;">${flagged ? '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;">FLAGGED</span>' : '<span style="color:#16a34a;">✓ Clear</span>'}</td></tr>`;
-  }).join('');
-
-  const flagHtml = (audit.flags || []).map(f => {
-    const st = AF_RISK_STYLES[f.riskLevel] || AF_RISK_STYLES.CAUTION;
+  const flagHtml = audit.flags.map(f => {
+    const st = AF_RISK_STYLES[f.riskLevel] || AF_RISK_STYLES.MONITOR;
     return `<tr style="border-bottom:1px solid #e2e8f0;">
-      <td style="padding:10px 12px;font-weight:600;">${f.drugName}${f.dose ? '<div style="font-size:11px;color:#64748b;font-weight:400;">' + f.dose + '</div>' : ''}</td>
+      <td style="padding:10px 12px;font-weight:600;">${f.drugName}</td>
       <td style="padding:10px 12px;font-size:12px;color:#64748b;">${f.drugClass}</td>
       <td style="padding:10px 12px;"><span style="background:${st.badgeBg};color:${st.badgeColor};font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">${st.label}</span></td>
       <td style="padding:10px 12px;font-size:12px;">${f.alternative}</td>
-      <td style="padding:10px 12px;font-size:11px;color:#0f766e;font-style:italic;">${f.pharmacistNote || ''}</td>
     </tr>`;
   }).join('');
 
-  const notesSection = (audit.flags || []).some(f => f.pharmacistNote)
-    ? `<div style="margin-top:24px;"><h3 style="font-size:14px;font-weight:700;color:#0f2744;margin-bottom:12px;">Pharmacist Notes</h3>${(audit.flags||[]).filter(f=>f.pharmacistNote).map(f=>`<div style="padding:10px 14px;background:#f0fdf4;border-radius:8px;margin-bottom:8px;font-size:12px;"><strong>${f.drugName}:</strong> ${f.pharmacistNote}</div>`).join('')}</div>` : '';
-
-  const newWin = window.open('', '_blank', 'width=900,height=1000');
-  newWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Age-Friendly Admission Audit — ${audit.patientName}</title>
-  <style>
-    body{font-family:Arial,sans-serif;color:#1a2332;margin:0;padding:32px;font-size:13px;}
-    h1{font-size:22px;margin:0 0 4px;}h2{font-size:14px;color:#64748b;font-weight:400;margin:0 0 24px;}
-    table{width:100%;border-collapse:collapse;margin-bottom:16px;}
-    th{background:#0f2744;color:white;padding:9px 12px;text-align:left;font-size:11px;letter-spacing:.05em;}
-    .info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
-    .info-cell{border:1px solid #e2e8f0;border-radius:8px;padding:12px;}
-    .info-lbl{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;}
-    .info-val{font-weight:700;font-size:14px;}
-    .attestation{border:1.5px solid #e2e8f0;border-radius:8px;padding:16px;margin-top:24px;font-size:12px;color:#374151;line-height:1.7;}
-    .sig-block{display:flex;gap:40px;margin-top:36px;}
-    .sig-line{border-top:1px solid #374151;padding-top:6px;font-size:11px;color:#64748b;width:220px;}
-    .section-hdr{font-size:13px;font-weight:700;color:#0f2744;margin:20px 0 10px;border-bottom:2px solid #e2e8f0;padding-bottom:6px;}
-    @media print{body{padding:16px;}button{display:none;}}
-  </style>
+  const newWin = window.open('', '_blank', 'width=800,height=900');
+  newWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Age-Friendly Audit — ${audit.patientName}</title>
+  <style>body{font-family:Arial,sans-serif;color:#1a2332;margin:0;padding:32px;}h1{font-size:22px;margin-bottom:4px;}h2{font-size:15px;color:#64748b;font-weight:400;margin-bottom:24px;}table{width:100%;border-collapse:collapse;}th{background:#0f2744;color:white;padding:10px 12px;text-align:left;font-size:12px;letter-spacing:.05em;}.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}.info-cell{border:1px solid #e2e8f0;border-radius:8px;padding:12px;}.info-lbl{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}.info-val{font-weight:700;font-size:15px;}.attestation{border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-top:24px;font-size:12px;color:#64748b;}.sig-line{border-top:1px solid #1a2332;width:240px;margin-top:40px;padding-top:6px;font-size:11px;color:#64748b;}@media print{body{padding:16px;}}</style>
   </head><body>
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;border-bottom:3px solid #00a896;padding-bottom:16px;">
-    <div><h1>🛡️ Age-Friendly Admission Audit</h1><h2>${inst} · CMS Age-Friendly Hospital Measure — Domain 2: Responsible Medication Management</h2></div>
-    <div style="text-align:right;font-size:11px;color:#64748b;font-family:monospace;line-height:1.8;"><strong>Audit ID:</strong> ${audit.auditId}<br>${dateStr}<br>${timeStr}</div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+    <div><h1>🛡️ Age-Friendly Admission Audit</h1><h2>${inst} · CMS Domain 2 Medication Review</h2></div>
+    <div style="text-align:right;font-size:11px;color:#64748b;font-family:monospace;">Audit ID: ${audit.auditId}<br>${dateStr} · ${timeStr}</div>
   </div>
   <div class="info-grid">
     <div class="info-cell"><div class="info-lbl">Patient Name</div><div class="info-val">${audit.patientName}</div></div>
     <div class="info-cell"><div class="info-lbl">Age</div><div class="info-val">${audit.patientAge} yrs</div></div>
-    <div class="info-cell"><div class="info-lbl">MRN</div><div class="info-val" style="font-family:monospace;">${audit.patientMRN || audit.patientId || '—'}</div></div>
-    <div class="info-cell"><div class="info-lbl">Admission Date</div><div class="info-val">${dateStr}</div></div>
-  </div>
-  <div class="info-grid">
     <div class="info-cell"><div class="info-lbl">Meds Reviewed</div><div class="info-val">${audit.medsReviewed}</div></div>
-    <div class="info-cell"><div class="info-lbl">Flags Found</div><div class="info-val" style="color:${audit.flagCount>0?'#dc2626':'#16a34a'};">${audit.flagCount}</div></div>
-    <div class="info-cell"><div class="info-lbl">High Alert</div><div class="info-val" style="color:${(audit.highAlertCount||0)>0?'#dc2626':'#16a34a'};">${audit.highAlertCount||0}</div></div>
-    <div class="info-cell"><div class="info-lbl">High Risk</div><div class="info-val" style="color:${(audit.highRiskCount||0)>0?'#c2410c':'#16a34a'};">${audit.highRiskCount||0}</div></div>
+    <div class="info-cell"><div class="info-lbl">Beers Flags</div><div class="info-val" style="color:${audit.flagCount > 0 ? '#dc2626' : '#16a34a'};">${audit.flagCount}</div></div>
   </div>
-  <div class="section-hdr">All Medications Reviewed (${audit.medsReviewed})</div>
-  <table><thead><tr><th>Medication Name</th><th style="width:110px;text-align:center;">Status</th></tr></thead><tbody>${allMedsHtml || '<tr><td colspan="2" style="padding:10px 12px;color:#94a3b8;font-style:italic;">No medications on file</td></tr>'}</tbody></table>
-  ${audit.flagCount > 0 ? `
-  <div class="section-hdr">Flagged Medications — Beers Criteria (${audit.flagCount})</div>
-  <table><thead><tr><th>Medication</th><th>Drug Class</th><th>Risk Level</th><th>Recommended Alternative</th><th>Pharmacist Note</th></tr></thead><tbody>${flagHtml}</tbody></table>` : '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px;color:#166534;font-weight:600;margin:12px 0;">✅ No Beers Criteria flags identified — all medications reviewed and found acceptable for this patient.</div>'}
-  ${notesSection}
+  ${audit.flagCount > 0 ? `<table><thead><tr><th>Medication</th><th>Drug Class</th><th>Risk Level</th><th>Recommended Alternative</th></tr></thead><tbody>${flagHtml}</tbody></table>` : '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;color:#166534;font-weight:600;margin:16px 0;">✅ No Beers Criteria flags identified — all medications reviewed.</div>'}
   <div class="attestation">
-    <strong>Pharmacist Attestation Statement:</strong><br>
-    Medications reviewed for potentially inappropriate prescribing in accordance with evidence-based guidelines for older adults as required by CMS Age-Friendly Hospital Measure Domain 2 — Responsible Medication Management. I attest that the active medication list for <strong>${audit.patientName}</strong> (age ${audit.patientAge}) has been reviewed against the American Geriatrics Society Beers Criteria® at admission. Findings are documented above.
-    <div class="sig-block">
-      <div class="sig-line">Pharmacist Name (Print)</div>
-      <div class="sig-line">Signature</div>
-      <div class="sig-line">Date / Time</div>
-    </div>
+    <strong>Pharmacist Attestation:</strong> I attest that I have reviewed the above medication list for this patient (age ${audit.patientAge}) against the American Geriatrics Society Beers Criteria® and have documented the findings above. This review supports CMS Age-Friendly Hospital Measure Domain 2 attestation requirements.
+    <div class="sig-line">Pharmacist Signature &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date / Time</div>
   </div>
-  <div style="font-size:10px;color:#94a3b8;margin-top:20px;border-top:1px solid #e2e8f0;padding-top:10px;">Generated by DoseDefender Clinical Protocol Intelligence · Educational reference only · Verify all clinical decisions against institutional protocols and prescriber orders</div>
+  <div style="font-size:10px;color:#94a3b8;margin-top:24px;">Generated by DoseDefender · Educational reference only · Verify all clinical decisions against institutional protocols</div>
   </body></html>`);
   newWin.document.close();
   newWin.focus();
   setTimeout(() => newWin.print(), 400);
 }
 
-function resetAdmissionAudit(patientId, patientName) {
-  if (!confirm('This will clear the existing audit for ' + patientName + ' and start a new admission audit.\n\nAre you sure? This is typically used for readmissions.')) return;
-  localStorage.removeItem(afPatientKey(patientId));
-  // Remove from global log too
+// ── AF Tab Switcher ──────────────────────────────────────────
+function setAFTab(tab) {
+  _afActiveTab = tab;
+  const singleContent = document.getElementById('af-tab-single-content');
+  const wardContent   = document.getElementById('af-tab-ward-content');
+  const singleBtn     = document.getElementById('af-tab-single');
+  const wardBtn       = document.getElementById('af-tab-ward');
+  if (!singleContent || !wardContent) return;
+
+  const isWard = tab === 'ward';
+  singleContent.style.display = isWard ? 'none' : '';
+  wardContent.style.display   = isWard ? '' : 'none';
+  singleBtn?.classList.toggle('active', !isWard);
+  wardBtn?.classList.toggle('active',  isWard);
+}
+
+// ── AF Ward Census ───────────────────────────────────────────
+async function loadAFWardCensus() {
+  const locInput  = document.getElementById('af-ward-location');
+  const locationId = locInput ? locInput.value.trim() : '';
+  if (!locationId) { alert('Enter a unit / location ID.'); return; }
+
+  const statusEl = document.getElementById('af-ward-status');
+  const listEl   = document.getElementById('af-ward-list');
+  if (statusEl) { statusEl.style.display = ''; statusEl.innerHTML = '<div style="padding:16px;color:var(--muted);font-size:13px;">Loading census…</div>'; }
+  if (listEl)   listEl.innerHTML = '';
+
   try {
-    const log = JSON.parse(localStorage.getItem(AF_LS_LOG) || '[]');
-    const updated = log.filter(a => a.patientId !== patientId);
-    localStorage.setItem(AF_LS_LOG, JSON.stringify(updated));
-  } catch(e) {}
-  updateAFGlobalBanner();
-  updateAFIntegrationBanner('heparin');
-  updateAFIntegrationBanner('vancomycin');
-  updateAFIntegrationBanner('dka');
-  renderAgeFriendlyAudit();
+    const resp = await fetch(`${FHIR_API}/api/census/${locationId}`);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const patients = data.patients || [];
+
+    const threshold = parseInt(localStorage.getItem('dosedefender_af_age_threshold') || '65');
+    const eligible  = patients.filter(pt => pt.age >= threshold);
+
+    if (statusEl) statusEl.style.display = 'none';
+
+    if (eligible.length === 0) {
+      if (listEl) listEl.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">No patients aged ${threshold}+ in this unit.</div>`;
+      return;
+    }
+
+    // Fetch meds for all eligible patients in parallel
+    const medResults = await Promise.allSettled(
+      eligible.map(pt => fetch(`${FHIR_API}/api/medications/${pt.patientId}`).then(r => r.ok ? r.json() : { medications: [] }))
+    );
+
+    const todayKey  = new Date().toISOString().split('T')[0];
+    const allAudits = JSON.parse(localStorage.getItem(AF_LS_KEY) || '[]');
+
+    const enriched = eligible.map((pt, i) => {
+      const medsData = medResults[i].status === 'fulfilled' ? medResults[i].value : { medications: [] };
+      const meds     = medsData.medications || [];
+      const flags    = checkBeersMedications(meds);
+      const pid      = pt.patientId || pt.mrn || '';
+      const alreadyAudited = allAudits.some(a => a.patientId === pid && a.timestamp?.startsWith(todayKey));
+      return { patientId: pt.patientId, name: pt.name, age: pt.age, mrn: pt.mrn, meds, flags, highCount: flags.filter(f => f.riskLevel === 'HIGH_ALERT').length, alreadyAudited };
+    });
+
+    renderAFWardList(enriched);
+  } catch (err) {
+    if (statusEl) statusEl.innerHTML = `<div style="padding:12px 16px;color:#dc2626;font-size:13px;">⚠ ${err.message}</div>`;
+  }
+}
+
+function renderAFWardList(patients) {
+  const listEl = document.getElementById('af-ward-list');
+  if (!listEl) return;
+
+  const auditedCount = patients.filter(p => p.alreadyAudited).length;
+
+  const summaryColor = auditedCount === patients.length ? '#166534' : '#92400e';
+  const summaryBg    = auditedCount === patients.length ? '#f0fdf4' : '#fffbeb';
+  const summaryBorder= auditedCount === patients.length ? '#bbf7d0' : '#fde68a';
+
+  listEl.innerHTML = `
+    <div id="af-ward-summary" style="background:${summaryBg};border:1px solid ${summaryBorder};border-radius:10px;padding:12px 18px;margin-bottom:16px;font-size:13px;font-weight:600;color:${summaryColor};">
+      ${auditedCount} of ${patients.length} patient${patients.length !== 1 ? 's' : ''} aged ${localStorage.getItem('dosedefender_af_age_threshold') || '65'}+ audited today
+    </div>
+    ${patients.map(pt => _renderAFWardRow(pt)).join('')}
+  `;
+}
+
+function _renderAFWardRow(pt) {
+  const pid        = (pt.patientId || pt.mrn || '').replace(/'/g, "\\'");
+  const flagColor  = pt.flags.length > 0 ? '#dc2626' : '#16a34a';
+  const flagText   = pt.flags.length > 0 ? `<span style="color:${flagColor};font-weight:700;">${pt.flags.length}</span> Beers flag${pt.flags.length !== 1 ? 's' : ''}` : '<span style="color:#16a34a;font-weight:700;">0</span> Beers flags';
+  const highLine   = pt.highCount > 0 ? `<div style="font-size:11px;color:#dc2626;font-weight:600;margin-top:3px;">⚠ ${pt.highCount} HIGH ALERT</div>` : '';
+  const statusPill = pt.alreadyAudited
+    ? `<span style="background:#d1fae5;color:#065f46;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;">✅ Audited Today</span>`
+    : `<span style="background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;">🔴 Not Audited</span>`;
+
+  // Safely encode patient data for the mark-complete button
+  const ptJson = encodeURIComponent(JSON.stringify({ patientId: pt.patientId, name: pt.name, age: pt.age, mrn: pt.mrn, medsLen: pt.meds.length, flags: pt.flags }));
+
+  return `<div id="af-ward-row-${pid}" data-af-audited="${pt.alreadyAudited ? '1' : '0'}" style="background:white;border:1.5px solid var(--border);border-radius:14px;padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:180px;">
+      <div style="font-weight:700;font-size:15px;color:var(--navy);">${pt.name}</div>
+      <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-top:2px;">${pt.age} yrs · MRN ${pt.mrn || '—'} · ${pt.meds.length} med${pt.meds.length !== 1 ? 's' : ''} · ${flagText}</div>
+      ${highLine}
+    </div>
+    <div style="flex-shrink:0;">${statusPill}</div>
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button onclick="afWardLoadPatient('${pid}')" style="background:var(--navy);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">Load &amp; Audit</button>
+      ${!pt.alreadyAudited ? `<button onclick="afWardMarkAudited(decodeURIComponent('${ptJson}'))" style="background:white;border:1.5px solid #bbf7d0;color:#065f46;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">Mark Complete</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function afWardMarkAudited(patientJsonStr) {
+  let pt;
+  try { pt = JSON.parse(patientJsonStr); } catch (e) { return; }
+
+  const pid = pt.patientId || pt.mrn || '';
+  const todayKey  = new Date().toISOString().split('T')[0];
+  const allAudits = JSON.parse(localStorage.getItem(AF_LS_KEY) || '[]');
+  if (allAudits.some(a => a.patientId === pid && a.timestamp?.startsWith(todayKey))) return; // already done
+
+  const audit = {
+    auditId:      'AF-' + Date.now(),
+    timestamp:    new Date().toISOString(),
+    patientId:    pid,
+    patientAge:   pt.age,
+    patientName:  pt.name,
+    medsReviewed: pt.medsLen || 0,
+    flagCount:    (pt.flags || []).length,
+    flags:        pt.flags || [],
+    source:       'ward-batch',
+  };
+  allAudits.push(audit);
+  localStorage.setItem(AF_LS_KEY, JSON.stringify(allAudits));
+
+  // Update the row in place
+  const safePid = pid.replace(/'/g, "\\'");
+  const rowEl   = document.getElementById('af-ward-row-' + safePid);
+  if (rowEl) {
+    const updatedPt = { patientId: pt.patientId, name: pt.name, age: pt.age, mrn: pt.mrn, meds: { length: pt.medsLen || 0 }, flags: pt.flags || [], highCount: (pt.flags || []).filter(f => f.riskLevel === 'HIGH_ALERT').length, alreadyAudited: true };
+    // Rebuild meds array shape for _renderAFWardRow
+    updatedPt.meds = Array(pt.medsLen || 0).fill({});
+    rowEl.outerHTML = _renderAFWardRow(updatedPt);
+  }
+
+  // Refresh summary bar
+  const summaryEl = document.getElementById('af-ward-summary');
+  if (summaryEl) {
+    const rows = document.querySelectorAll('[id^="af-ward-row-"]');
+    const total   = rows.length;
+    const audited = [...rows].filter(r => r.dataset.afAudited === '1').length;
+    const color  = audited === total ? '#166534' : '#92400e';
+    const bg     = audited === total ? '#f0fdf4' : '#fffbeb';
+    const border = audited === total ? '#bbf7d0' : '#fde68a';
+    summaryEl.style.background    = bg;
+    summaryEl.style.borderColor   = border;
+    summaryEl.style.color         = color;
+    const threshold = localStorage.getItem('dosedefender_af_age_threshold') || '65';
+    summaryEl.textContent = `${audited} of ${total} patient${total !== 1 ? 's' : ''} aged ${threshold}+ audited today`;
+  }
+}
+
+function afWardLoadPatient(patientId) {
+  const pidInput = document.getElementById('fhir-pid-input');
+  if (pidInput) { pidInput.value = patientId; }
+  _afActiveTab = 'single';
+  loadFHIRPatient();
 }
 
 function updateAgeFriendlyCard() {
   const card = document.getElementById('af-calc-card');
+  const label = document.getElementById('af-card-disabled-label');
   const threshold = parseInt(localStorage.getItem('dosedefender_af_age_threshold') || '65');
   const patient = (typeof _fhirPatient !== 'undefined') ? _fhirPatient : null;
-  const active = !!(patient && patient.age >= threshold);
-  if (!card) return;
-  card.classList.toggle('af-card-active', active);
-  // Remove old disabled label if present
-  const lbl = document.getElementById('af-card-disabled-label');
-  if (lbl) lbl.style.display = 'none';
-}
-
-function updateAFGlobalBanner() {
-  const banner = document.getElementById('af-global-banner');
-  if (!banner) return;
-  const threshold = parseInt(localStorage.getItem('dosedefender_af_age_threshold') || '65');
-  const patient = (typeof _fhirPatient !== 'undefined') ? _fhirPatient : null;
-  // Always sync the dashboard card from here (runs on every view)
-  updateAgeFriendlyCard();
-  if (!patient || patient.age < threshold) {
-    banner.style.display = 'none';
-    document.body.classList.remove('af-audit-pending','af-audit-done');
-    return;
+  const active = patient && patient.age >= threshold;
+  if (card) {
+    card.classList.toggle('af-card-disabled', !active);
+    card.style.pointerEvents = active ? '' : 'none';
   }
-  const patientId = patient.id || patient.mrn || '';
-  const existingAudit = getAFPatientAudit(patientId);
-  const patientName = patient.name || patient.fullName || patientId || 'Patient';
-  banner.style.display = 'flex';
-  if (existingAudit) {
-    banner.className = 'af-banner-done';
-    const ts = new Date(existingAudit.timestamp);
-    const dateLabel = ts.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + ts.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    banner.innerHTML = `<span>✓ Admission Audit Complete — ${dateLabel} · ${existingAudit.flagCount} flag(s) found</span>
-      <a onclick="openCalcImmersive('/app/agefriendly');return false;" href="#" style="margin-left:auto;">View Report</a>
-      <span onclick="this.parentElement.style.display='none';document.body.classList.remove('af-audit-done');" style="cursor:pointer;padding:0 8px;font-size:16px;opacity:.5;" title="Dismiss">✕</span>`;
-    document.body.classList.remove('af-audit-pending');
-    document.body.classList.add('af-audit-done');
-  } else {
-    banner.className = 'af-banner-pending';
-    banner.innerHTML = `<span style="font-size:16px;">⚕</span>
-      <span><strong>Age-Friendly Admission Audit Required</strong> — ${patientName}, ${patient.age}y &nbsp;·&nbsp; CMS Domain 2 compliance requires medication review at admission for patients ${threshold}+</span>
-      <a onclick="openCalcImmersive('/app/agefriendly');return false;" href="#" style="margin-left:auto;white-space:nowrap;">Begin Audit →</a>`;
-    document.body.classList.add('af-audit-pending');
-    document.body.classList.remove('af-audit-done');
-  }
+  if (label) label.style.display = active ? 'none' : '';
 }
 
 function updateAFIntegrationBanner(calcId) {
@@ -4526,18 +4549,75 @@ function updateAFIntegrationBanner(calcId) {
   const patient = (typeof _fhirPatient !== 'undefined') ? _fhirPatient : null;
   if (!patient || patient.age < threshold) { el.style.display = 'none'; return; }
 
-  const patientId = patient.id || patient.mrn || '';
-  const existingAudit = getAFPatientAudit(patientId);
+  const todayKey = new Date().toISOString().split('T')[0];
+  const allAudits = JSON.parse(localStorage.getItem(AF_LS_KEY) || '[]');
+  const todayAudit = allAudits.find(a => a.patientId === (patient.patientId || patient.mrn || '') && a.timestamp?.startsWith(todayKey));
 
   el.style.display = '';
-  if (existingAudit) {
-    const ts = new Date(existingAudit.timestamp);
+  if (todayAudit) {
     el.className = 'af-alert-integration completed';
-    el.innerHTML = `<span style="font-size:15px;">✅</span> <span>Age-Friendly Admission Audit complete — ${ts.toLocaleDateString('en-US',{month:'short',day:'numeric'})} · ${existingAudit.flagCount} flag(s) documented.</span> <a href="#" onclick="openCalcImmersive('/app/agefriendly');return false;" style="margin-left:auto;font-weight:700;color:#166534;text-decoration:underline;white-space:nowrap;">View</a>`;
+    el.innerHTML = `<span style="font-size:16px;">✅</span> <span>Age-Friendly Audit completed at ${new Date(todayAudit.timestamp).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})} for this patient.</span> <a href="#" onclick="openCalcImmersive('/app/agefriendly');return false;" style="margin-left:auto;font-weight:700;color:#166534;text-decoration:underline;white-space:nowrap;">View Audit</a>`;
   } else {
     el.className = 'af-alert-integration';
-    el.innerHTML = `<span style="font-size:15px;">⚕</span> <span>Patient aged ${patient.age} — <strong>Age-Friendly Admission Audit not yet completed</strong> for this admission.</span> <a href="#" onclick="openCalcImmersive('/app/agefriendly');return false;" style="margin-left:auto;font-weight:700;color:#92400e;text-decoration:underline;white-space:nowrap;">Begin Audit →</a>`;
+    el.innerHTML = `<span style="font-size:16px;">🛡️</span> <span>Patient aged ${patient.age} — <strong>Age-Friendly Admission Audit not yet completed</strong> for today.</span> <a href="#" onclick="openCalcImmersive('/app/agefriendly');return false;" style="margin-left:auto;font-weight:700;color:#92400e;text-decoration:underline;white-space:nowrap;">Start Audit</a>`;
   }
+}
+
+function triggerAFAdmissionAlert() {
+  if (localStorage.getItem('dosedefender_af_enabled') === 'false') return;
+  if (localStorage.getItem('dosedefender_af_auto_trigger') === 'false') return;
+  const patient = (typeof _fhirPatient !== 'undefined') ? _fhirPatient : null;
+  if (!patient) return;
+  const threshold = parseInt(localStorage.getItem('dosedefender_af_age_threshold') || '65');
+  if (patient.age < threshold) return;
+
+  // Skip if audit already completed today for this patient
+  const todayKey = new Date().toISOString().split('T')[0];
+  const allAudits = JSON.parse(localStorage.getItem(AF_LS_KEY) || '[]');
+  const pid = patient.patientId || patient.mrn || '';
+  const alreadyDone = allAudits.find(a => a.patientId === pid && a.timestamp?.startsWith(todayKey));
+  if (alreadyDone) return;
+
+  const meds = (typeof _fhirMeds !== 'undefined' && _fhirMeds?.medications) ? _fhirMeds.medications : [];
+  const flags = checkBeersMedications(meds);
+  const highCount = flags.filter(f => f.riskLevel === 'HIGH_ALERT').length;
+  const patientName = patient.name || patient.fullName || patient.patientId || 'Unknown';
+
+  const flagColor = flags.length > 0 ? '#dc2626' : '#16a34a';
+  const flagText = flags.length > 0
+    ? `<span style="color:#dc2626;font-weight:700;">${flags.length} Beers flag${flags.length !== 1 ? 's' : ''}</span>`
+    : `<span style="color:#16a34a;font-weight:700;">0 Beers flags</span>`;
+  const highLine = highCount > 0
+    ? `<div style="color:#dc2626;font-weight:700;font-size:13px;margin-top:6px;">⚠️ ${highCount} HIGH ALERT medication${highCount !== 1 ? 's' : ''} identified</div>`
+    : '';
+
+  document.getElementById('af-modal-content').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="font-weight:700;font-size:16px;color:var(--navy);">${patientName}</div>
+      <span style="background:#0d9488;color:white;font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;">${patient.age} yrs</span>
+    </div>
+    <div style="display:flex;gap:20px;background:var(--bg,#f8fafc);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:14px;">
+      <span>${meds.length} medication${meds.length !== 1 ? 's' : ''} reviewed</span>
+      <span>·</span>
+      ${flagText}
+    </div>
+    ${highLine}
+    <div style="display:flex;gap:10px;margin-top:20px;align-items:center;flex-wrap:wrap;">
+      <button class="btn-primary" style="font-size:14px;" onclick="openCalcImmersive('/app/agefriendly');closeAFAdmissionModal()">Start Audit Now</button>
+      <a href="#" style="font-size:13px;color:var(--muted);text-decoration:underline;" onclick="closeAFAdmissionModal();return false;">Dismiss</a>
+    </div>
+    <div style="margin-top:18px;font-size:11px;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);padding-top:12px;">
+      CMS Age-Friendly Hospital Measure — Domain 2 requires medication review for all inpatients aged 65+
+    </div>`;
+
+  const modal = document.getElementById('af-admission-modal');
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAFAdmissionModal() {
+  document.getElementById('af-admission-modal').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 // ── Init hook: populate renal form when FHIR patient loads ──
