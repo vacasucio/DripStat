@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DoseDefender — Clinical Dosing Calculators</title>
+<title>DoseDefender — Clinical Protocol Intelligence</title>
+<meta name="description" content="Protocol-driven dosing calculators for heparin, vancomycin, DKA, and more. Free for individual clinicians. Built by pharmacists.">
+<meta property="og:title" content="DoseDefender — Clinical Protocol Intelligence">
+<meta property="og:description" content="Protocol-driven dosing calculators for heparin, vancomycin, DKA, and more. CMS Age-Friendly compliant.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dosedefender.com">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DoseDefender — Clinical Protocol Intelligence">
+<meta name="twitter:description" content="Protocol-driven dosing calculators for heparin, vancomycin, DKA, and more. Free for individual clinicians.">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600&family=Instrument+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -186,13 +194,13 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
   <span id="inst-label" style="display:none;font-size:13px;color:var(--muted);font-weight:500;margin-left:8px;white-space:nowrap;"></span>
   <div class="nav-links">
     <div class="nav-link" onclick="document.getElementById('features')?.scrollIntoView({behavior:'smooth'})">Features</div>
-    <div class="nav-link" onclick="document.getElementById('hospitals')?.scrollIntoView({behavior:'smooth'})">For Hospitals</div>
-    <a href="/app" class="nav-link" style="text-decoration:none;">Calculators</a>
+    <a href="/pricing" class="nav-link" style="text-decoration:none;">Pricing</a>
+    <a href="/app-v2" class="nav-link" style="text-decoration:none;">App</a>
     <div class="nav-link" onclick="document.getElementById('about')?.scrollIntoView({behavior:'smooth'})">About</div>
   </div>
   <div class="nav-right">
-    <div class="nav-login">Log In</div>
-    <a href="/app" class="nav-cta" style="text-decoration:none;color:white;">Open App</a>
+    <a href="/login" class="nav-login" style="text-decoration:none;">Log In</a>
+    <a href="/register" class="nav-cta" style="text-decoration:none;color:white;">Register Free</a>
   </div>
 </nav>
 
@@ -203,18 +211,18 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
 
   <section class="hero">
     <div class="hero-inner">
-      <div class="hero-eyebrow"><div class="eyebrow-dot"></div>Now in Beta — Free for Individual Clinicians</div>
-      <h1 class="hero-title">Clinical dosing,<br><em>precisely calculated.</em></h1>
-      <p class="hero-sub">Accurate, weight-based drug calculators built by pharmacists. Customizable to your institution's protocols. No Epic required — works with any EMR.</p>
+      <div class="hero-eyebrow"><div class="eyebrow-dot"></div>Beta — Free for Individual Clinicians</div>
+      <h1 class="hero-title">Clinical Protocol<br><em>Intelligence.</em></h1>
+      <p class="hero-sub">Protocol-driven dosing calculators for heparin, vancomycin, DKA, and more. Free for individual clinicians. PRO features for power users.</p>
       <div class="hero-actions">
-        <div class="btn-primary" onclick="window.location.href='/app'">Explore Calculators →</div>
-        <div class="btn-secondary" onclick="document.getElementById('hospitals').scrollIntoView({behavior:'smooth'})">For Hospitals</div>
+        <a href="/register" class="btn-primary" style="text-decoration:none;color:white;">Register Free →</a>
+        <a href="/pricing" class="btn-secondary" style="text-decoration:none;">See Pricing</a>
       </div>
       <div class="hero-trust">
         <div class="trust-item"><span class="trust-check">✓</span>Zero patient data stored</div>
         <div class="trust-item"><span class="trust-check">✓</span>Works on any device</div>
         <div class="trust-item"><span class="trust-check">✓</span>Built by pharmacists</div>
-        <div class="trust-item"><span class="trust-check">✓</span>No Epic required</div>
+        <div class="trust-item"><span class="trust-check">✓</span>CMS Domain 2 compliant</div>
       </div>
     </div>
   </section>
@@ -242,32 +250,58 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
     </div>
   </section>
 
-  <section class="section section-alt">
+  <!-- ══ HOW IT WORKS ══ -->
+  <section class="section section-alt" id="how-it-works">
+    <div class="section-inner">
+      <div class="sec-eyebrow">How It Works</div>
+      <div class="sec-title">Up and running in minutes.</div>
+      <div class="sec-sub">No IT approval. No EMR integration. Just clinical precision, right now.</div>
+      <div class="feat-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="feat-card" style="text-align:center;">
+          <div class="feat-icon" style="margin:0 auto 18px;font-size:24px;">1️⃣</div>
+          <div class="feat-title">Register Free</div>
+          <div class="feat-desc">Create your account in 30 seconds. No credit card required. All core calculators are free forever.</div>
+        </div>
+        <div class="feat-card" style="text-align:center;">
+          <div class="feat-icon" style="margin:0 auto 18px;font-size:24px;">2️⃣</div>
+          <div class="feat-title">Enter Patient Data</div>
+          <div class="feat-desc">Type in patient labs and weights — or use PRO's Snap & Calculate to extract values instantly from a screenshot.</div>
+        </div>
+        <div class="feat-card" style="text-align:center;">
+          <div class="feat-icon" style="margin:0 auto 18px;font-size:24px;">3️⃣</div>
+          <div class="feat-title">Get Protocol Results</div>
+          <div class="feat-desc">Protocol-driven dosing calculations appear instantly. Verify and apply. No nomogram hunting required.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
     <div class="section-inner">
       <div class="sec-eyebrow">Calculator Library</div>
       <div class="sec-title">Everything you need,<br>in one place.</div>
       <div class="sec-sub">A growing library of clinical calculators — all built to the same standard of accuracy and usability.</div>
       <div class="calc-prev-grid">
-        <div class="calc-prev-card" onclick="window.location.href='/app'">
+        <div class="calc-prev-card" onclick="window.location.href='/app-v2'">
           <div class="cpc-top"><div class="cpc-icon ci-teal">💉</div><span class="chip chip-free">FREE</span></div>
           <div class="cpc-name">Heparin Infusion</div>
           <div class="cpc-desc">Weight-based IV heparin with full PTT nomogram for ACS and DVT/VTE protocols.</div>
           <div class="cpc-tags"><span class="cpc-tag">ACS</span><span class="cpc-tag">DVT/VTE</span><span class="cpc-tag">PTT Nomogram</span></div>
         </div>
-        <div class="calc-prev-card" onclick="window.location.href='/app'">
+        <div class="calc-prev-card" onclick="window.location.href='/app-v2'">
           <div class="cpc-top"><div class="cpc-icon ci-gold"><svg width="22" height="20" viewBox="0 0 28 26" xmlns="http://www.w3.org/2000/svg"><line x1="3" y1="23" x2="26" y2="23" stroke="#92400e" stroke-width="1" opacity="0.4"/><line x1="3" y1="3" x2="3" y2="23" stroke="#92400e" stroke-width="1" opacity="0.4"/><rect x="3" y="10" width="23" height="7" fill="#f59e0b" opacity="0.2"/><line x1="3" y1="10" x2="26" y2="10" stroke="#92400e" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.5"/><line x1="3" y1="17" x2="26" y2="17" stroke="#92400e" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.5"/><path d="M3,23 L5,6 Q9,2 13,8 Q17,14 20,17 Q23,19 26,21 L26,23 Z" fill="#92400e" opacity="0.1"/><path d="M3,23 L5,6 Q9,2 13,8 Q17,14 20,17 Q23,19 26,21" fill="none" stroke="#92400e" stroke-width="1.8" stroke-linecap="round"/></svg></div><span class="chip chip-pro">PRO</span></div>
           <div class="cpc-name">Vancomycin AUC/MIC</div>
           <div class="cpc-desc">Bayesian-guided vancomycin dosing targeting AUC/MIC 400–600 per ASHP/IDSA 2020 guidelines.</div>
           <div class="cpc-tags"><span class="cpc-tag">Bayesian</span><span class="cpc-tag">AUC/MIC</span><span class="cpc-tag">Renal adjusted</span></div>
         </div>
-        <div class="calc-prev-card" onclick="window.location.href='/app'">
+        <div class="calc-prev-card" onclick="window.location.href='/app-v2'">
           <div class="cpc-top"><div class="cpc-icon ci-teal">🔄</div><span class="chip chip-pro">PRO</span></div>
           <div class="cpc-name">Protamine Reversal</div>
           <div class="cpc-desc">Heparin reversal dosing based on total dose given and time since administration.</div>
           <div class="cpc-tags"><span class="cpc-tag">Dose-based</span><span class="cpc-tag">Time-based</span></div>
         </div>
       </div>
-      <div class="view-all" onclick="window.location.href='/app'">View All Calculators →</div>
+      <div class="view-all" onclick="window.location.href='/app-v2'" style="cursor:pointer;">View All Calculators →</div>
     </div>
   </section>
 
@@ -283,6 +317,58 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
     </div>
   </section>
 
+  <!-- ══ PRICING TEASER ══ -->
+  <section class="section" id="pricing-teaser" style="background:var(--bg);">
+    <div class="section-inner" style="text-align:center;">
+      <div class="sec-eyebrow">Pricing</div>
+      <div class="sec-title">Free to start. PRO when you're ready.</div>
+      <div class="sec-sub" style="margin:0 auto 48px;">Core calculators are free forever. Upgrade to PRO for AI-powered Snap & Calculate, age-friendly medication auditing, and more.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:640px;margin:0 auto 40px;">
+        <div style="background:white;border:1.5px solid var(--border);border-radius:16px;padding:32px 24px;text-align:left;">
+          <div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Free</div>
+          <div style="font-family:'Playfair Display',serif;font-size:36px;color:var(--navy);margin-bottom:4px;">$0</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">Forever free</div>
+          <ul style="list-style:none;padding:0;margin-bottom:24px;">
+            <li style="font-size:13px;color:var(--text);margin-bottom:8px;"><span style="color:var(--teal);font-weight:700;">✓</span> Heparin calculator</li>
+            <li style="font-size:13px;color:var(--text);margin-bottom:8px;"><span style="color:var(--teal);font-weight:700;">✓</span> DKA management</li>
+            <li style="font-size:13px;color:var(--text);margin-bottom:8px;"><span style="color:var(--teal);font-weight:700;">✓</span> Renal dose checker</li>
+            <li style="font-size:13px;color:var(--muted);margin-bottom:8px;"><span style="color:var(--muted);">—</span> Snap & Calculate (AI)</li>
+          </ul>
+          <a href="/register" style="display:block;text-align:center;padding:11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--navy);text-decoration:none;transition:all .2s;">Get Started Free</a>
+        </div>
+        <div style="background:var(--navy);border:1.5px solid var(--navy);border-radius:16px;padding:32px 24px;text-align:left;position:relative;">
+          <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--teal);color:white;font-size:10px;font-weight:700;padding:4px 12px;border-radius:100px;letter-spacing:.08em;text-transform:uppercase;">Most Popular</div>
+          <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">PRO</div>
+          <div style="font-family:'Playfair Display',serif;font-size:36px;color:white;margin-bottom:4px;">$14.99</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:20px;">per month</div>
+          <ul style="list-style:none;padding:0;margin-bottom:24px;">
+            <li style="font-size:13px;color:rgba(255,255,255,.85);margin-bottom:8px;"><span style="color:var(--teal);font-weight:700;">✓</span> Everything in Free</li>
+            <li style="font-size:13px;color:rgba(255,255,255,.85);margin-bottom:8px;"><span style="color:var(--teal);font-weight:700;">✓</span> Snap & Calculate (AI)</li>
+            <li style="font-size:13px;color:rgba(255,255,255,.85);margin-bottom:8px;"><span style="color:var(--teal);font-weight:700;">✓</span> Age-Friendly / Beers audit</li>
+            <li style="font-size:13px;color:rgba(255,255,255,.85);margin-bottom:8px;"><span style="color:var(--teal);font-weight:700;">✓</span> Vancomycin AUC/MIC</li>
+          </ul>
+          <a href="/pricing" style="display:block;text-align:center;padding:11px;background:var(--teal);border-radius:8px;font-size:13px;font-weight:700;color:white;text-decoration:none;transition:all .2s;">Start PRO Trial</a>
+        </div>
+      </div>
+      <a href="/pricing" style="font-size:13px;color:var(--teal);text-decoration:none;font-weight:600;">See full pricing details →</a>
+    </div>
+  </section>
+
+  <!-- ══ CMS COMPLIANCE CALLOUT ══ -->
+  <section style="background:linear-gradient(135deg,#0f2744 0%,#1a3a5c 100%);padding:64px;text-align:center;">
+    <div style="max-width:640px;margin:0 auto;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--teal-mid);margin-bottom:16px;">CMS Compliance</div>
+      <div style="font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,34px);color:white;margin-bottom:16px;">Built for CMS Age-Friendly Care requirements.</div>
+      <div style="font-size:15px;color:rgba(255,255,255,.5);max-width:480px;margin:0 auto 32px;line-height:1.7;">DoseDefender's Age-Friendly Beers Criteria Admission Audit is built to support CMS Domain 2 compliance — helping your team identify high-risk medications in patients 65+ at the point of admission.</div>
+      <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:32px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.7);"><span style="color:var(--teal);font-size:16px;">✓</span>2024 Beers Criteria database</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.7);"><span style="color:var(--teal);font-size:16px;">✓</span>Manual med list import</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.7);"><span style="color:var(--teal);font-size:16px;">✓</span>Age-gated (65+)</div>
+      </div>
+      <a href="/register" style="display:inline-block;background:var(--teal);color:white;padding:14px 32px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;transition:all .2s;">Start Free — CMS Ready</a>
+    </div>
+  </section>
+
   <section class="hosp-section" id="hospitals">
     <div class="sec-eyebrow" style="color:var(--teal-mid);text-align:center;">For Institutions</div>
     <div class="hosp-title">Designed for hospitals<br>without Epic.</div>
@@ -292,7 +378,7 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
       <div class="hosp-feat"><div class="hosp-feat-title">📋 Custom Protocols</div><div class="hosp-feat-desc">Upload your institution's specific nomograms, dosing limits, and adjustment parameters.</div></div>
       <div class="hosp-feat"><div class="hosp-feat-title">🔐 No IT Required</div><div class="hosp-feat-desc">No patient data means no complex security reviews. Get your team using it in days, not months.</div></div>
     </div>
-    <div class="btn-white" onclick="window.location.href='/app'">Request a Hospital Demo</div>
+    <a href="mailto:sales@dosedefender.com" class="btn-white" style="text-decoration:none;color:var(--navy);">Request a Hospital Demo</a>
   </section>
 
   <section class="cta-section" id="about">
@@ -300,8 +386,8 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
     <div class="cta-title">Free for individual clinicians.<br>Customizable for your institution.</div>
     <div class="cta-sub">No credit card required. Start calculating in seconds.</div>
     <div class="cta-actions">
-      <div class="btn-primary" onclick="window.location.href='/app'">Create Free Account →</div>
-      <div class="btn-secondary">Request Hospital Demo</div>
+      <a href="/register" class="btn-primary" style="text-decoration:none;color:white;">Create Free Account →</a>
+      <a href="/pricing" class="btn-secondary" style="text-decoration:none;">View Pricing</a>
     </div>
   </section>
 
@@ -309,9 +395,9 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
     <div class="footer-top">
       <div><div id="footer-logo-land"></div><div class="footer-brand-sub">Clinical dosing calculators built by pharmacists for every clinician at every institution.</div></div>
       <div class="footer-cols">
-        <div><div class="footer-col-title">Product</div><span class="footer-link" onclick="window.location.href='/app'">Calculators</span><span class="footer-link">For Hospitals</span><span class="footer-link">Pricing</span></div>
-        <div><div class="footer-col-title">Company</div><span class="footer-link">About</span><span class="footer-link">Blog</span><span class="footer-link">Contact</span></div>
-        <div><div class="footer-col-title">Legal</div><span class="footer-link">Privacy Policy</span><span class="footer-link">Terms of Use</span><span class="footer-link">Disclaimer</span></div>
+        <div><div class="footer-col-title">Product</div><a href="/app-v2" class="footer-link">Calculators</a><a href="/pricing" class="footer-link">Pricing</a><a href="/register" class="footer-link">Register Free</a></div>
+        <div><div class="footer-col-title">Company</div><span class="footer-link" onclick="document.getElementById('about')?.scrollIntoView({behavior:'smooth'})">About</span><a href="mailto:support@dosedefender.com" class="footer-link">Contact</a></div>
+        <div><div class="footer-col-title">Legal</div><a href="/privacy" class="footer-link">Privacy Policy</a><a href="/terms" class="footer-link">Terms of Service</a></div>
       </div>
     </div>
     <div class="footer-bottom">

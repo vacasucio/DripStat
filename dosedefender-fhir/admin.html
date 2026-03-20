@@ -270,16 +270,15 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
 ══════════════════════════════════ -->
 <div id="pin-screen">
   <div class="pin-card">
-    <div class="pin-wordmark">Dose<em>Safe</em></div>
+    <div class="pin-wordmark">Dose<em>Defender</em></div>
     <div class="pin-eyebrow">Admin Settings</div>
-    <label class="pin-lbl" for="pin-input">Enter Admin PIN</label>
-    <input id="pin-input" class="pin-input" type="password"
-           placeholder="••••" maxlength="4"
-           inputmode="numeric" autocomplete="off"
-           onkeydown="if(event.key==='Enter')submitPin()">
-    <button class="pin-btn" id="pin-btn" onclick="submitPin()">Unlock Admin Settings</button>
-    <span id="pin-err" class="pin-err"></span>
-    <div id="pin-lock" class="pin-lock"></div>
+    <div id="auth-status" style="font-size:13px;color:var(--muted);text-align:center;margin-top:16px;">
+      Verifying credentials…
+    </div>
+    <div id="auth-error" style="display:none;font-size:13px;color:var(--red);text-align:center;margin-top:16px;"></div>
+    <a id="login-link" href="/login" style="display:none;margin-top:20px;background:var(--navy);color:white;border-radius:10px;padding:13px 24px;font-size:13px;font-weight:600;text-decoration:none;text-align:center;">
+      Sign In
+    </a>
   </div>
 </div>
 
@@ -305,6 +304,50 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
       ⚠️ <span>Settings saved here take effect immediately when clinicians return to DoseDefender. Only modify values in accordance with your institution's approved heparin protocol. All changes are stored in this browser's localStorage.</span>
     </div>
 
+    <!-- ── Users Section ── -->
+    <div class="section-card" id="users-section-card">
+      <div class="section-hdr">
+        <span class="section-icon">👥</span>
+        <span class="section-title">Registered Users</span>
+      </div>
+      <div class="section-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+            <div style="font-size:28px;font-weight:700;color:var(--navy);" id="admin-total-users">—</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Total Users</div>
+          </div>
+          <div style="background:var(--green-light);border:1px solid #bbf7d0;border-radius:12px;padding:20px;text-align:center;">
+            <div style="font-size:28px;font-weight:700;color:var(--green);" id="admin-pro-users">—</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">PRO Users</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+            <div style="font-size:28px;font-weight:700;color:var(--muted);" id="admin-free-users">—</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Free Users</div>
+          </div>
+        </div>
+
+        <!-- Manual tier override -->
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;">
+          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;">Manual Tier Override (comp accounts / testing)</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <input type="email" id="admin-tier-email" placeholder="user@example.com" style="flex:1;min-width:200px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Instrument Sans',sans-serif;">
+            <select id="admin-tier-select" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Instrument Sans',sans-serif;">
+              <option value="pro">→ PRO</option>
+              <option value="free">→ Free</option>
+            </select>
+            <button onclick="adminSetTier()" style="background:var(--navy);color:white;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;">Set Tier</button>
+          </div>
+          <div id="admin-tier-msg" style="font-size:12px;margin-top:8px;display:none;"></div>
+        </div>
+
+        <!-- Recent users table -->
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Recent Sign-ups</div>
+        <div id="admin-users-table" style="border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:13px;">
+          <div style="padding:20px;color:var(--muted);text-align:center;">Loading…</div>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Shared Settings ── -->
     <div class="section-card">
       <div class="section-hdr">
@@ -318,12 +361,6 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
             <input id="inst-name" class="inp inp-text" type="text"
                    placeholder="e.g. General Hospital Pharmacy">
             <div class="inp-hint">Displayed in the calculator header when set</div>
-          </div>
-          <div class="field">
-            <label class="lbl" for="new-pin">Change Admin PIN</label>
-            <input id="new-pin" class="inp" type="password"
-                   placeholder="New 4-digit PIN" maxlength="4" autocomplete="new-password">
-            <div class="inp-hint">Leave blank to keep current PIN</div>
           </div>
         </div>
       </div>
@@ -465,13 +502,11 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
 <script>
 // ══ localStorage KEYS (must match DoseDefender.html getProtocol() / _ADMIN_LS) ══
 const LS = {
-  PIN:         'dosedefender_admin_pin',
   INST:        'dosedefender_admin_inst',
   ACS:         'dosedefender_admin_heparin_acs',
   DVT:         'dosedefender_admin_heparin_vte',
   RENAL_RULES: 'dosedefender_renal_rules',
 };
-const SESSION_KEY = 'dosedefender_admin_auth';
 
 // ══ PUBLISHED DEFAULTS (mirror of PROTOCOLS in DoseDefender.html) ══
 const DEFAULTS = {
@@ -500,72 +535,39 @@ const DEFAULTS = {
   }
 };
 
-// ══ PIN / AUTH ══
-let wrongAttempts = 0;
-let lockUntil = 0;
-let lockInterval = null;
+// ══ JWT AUTH ══
+let _adminToken = null;
 
-function getPin(){ return localStorage.getItem(LS.PIN) || '1234'; }
-
-function submitPin(){
-  if(Date.now() < lockUntil) return;
-  const val = (document.getElementById('pin-input').value || '').trim();
-  if(val === getPin()){
-    wrongAttempts = 0;
-    sessionStorage.setItem(SESSION_KEY, '1');
+async function checkAdminAuth() {
+  const token = localStorage.getItem('dosedefender_token');
+  if (!token) { showAuthError('Not signed in.', true); return; }
+  try {
+    const r = await fetch('/auth/me', { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) { localStorage.removeItem('dosedefender_token'); showAuthError('Session expired. Please sign in again.', true); return; }
+    const user = await r.json();
+    if (!user.isAdmin) { showAuthError('Access denied. Admin account required.', false); return; }
+    _adminToken = token;
     showAdminPanel();
-  } else {
-    wrongAttempts++;
-    document.getElementById('pin-input').value = '';
-    if(wrongAttempts >= 3){
-      lockUntil = Date.now() + 60000;
-      wrongAttempts = 0;
-      startLockdown();
-    } else {
-      const left = 3 - wrongAttempts;
-      document.getElementById('pin-err').textContent =
-        `Incorrect PIN — ${left} attempt${left === 1 ? '' : 's'} remaining`;
-    }
-  }
+  } catch { showAuthError('Could not verify credentials. Check your connection.', false); }
 }
 
-function startLockdown(){
-  const input = document.getElementById('pin-input');
-  const btn   = document.getElementById('pin-btn');
-  const lock  = document.getElementById('pin-lock');
-  input.disabled = btn.disabled = true;
-  document.getElementById('pin-err').textContent = '';
-  if(lockInterval) clearInterval(lockInterval);
-  lockInterval = setInterval(()=>{
-    const rem = Math.ceil((lockUntil - Date.now()) / 1000);
-    if(rem <= 0){
-      clearInterval(lockInterval); lockInterval = null;
-      input.disabled = btn.disabled = false;
-      lock.style.display = 'none';
-      input.focus();
-    } else {
-      lock.style.display = 'block';
-      lock.textContent = `Too many incorrect attempts — try again in ${rem}s`;
-    }
-  }, 500);
+function showAuthError(msg, showLink) {
+  document.getElementById('auth-status').style.display = 'none';
+  const errEl = document.getElementById('auth-error');
+  errEl.textContent = msg; errEl.style.display = '';
+  if (showLink) document.getElementById('login-link').style.display = 'block';
 }
 
 function showAdminPanel(){
   document.getElementById('pin-screen').style.display = 'none';
   document.getElementById('admin-panel').style.display = 'block';
   document.getElementById('inst-name').value = localStorage.getItem(LS.INST) || '';
-  document.getElementById('new-pin').value = '';
   loadProtocol('DVT');
 }
 
 function logout(){
-  sessionStorage.removeItem(SESSION_KEY);
-  document.getElementById('admin-panel').style.display = 'none';
-  document.getElementById('pin-screen').style.display = 'flex';
-  document.getElementById('pin-input').value = '';
-  document.getElementById('pin-err').textContent = '';
-  document.getElementById('pin-lock').style.display = 'none';
-  setTimeout(()=>document.getElementById('pin-input').focus(), 80);
+  _adminToken = null;
+  window.location.href = '/login';
 }
 
 // ══ PROTOCOL LOADING ══
@@ -686,11 +688,6 @@ function saveSettings(){
   // Shared
   const instName = (document.getElementById('inst-name').value || '').trim();
   if(instName) localStorage.setItem(LS.INST, instName);
-  const newPin = (document.getElementById('new-pin').value || '').trim();
-  if(newPin && /^\d{4}$/.test(newPin)){
-    localStorage.setItem(LS.PIN, newPin);
-    document.getElementById('new-pin').value = '';
-  }
 
   // PTT ranges — deep copy defaults, overlay editable fields
   const ranges = JSON.parse(JSON.stringify(p.ptt_ranges));
@@ -893,20 +890,90 @@ function loadAFSettings() {
   if (autoTriggerEl) autoTriggerEl.value = autoTrigger;
 }
 
-// Hook into showAdminPanel to also render renal rules
+// Hook into showAdminPanel to also render renal rules + users
 const _origShowAdminPanel = showAdminPanel;
 showAdminPanel = function() {
   _origShowAdminPanel();
   renderRenalRulesTable();
   loadAFSettings();
+  loadAdminUsers();
 };
 
-// ══ INIT ══
-if(sessionStorage.getItem(SESSION_KEY) === '1'){
-  showAdminPanel();
-} else {
-  document.getElementById('pin-input').focus();
+// ── Admin Users ────────────────────────────────────────
+async function loadAdminUsers() {
+  try {
+    const r = await fetch('/api/admin/users', {
+      headers: { Authorization: 'Bearer ' + (_adminToken || '') }
+    });
+    if (!r.ok) return;
+    const users = await r.json();
+    const total = users.length;
+    const pro = users.filter(u => u.tier === 'pro').length;
+    document.getElementById('admin-total-users').textContent = total;
+    document.getElementById('admin-pro-users').textContent = pro;
+    document.getElementById('admin-free-users').textContent = total - pro;
+
+    const recent = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 20);
+    const table = document.getElementById('admin-users-table');
+    if (!recent.length) {
+      table.innerHTML = '<div style="padding:20px;color:var(--muted);text-align:center;">No users yet.</div>';
+      return;
+    }
+    table.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:var(--bg);">
+        <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Email</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Tier</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Status</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Daily Analyses</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Joined</th>
+      </tr></thead>
+      <tbody>${recent.map((u, i) => {
+        const usagePct = u.dailyLimit > 0 ? Math.round((u.dailyUsageToday / u.dailyLimit) * 100) : 0;
+        const usageColor = usagePct >= 80 ? '#dc2626' : usagePct >= 50 ? '#f59e0b' : '#16a34a';
+        const usageCell = u.tier === 'pro'
+          ? `<span style="font-size:12px;font-weight:600;color:${usageColor};">${u.dailyUsageToday}/${u.dailyLimit}</span><span style="font-size:10px;color:var(--muted);margin-left:4px;">(${u.billingPeriod})</span>`
+          : `<span style="font-size:12px;color:var(--muted);">—</span>`;
+        return `<tr style="border-top:1px solid var(--border);${i%2===0?'background:white;':'background:var(--bg);'}">
+          <td style="padding:10px 14px;font-size:13px;">${u.email}</td>
+          <td style="padding:10px 14px;"><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:${u.tier==='pro'?'var(--green-light)':'var(--surface)'};color:${u.tier==='pro'?'var(--green)':'var(--muted)'};">${u.tier.toUpperCase()}</span></td>
+          <td style="padding:10px 14px;font-size:12px;color:var(--muted);">${u.subscriptionStatus || '—'}</td>
+          <td style="padding:10px 14px;">${usageCell}</td>
+          <td style="padding:10px 14px;font-size:12px;color:var(--muted);">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  } catch (err) {
+    console.error('[Admin users]', err);
+  }
 }
+
+async function adminSetTier() {
+  const email = document.getElementById('admin-tier-email').value.trim();
+  const tier = document.getElementById('admin-tier-select').value;
+  const msgEl = document.getElementById('admin-tier-msg');
+  if (!email) { msgEl.textContent = 'Enter an email address.'; msgEl.style.color = 'var(--red)'; msgEl.style.display = ''; return; }
+  try {
+    const r = await fetch('/api/admin/set-tier', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (_adminToken || '') },
+      body: JSON.stringify({ email, tier }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Failed');
+    msgEl.textContent = `✓ ${data.user.email} is now ${data.user.tier.toUpperCase()}`;
+    msgEl.style.color = 'var(--green)';
+    msgEl.style.display = '';
+    document.getElementById('admin-tier-email').value = '';
+    setTimeout(loadAdminUsers, 500);
+  } catch (err) {
+    msgEl.textContent = '✗ ' + err.message;
+    msgEl.style.color = 'var(--red)';
+    msgEl.style.display = '';
+  }
+}
+
+// ══ INIT ══
+checkAdminAuth();
 </script>
 </body>
 </html>

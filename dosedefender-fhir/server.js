@@ -5,12 +5,15 @@ const path = require('path');
 const session = require('express-session');
 const axios = require('axios');
 const basicAuth = require('basic-auth');
+const fs = require('fs');
 
 const patientRoutes = require('./routes/patient');
 const labRoutes = require('./routes/labs');
 const medicationRoutes = require('./routes/medications');
 const vitalRoutes = require('./routes/vitals');
 const censusRoutes = require('./routes/census');
+const authRoutes = require('./auth');
+const paymentsRoutes = require('./payments');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -242,7 +245,196 @@ app.use('/api/medications', medicationRoutes);
 app.use('/api/vitals', vitalRoutes);
 app.use('/api/census', censusRoutes);
 
-// ── Health check ───────────────────────────────────────────────────────────
+// ── Auth routes ────────────────────────────────────────────────────────────
+app.use('/auth', authRoutes);
+
+// ── Stripe webhook (needs raw body — must be before express.json()) ────────
+// Raw body capture for Stripe webhook
+app.use('/payments/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+  req.rawBody = req.body;
+  next();
+});
+app.use('/payments', paymentsRoutes);
+
+// ── Snap & Calculate helpers ───────────────────────────────────────────────
+function getTodayET() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // YYYY-MM-DD
+}
+
+function snapDailyLimit(user) {
+  return user.billingPeriod === 'annual' ? 30 : 25;
+}
+
+function snapUsageToday(user) {
+  const today = getTodayET();
+  const analyses = user.dailyAnalyses || {};
+  return analyses[today] || 0;
+}
+
+// ── GET /api/snap-usage ────────────────────────────────────────────────────
+app.get('/api/snap-usage', authRoutes.requireAuth, (req, res) => {
+  if (req.user.isAdmin === true) {
+    return res.json({ used: 0, limit: -1, unlimited: true, date: getTodayET() });
+  }
+  const { readUsers } = require('./auth');
+  const users = readUsers();
+  const user = users.find(u => u.id === req.user.id);
+  if (!user || user.tier !== 'pro') {
+    return res.json({ used: 0, limit: 0, date: getTodayET() });
+  }
+  const limit = snapDailyLimit(user);
+  const used = snapUsageToday(user);
+  res.json({ used, limit, date: getTodayET(), billingPeriod: user.billingPeriod || 'monthly' });
+});
+
+// ── Snap & Calculate (Claude AI image extraction) ─────────────────────────
+app.post('/api/snap-calculate', authRoutes.requireAuth, async (req, res) => {
+  const { imageBase64, mimeType } = req.body;
+  if (!imageBase64) return res.status(400).json({ error: 'No image provided' });
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(503).json({ error: 'AI extraction not configured' });
+
+  // Verify user is PRO (or admin) and within daily limit
+  const { readUsers, writeUsers } = require('./auth');
+  const users = readUsers();
+  const user = users.find(u => u.id === req.user.id);
+  const isAdmin = req.user.isAdmin === true;
+
+  if (!isAdmin && (!user || user.tier !== 'pro')) {
+    return res.status(403).json({ error: 'PRO subscription required for Snap & Calculate' });
+  }
+
+  const today = getTodayET();
+  let used = 0;
+  let limit = 0;
+  if (!isAdmin) {
+    limit = snapDailyLimit(user);
+    if (!user.dailyAnalyses) user.dailyAnalyses = {};
+    used = user.dailyAnalyses[today] || 0;
+    if (used >= limit) {
+      return res.status(429).json({
+        error: 'daily_limit_reached',
+        used,
+        limit,
+        message: `You've used all ${limit} daily analyses. Need more? Contact us at hello@dosedefender.com — we can increase your limit or discuss a hospital plan.`,
+      });
+    }
+    // Increment usage before API call (prevents double-clicks from bypassing limit)
+    user.dailyAnalyses[today] = used + 1;
+    writeUsers(users);
+  }
+
+  try {
+    const response = await axios.post(
+      'https://api.anthropic.com/v1/messages',
+      {
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: 'You are a clinical data extractor. Extract clinical values from the provided image. Return ONLY a valid JSON object with no markdown, no explanation, no preamble. Use these exact keys and include only values you can clearly read from the image: weight_kg (number), height_cm (number), age (number), scr (serum creatinine, number), ptt (number), glucose (number), potassium (number), sodium (number), chloride (number), bicarbonate (number), bun (number), medications (array of strings with drug name and dose). Set any value you cannot read to null.',
+        messages: [{
+          role: 'user',
+          content: [{
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: mimeType || 'image/png',
+              data: imageBase64,
+            }
+          }, {
+            type: 'text',
+            text: 'Extract all clinical values from this image and return as JSON.'
+          }]
+        }]
+      },
+      {
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'Content-Type': 'application/json',
+        }
+      }
+    );
+
+    const text = response.data.content[0]?.text || '';
+    let extracted;
+    try {
+      extracted = JSON.parse(text);
+    } catch {
+      // Try to extract JSON from response if there's any wrapping text
+      const match = text.match(/\{[\s\S]*\}/);
+      extracted = match ? JSON.parse(match[0]) : null;
+    }
+
+    if (!extracted) return res.status(422).json({ error: 'Could not parse extraction result' });
+
+    if (isAdmin) {
+      res.json({ extracted, usage: { used: 0, limit: -1, unlimited: true } });
+    } else {
+      // Re-read user to get fresh count (already incremented above)
+      const freshUsers = readUsers();
+      const freshUser = freshUsers.find(u => u.id === req.user.id);
+      const newUsed = (freshUser?.dailyAnalyses?.[today]) || (used + 1);
+      res.json({ extracted, usage: { used: newUsed, limit } });
+    }
+  } catch (err) {
+    // Roll back usage increment on API error
+    if (!isAdmin) {
+      const rollbackUsers = readUsers();
+      const rollbackUser = rollbackUsers.find(u => u.id === req.user.id);
+      if (rollbackUser?.dailyAnalyses?.[today] > 0) {
+        rollbackUser.dailyAnalyses[today]--;
+        writeUsers(rollbackUsers);
+      }
+    }
+    console.error('[Snap & Calculate]', err.response?.data || err.message);
+    res.status(500).json({ error: 'Extraction failed: ' + (err.response?.data?.error?.message || err.message) });
+  }
+});
+
+// ── Feedback ───────────────────────────────────────────────────────────────
+app.post('/api/feedback', (req, res) => {
+  const { message, page } = req.body;
+  if (!message || !message.trim()) return res.status(400).json({ error: 'Message required' });
+  const feedbackFile = path.join(__dirname, 'data/feedback.json');
+  let feedback = [];
+  try { feedback = JSON.parse(fs.readFileSync(feedbackFile, 'utf8')); } catch { feedback = []; }
+  feedback.push({ id: Date.now().toString(36), message: message.trim(), page: page || '', createdAt: new Date().toISOString() });
+  fs.writeFileSync(feedbackFile, JSON.stringify(feedback, null, 2));
+  res.json({ success: true });
+});
+
+// ── Admin API: users list ──────────────────────────────────────────────────
+app.get('/api/admin/users', authRoutes.requireAdmin, (req, res) => {
+  const { readUsers } = require('./auth');
+  const today = getTodayET();
+  const users = readUsers().map(u => ({
+    id: u.id, email: u.email, tier: u.tier,
+    billingPeriod: u.billingPeriod || 'monthly',
+    createdAt: u.createdAt, subscriptionStatus: u.subscriptionStatus,
+    dailyUsageToday: u.dailyAnalyses?.[today] || 0,
+    dailyLimit: u.tier === 'pro' ? snapDailyLimit(u) : 0,
+  }));
+  res.json(users);
+});
+
+app.post('/api/admin/set-tier', authRoutes.requireAdmin, express.json(), (req, res) => {
+  const { email, tier } = req.body;
+  if (!email || !tier || !['free','pro'].includes(tier)) return res.status(400).json({ error: 'Invalid request' });
+  const { readUsers, writeUsers } = require('./auth');
+  const users = readUsers();
+  const user = users.find(u => u.email === email.toLowerCase().trim());
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  user.tier = tier;
+  if (tier === 'free') { user.subscriptionStatus = 'manual_override'; }
+  if (tier === 'pro') { user.subscriptionStatus = 'comped'; }
+  writeUsers(users);
+  res.json({ success: true, user: { email: user.email, tier: user.tier } });
+});
+
+// ── Health checks ──────────────────────────────────────────────────────────
+app.get('/health', (req, res) => res.json({ status: 'ok', ts: Date.now() }));
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -251,6 +443,41 @@ app.get('/api/health', (req, res) => {
     sessionActive: !!(req.session?.accessToken),
   });
 });
+
+// ── v2 App routes ──────────────────────────────────────────────────────────
+const NO_CACHE_V2 = { 'Cache-Control': 'no-store, no-cache, must-revalidate', 'Pragma': 'no-cache', 'Expires': '0' };
+app.get('/app-v2', (req, res) => res.set(NO_CACHE_V2).sendFile(path.join(__dirname, 'app-v2.html')));
+app.get('/app-v2/*', (req, res) => res.set(NO_CACHE_V2).sendFile(path.join(__dirname, 'app-v2.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
+app.get('/register', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
+app.get('/pricing', (req, res) => res.sendFile(path.join(__dirname, 'pricing.html')));
+app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
+app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'privacy.html')));
+app.get('/feedback', (req, res) => {
+  const feedbackFile = path.join(__dirname, 'data/feedback.json');
+  try { res.json(JSON.parse(fs.readFileSync(feedbackFile, 'utf8'))); }
+  catch { res.json([]); }
+});
+
+function ensureAdminUser() {
+  const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
+  const { readUsers, writeUsers } = require('./auth');
+  const users = readUsers();
+  let changed = false;
+  users.forEach(u => { if (u.isAdmin) { u.isAdmin = false; changed = true; } });
+  if (adminEmail) {
+    const adminUser = users.find(u => u.email === adminEmail);
+    if (adminUser) {
+      adminUser.isAdmin = true; changed = true;
+      console.log(`[Admin] isAdmin granted to: ${adminEmail}`);
+    } else {
+      console.warn(`[Admin] ADMIN_EMAIL="${adminEmail}" not found in users.json — register this account first`);
+    }
+  } else {
+    console.log('[Admin] ADMIN_EMAIL not set — no admin user configured');
+  }
+  if (changed) writeUsers(users);
+}
 
 app.listen(PORT, () => {
   console.log(`DoseDefender server running on http://localhost:${PORT}`);
@@ -263,4 +490,5 @@ app.listen(PORT, () => {
   } else {
     console.log(`Basic auth: DISABLED — BASIC_AUTH_USER=${authUser ?? 'not set'}, BASIC_AUTH_PASS=${authPass ? '[set]' : 'not set'}`);
   }
+  ensureAdminUser();
 });

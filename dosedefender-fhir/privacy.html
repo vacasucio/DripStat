@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — DoseDefender</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0f2744;--teal:#00a896;--text:#1a2332;--muted:#64748b;--border:#e2e8f0;--bg:#f0f4f8;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sora',sans-serif;color:var(--text);background:var(--bg);}
+nav{background:var(--navy);padding:16px 48px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-size:18px;font-weight:700;color:white;text-decoration:none;letter-spacing:-.02em;}
+.nav-logo em{color:var(--teal);font-style:normal;}
+.content{max-width:720px;margin:0 auto;padding:60px 24px;}
+h1{font-size:32px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+.updated{font-size:13px;color:var(--muted);margin-bottom:48px;}
+h2{font-size:18px;font-weight:700;color:var(--navy);margin:36px 0 12px;}
+p{font-size:14px;line-height:1.8;color:var(--text);margin-bottom:14px;}
+ul{padding-left:20px;margin-bottom:14px;}
+ul li{font-size:14px;line-height:1.8;color:var(--text);margin-bottom:4px;}
+a{color:var(--teal);}
+.highlight{background:var(--bg);border-left:3px solid var(--teal);padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:20px;font-size:14px;line-height:1.7;}
+footer{background:white;border-top:1px solid var(--border);padding:24px 48px;display:flex;gap:20px;font-size:13px;color:var(--muted);}
+footer a{color:var(--muted);text-decoration:none;}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">Dose<em>Defender</em></a>
+  <a href="/app-v2" style="font-size:13px;color:rgba(255,255,255,.7);text-decoration:none;">← Back to App</a>
+</nav>
+
+<div class="content">
+  <h1>Privacy Policy</h1>
+  <div class="updated">Last updated: March 20, 2025</div>
+
+  <div class="highlight"><strong>The short version:</strong> We collect only your email address and subscription status. We never store patient data. Images uploaded via Snap & Calculate are processed in real time and immediately discarded.</div>
+
+  <h2>1. Information We Collect</h2>
+  <p>DoseDefender collects only the minimum information necessary to provide the Service:</p>
+  <ul>
+    <li><strong>Email address</strong> — required to create an account</li>
+    <li><strong>Password hash</strong> — stored as a one-way bcrypt hash; we cannot recover your plaintext password</li>
+    <li><strong>Subscription status</strong> — whether your account is on the free or PRO plan</li>
+    <li><strong>Stripe customer ID</strong> — if you subscribe to PRO, Stripe assigns a customer identifier that we store to manage your subscription</li>
+    <li><strong>Feedback messages</strong> — if you voluntarily submit feedback through the app</li>
+  </ul>
+
+  <h2>2. What We Do NOT Collect</h2>
+  <ul>
+    <li><strong>No patient data.</strong> DoseDefender does not collect, store, or transmit any patient health information (PHI). All clinical calculations occur locally in your browser.</li>
+    <li><strong>No images stored.</strong> Images uploaded for Snap & Calculate (PRO feature) are sent directly to the Anthropic Claude API for real-time processing and are not retained on DoseDefender servers.</li>
+    <li><strong>No usage tracking.</strong> We do not use Google Analytics, Facebook Pixel, or other third-party tracking technologies.</li>
+    <li><strong>No cookies beyond session state.</strong> We use session cookies only for authentication purposes.</li>
+  </ul>
+
+  <h2>3. How We Use Your Information</h2>
+  <p>We use the information we collect solely to:</p>
+  <ul>
+    <li>Authenticate your account and maintain your session</li>
+    <li>Process and manage your PRO subscription through Stripe</li>
+    <li>Send transactional emails (e.g., subscription confirmations) — we do not send marketing emails without explicit consent</li>
+    <li>Respond to support requests and feedback</li>
+  </ul>
+
+  <h2>4. Snap & Calculate and Third-Party AI Processing</h2>
+  <p>The PRO feature "Snap & Calculate" sends images to the Anthropic Claude API for clinical value extraction. By using this feature, you acknowledge that:</p>
+  <ul>
+    <li>Images are transmitted to Anthropic's servers for processing</li>
+    <li>Anthropic's <a href="https://www.anthropic.com/privacy" target="_blank">Privacy Policy</a> applies to this processing</li>
+    <li>Images should not contain individually identifiable patient information — use de-identified screenshots where possible</li>
+    <li>DoseDefender does not retain any copy of uploaded images</li>
+  </ul>
+
+  <h2>5. Stripe Payment Processing</h2>
+  <p>Payments are processed by Stripe. DoseDefender does not collect or store payment card information. Stripe's <a href="https://stripe.com/privacy" target="_blank">Privacy Policy</a> governs the processing of your payment information.</p>
+
+  <h2>6. Data Security</h2>
+  <p>We implement industry-standard security practices including:</p>
+  <ul>
+    <li>Passwords hashed using bcrypt with appropriate work factors</li>
+    <li>JWT tokens with 30-day expiry</li>
+    <li>HTTPS encryption in transit for all data</li>
+    <li>No storage of sensitive clinical data</li>
+  </ul>
+
+  <h2>7. Data Retention</h2>
+  <p>Account data (email, subscription status) is retained until you request account deletion. To delete your account, contact <a href="mailto:privacy@dosedefender.com">privacy@dosedefender.com</a>. We will delete your account data within 30 days of a verified deletion request.</p>
+
+  <h2>8. Your Rights</h2>
+  <p>Depending on your location, you may have rights to access, correct, or delete your personal data. To exercise these rights, contact us at <a href="mailto:privacy@dosedefender.com">privacy@dosedefender.com</a>. We will respond within 30 days.</p>
+
+  <h2>9. Children's Privacy</h2>
+  <p>The Service is intended for licensed healthcare professionals and is not directed to individuals under 18 years of age. We do not knowingly collect information from minors.</p>
+
+  <h2>10. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. We will notify you of material changes by updating the "Last updated" date above. Continued use of the Service following notification constitutes acceptance of the revised policy.</p>
+
+  <h2>11. Contact</h2>
+  <p>For privacy-related questions or requests, contact us at:<br>
+  <a href="mailto:privacy@dosedefender.com">privacy@dosedefender.com</a><br>
+  DoseDefender LLC</p>
+</div>
+
+<footer>
+  <span>© 2025 DoseDefender LLC</span>
+  <a href="/terms">Terms of Service</a>
+  <a href="/privacy">Privacy Policy</a>
+  <a href="/app-v2">App</a>
+</footer>
+</body>
+</html>
