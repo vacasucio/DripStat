@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 :root {
   --navy:#0f2744;--navy2:#1a3a5c;--navy3:#243b55;
@@ -723,6 +724,7 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
     <div id="fhir-status" style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;"></div>
     <div id="fhir-summary" style="display:none;align-items:center;gap:6px;flex-wrap:nowrap;overflow:hidden;flex:1;min-width:0;"></div>
     <button id="fhir-meds-btn" class="fhir-meds-btn" style="display:none;" onclick="openMedsModal()">💊 Medications</button>
+    <button id="manual-meds-btn" class="fhir-meds-btn" onclick="openManualMedsModal()">📋 Import Meds</button>
   </div>
 </div>
 
@@ -738,6 +740,75 @@ body.view--calculator .page.active{padding-top:calc(var(--nav-h) + 52px);}
         <div class="pump-modal-close" onclick="closeMedsModal()">✕</div>
       </div>
       <div id="meds-modal-content" style="padding:0 24px 24px;max-height:65vh;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MANUAL MED IMPORT MODAL ══ -->
+<div id="manual-meds-modal" style="display:none;">
+  <div class="pump-modal-overlay" onclick="if(event.target===this)closeManualMedsModal()">
+    <div class="pump-modal" onclick="event.stopPropagation()" style="max-width:680px;">
+      <div class="pump-modal-header">
+        <div>
+          <div class="pump-modal-title">📋 Import Medication List</div>
+          <div class="pump-modal-sub">Paste EMR text or upload/paste a screenshot — no FHIR needed</div>
+        </div>
+        <div class="pump-modal-close" onclick="closeManualMedsModal()">✕</div>
+      </div>
+      <div style="padding:0 24px 24px;">
+        <!-- Tab switcher -->
+        <div class="renal-mode-switcher" style="margin-bottom:16px;">
+          <button class="renal-mode-btn active" id="manual-tab-text" onclick="switchManualTab('text')">Paste Text</button>
+          <button class="renal-mode-btn" id="manual-tab-image" onclick="switchManualTab('image')">Image / OCR</button>
+        </div>
+
+        <!-- Text tab -->
+        <div id="manual-panel-text">
+          <textarea id="manual-med-textarea" style="width:100%;height:160px;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px;border:1px solid var(--border);border-radius:8px;resize:vertical;color:var(--text);background:var(--surface);" placeholder="Paste your medication list here. Supports formats like:
+1. Metformin 500mg PO BID
+2. Enoxaparin 40mg SQ daily
+Lisinopril 10mg PO once daily
+Gabapentin 300mg PO TID PRN"></textarea>
+          <button class="pump-btn" style="margin-top:10px;" onclick="parseManualTextTab()">Parse Medications</button>
+        </div>
+
+        <!-- Image tab -->
+        <div id="manual-panel-image" style="display:none;">
+          <div id="manual-ocr-dropzone" style="border:2px dashed var(--border);border-radius:8px;padding:32px;text-align:center;cursor:pointer;background:var(--surface);transition:border-color .2s;" onclick="document.getElementById('manual-img-input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--teal)'" ondragleave="this.style.borderColor=''" ondrop="handleManualImageDrop(event)">
+            <div style="font-size:32px;margin-bottom:8px;">📷</div>
+            <div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:4px;">Click to upload or drag & drop</div>
+            <div style="font-size:12px;color:var(--muted);">Also supports Ctrl+V to paste a screenshot</div>
+            <input id="manual-img-input" type="file" accept="image/*" style="display:none;" onchange="handleManualImageFile(this.files[0])">
+          </div>
+          <div id="manual-ocr-progress" style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-top:8px;display:none;"></div>
+          <button class="pump-btn" id="manual-ocr-btn" style="margin-top:10px;display:none;" onclick="parseManualImageTab()">Extract &amp; Parse</button>
+        </div>
+
+        <!-- Optional patient fields -->
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <div style="flex:2;">
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Patient Name / Label</label>
+            <input id="manual-patient-label" type="text" placeholder="e.g. Room 412 or patient initials" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:'Sora',sans-serif;">
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Patient Age (years)</label>
+            <input id="manual-patient-age" type="number" min="0" max="130" placeholder="e.g. 72" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:'Sora',sans-serif;">
+          </div>
+        </div>
+
+        <!-- Preview area -->
+        <div id="manual-meds-preview" style="display:none;margin-top:20px;">
+          <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Parsed Medications — uncheck or edit before importing</div>
+          <div id="manual-meds-preview-list" style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:4px 0;"></div>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <button class="pump-btn pump-btn-primary" id="manual-import-btn" style="display:none;" onclick="commitManualMeds()">Import Medications</button>
+          <span style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;" onclick="closeManualMedsModal()">Cancel</span>
+          <span style="font-size:11px;color:var(--warn);margin-left:auto;">⚠ Educational use only — verify against chart</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -3318,6 +3389,268 @@ async function loadFHIRPatient() {
   }
 }
 
+// ══ MANUAL MED IMPORT ══
+
+let _manualOCRText = '';
+let _manualOCRFile = null;
+
+function openManualMedsModal() {
+  const modal = document.getElementById('manual-meds-modal');
+  if (modal) modal.style.display = '';
+  // Reset state
+  document.getElementById('manual-med-textarea').value = '';
+  document.getElementById('manual-meds-preview').style.display = 'none';
+  document.getElementById('manual-meds-preview-list').innerHTML = '';
+  document.getElementById('manual-import-btn').style.display = 'none';
+  document.getElementById('manual-ocr-progress').style.display = 'none';
+  document.getElementById('manual-ocr-btn').style.display = 'none';
+  document.getElementById('manual-img-input').value = '';
+  document.getElementById('manual-patient-label').value = '';
+  document.getElementById('manual-patient-age').value = '';
+  _manualOCRText = '';
+  _manualOCRFile = null;
+  switchManualTab('text');
+}
+
+function closeManualMedsModal() {
+  const modal = document.getElementById('manual-meds-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function switchManualTab(tab) {
+  document.getElementById('manual-panel-text').style.display = tab === 'text' ? '' : 'none';
+  document.getElementById('manual-panel-image').style.display = tab === 'image' ? '' : 'none';
+  document.getElementById('manual-tab-text').classList.toggle('active', tab === 'text');
+  document.getElementById('manual-tab-image').classList.toggle('active', tab === 'image');
+}
+
+function parseManualMedText(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length >= 4);
+  const dosePattern = /^([A-Za-z][A-Za-z\s\-\/\(\)]+?)\s+(\d+\.?\d*\s*(?:mg|mcg|mEq|units?|g|mg\/mL|%|IU))/i;
+  const routePattern = /(PO|oral|IV|SQ|IM|topical|inhaled|SL|PR|NG)/i;
+  const freqPattern = /(once daily|BID|TID|QID|Q\d+H|PRN|daily|nightly|weekly)/i;
+
+  const seen = new Set();
+  const results = [];
+
+  for (let line of lines) {
+    // Strip numbered prefixes
+    line = line.replace(/^\d+[\.\)]\s*/, '').trim();
+    // Strip pipe-delimited trailing fields
+    line = line.split('|')[0].trim();
+
+    let name = '', doseText = '', route = '', frequency = '';
+    const doseMatch = line.match(dosePattern);
+    if (doseMatch) {
+      name = doseMatch[1].trim();
+      const afterName = line.slice(doseMatch.index + doseMatch[0].length);
+      doseText = doseMatch[2].trim();
+      const routeMatch = line.match(routePattern);
+      if (routeMatch) route = routeMatch[1];
+      const freqMatch = line.match(freqPattern);
+      if (freqMatch) frequency = freqMatch[1];
+    } else {
+      name = line;
+    }
+
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    results.push({ name, doseText, route, frequency });
+  }
+  return results;
+}
+
+function renderManualMedsPreview(parsedMeds) {
+  const preview = document.getElementById('manual-meds-preview');
+  const list = document.getElementById('manual-meds-preview-list');
+  const importBtn = document.getElementById('manual-import-btn');
+
+  if (!parsedMeds.length) {
+    list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">No medications found. Check the format and try again.</div>';
+    preview.style.display = '';
+    importBtn.style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = parsedMeds.map((med, i) => {
+    const chips = [med.doseText, med.route, med.frequency].filter(Boolean).map(c =>
+      `<span style="display:inline-block;background:var(--teal-light);color:var(--teal);font-size:11px;font-family:'JetBrains Mono',monospace;padding:2px 6px;border-radius:4px;margin-right:4px;">${c}</span>`
+    ).join('');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
+      <input type="checkbox" id="manual-check-${i}" checked style="flex-shrink:0;width:16px;height:16px;accent-color:var(--teal);">
+      <div style="flex:1;min-width:0;">
+        <input type="text" id="manual-name-${i}" value="${med.name.replace(/"/g, '&quot;')}" style="font-size:13px;font-weight:600;color:var(--navy);border:none;background:transparent;width:100%;padding:0;font-family:'Sora',sans-serif;">
+        <div style="margin-top:4px;">${chips}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateImportBtnCount(parsedMeds.length);
+  preview.style.display = '';
+  importBtn.style.display = '';
+
+  // Bind checkboxes to update count
+  parsedMeds.forEach((_, i) => {
+    document.getElementById('manual-check-' + i)?.addEventListener('change', () => {
+      const checked = parsedMeds.filter((__, j) => document.getElementById('manual-check-' + j)?.checked).length;
+      updateImportBtnCount(checked);
+    });
+  });
+}
+
+function updateImportBtnCount(n) {
+  const btn = document.getElementById('manual-import-btn');
+  if (btn) btn.textContent = `Import ${n} Medication${n !== 1 ? 's' : ''}`;
+}
+
+function parseManualTextTab() {
+  const text = document.getElementById('manual-med-textarea').value;
+  const parsed = parseManualMedText(text);
+  renderManualMedsPreview(parsed);
+}
+
+function handleManualImageFile(file) {
+  if (!file) return;
+  _manualOCRFile = file;
+  const dropzone = document.getElementById('manual-ocr-dropzone');
+  if (dropzone) dropzone.querySelector('div:first-child').textContent = file.name;
+  document.getElementById('manual-ocr-btn').style.display = '';
+}
+
+function handleManualImageDrop(event) {
+  event.preventDefault();
+  event.currentTarget.style.borderColor = '';
+  const file = event.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) handleManualImageFile(file);
+}
+
+function updateOCRProgress(progress) {
+  const el = document.getElementById('manual-ocr-progress');
+  if (!el) return;
+  el.style.display = '';
+  el.textContent = 'OCR: ' + Math.round(progress * 100) + '%';
+}
+
+async function extractTextFromImage(file) {
+  const url = URL.createObjectURL(file);
+  const result = await Tesseract.recognize(url, 'eng', {
+    logger: m => { if (m.status === 'recognizing text') updateOCRProgress(m.progress); }
+  });
+  URL.revokeObjectURL(url);
+  return result.data.text;
+}
+
+async function parseManualImageTab() {
+  if (!_manualOCRFile) { alert('Please select or paste an image first.'); return; }
+  const btn = document.getElementById('manual-ocr-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Processing…'; }
+  try {
+    const text = await extractTextFromImage(_manualOCRFile);
+    _manualOCRText = text;
+    const el = document.getElementById('manual-ocr-progress');
+    if (el) el.textContent = 'OCR complete ✓';
+    const parsed = parseManualMedText(text);
+    renderManualMedsPreview(parsed);
+  } catch (err) {
+    alert('OCR failed: ' + err.message);
+    console.error('[OCR]', err);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Extract & Parse'; }
+  }
+}
+
+// Wire Ctrl+V paste into the OCR tab dropzone
+document.addEventListener('paste', function(event) {
+  const imagePanel = document.getElementById('manual-panel-image');
+  if (!imagePanel || imagePanel.style.display === 'none') return;
+  const modal = document.getElementById('manual-meds-modal');
+  if (!modal || modal.style.display === 'none') return;
+  const items = event.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      if (file) { handleManualImageFile(file); break; }
+    }
+  }
+});
+
+function buildFhirMedsFromParsed(checkedMeds, label) {
+  const patientId = label || ('MANUAL-' + Date.now());
+  const medications = checkedMeds.map((med, i) => ({
+    id: 'manual-' + i,
+    status: 'active',
+    medicationName: med.name,
+    rxnormCodes: [],
+    dosages: med.doseText || med.route || med.frequency ? [{
+      text: [med.doseText, med.route, med.frequency].filter(Boolean).join(' '),
+      route: med.route || '',
+      doseQuantity: null,
+      frequency: med.frequency || ''
+    }] : [],
+    authoredOn: new Date().toISOString(),
+    requester: 'Manual Import',
+    note: []
+  }));
+  return { patientId, source: 'manual', medications };
+}
+
+function commitManualMeds() {
+  const list = document.getElementById('manual-meds-preview-list');
+  if (!list) return;
+  const rows = list.querySelectorAll('[id^="manual-check-"]');
+  const checkedMeds = [];
+  rows.forEach((cb, i) => {
+    if (cb.checked) {
+      const nameInput = document.getElementById('manual-name-' + i);
+      // Retrieve original parsed data from rendered row — re-read chips
+      const chips = list.querySelectorAll('[id^="manual-check-"]')[i]?.closest('[style*="display:flex"]')?.querySelectorAll('span[style*="teal"]') || [];
+      const chipTexts = Array.from(chips).map(c => c.textContent.trim());
+      checkedMeds.push({ name: nameInput?.value.trim() || '', doseText: chipTexts[0] || '', route: chipTexts[1] || '', frequency: chipTexts[2] || '' });
+    }
+  });
+
+  if (!checkedMeds.length) { alert('Select at least one medication.'); return; }
+
+  const label = document.getElementById('manual-patient-label').value.trim();
+  const ageVal = parseInt(document.getElementById('manual-patient-age').value, 10);
+
+  _fhirMeds = buildFhirMedsFromParsed(checkedMeds, label);
+
+  if (!_fhirPatient) {
+    _fhirPatient = {
+      patientId: _fhirMeds.patientId,
+      name: label || 'Manual Patient',
+      age: isNaN(ageVal) ? null : ageVal,
+      gender: null,
+      weight: null,
+      height: null
+    };
+  } else if (isNaN(ageVal) === false) {
+    _fhirPatient.age = ageVal;
+    if (label) _fhirPatient.name = label;
+  }
+
+  // Mirror post-load cascade
+  const renalPageActive = document.getElementById('page-renal')?.classList.contains('active');
+  if (renalPageActive && typeof calcRenal === 'function') calcRenal();
+  if (typeof updateAgeFriendlyCard === 'function') updateAgeFriendlyCard();
+  const afPageActive = document.getElementById('page-agefriendly')?.classList.contains('active');
+  if (afPageActive && typeof renderAgeFriendlyAudit === 'function') renderAgeFriendlyAudit();
+  if (typeof triggerAFAdmissionAlert === 'function') triggerAFAdmissionAlert();
+
+  // Update FHIR bar UI
+  const medsBtn = document.getElementById('fhir-meds-btn');
+  if (medsBtn) medsBtn.style.display = '';
+  setFHIRStatus('✓ ' + checkedMeds.length + ' medication' + (checkedMeds.length !== 1 ? 's' : '') + ' imported manually', 'ok');
+  const manualBtn = document.getElementById('manual-meds-btn');
+  if (manualBtn) manualBtn.textContent = '📋 Meds Loaded (' + checkedMeds.length + ')';
+
+  closeManualMedsModal();
+}
+
 function populateFHIRFields(patient, labs, weightData) {
   patient = patient || _fhirPatient;
   labs = labs || _fhirLabs || {};
@@ -3540,7 +3873,7 @@ function openMedsModal() {
   if (!modal || !content) return;
 
   const meds = _fhirMeds.medications || [];
-  if (sub) sub.textContent = `${_fhirPatient?.name || 'Patient'} · ${meds.length} active order${meds.length !== 1 ? 's' : ''} · Source: FHIR`;
+  if (sub) sub.textContent = `${_fhirPatient?.name || 'Patient'} · ${meds.length} active order${meds.length !== 1 ? 's' : ''} · Source: ${_fhirMeds?.source === 'manual' ? 'Manual Import' : 'FHIR'}`;
 
   if (meds.length === 0) {
     content.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;font-size:14px;">No active medications found.</div>';
