@@ -36,10 +36,10 @@ describe('calcCrCl', () => {
     expect(female.crcl / male.crcl).toBeCloseTo(0.85, 1);
   });
 
-  test('SCr floor applied at 0.4 mg/dL', () => {
+  test('SCr floor applied at 0.4 mg/dL (floor is 0.7 per ASHP/IDSA 2020)', () => {
     const result = calcCrCl({ age: 70, weightKg: 65, heightCm: 168, sex: 'M', scrMgDl: 0.4 });
     expect(result.floorApplied).toBe(true);
-    expect(result.scrUsed).toBe(0.6);
+    expect(result.scrUsed).toBe(0.7);
   });
 
   test('ABW used for obese patient (BMI > 30)', () => {

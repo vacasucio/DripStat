@@ -8,7 +8,7 @@
 <style>
 :root {
   --navy:#0f2744;--navy2:#1a3a5c;--navy3:#243b55;
-  --teal:#00a896;--teal-light:#e6f9f7;--teal-mid:#7fd8d0;
+  --teal:#0d7c6e;--teal-light:#e6f4f2;--teal-mid:#9dcdc7;
   --text:#1a2332;--muted:#64748b;--border:#e2e8f0;--bg:#f8fafc;--white:#fff;
   --red:#dc2626;--red-light:#fef2f2;--green:#16a34a;--green-light:#f0fdf4;
   --warn:#f59e0b;--warn-light:#fffbeb;--surface:#f1f5f9;
@@ -261,6 +261,57 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
   .row2,.row3,.row4{grid-template-columns:1fr;}
   .btn-return,.btn-logout{padding:7px 12px;font-size:12px;}
 }
+
+/* ══ PIN CONFIRM / SET-PIN MODALS ══ */
+#pin-confirm-overlay,#set-pin-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(9,30,56,.68);backdrop-filter:blur(5px);
+  align-items:center;justify-content:center;padding:24px;
+}
+#pin-confirm-overlay.open,#set-pin-overlay.open{display:flex;}
+.pcm-card{
+  background:white;border-radius:20px;padding:40px 36px 32px;
+  max-width:360px;width:100%;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,.48),0 0 0 1px rgba(255,255,255,.06);
+}
+.pcm-title{
+  font-family:'Playfair Display',serif;font-size:22px;font-weight:700;
+  color:var(--navy);margin-bottom:6px;
+}
+.pcm-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.55;}
+.pcm-chip{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--teal);background:var(--teal-light);
+  border:1px solid var(--teal-mid);padding:5px 14px;border-radius:100px;
+  display:inline-block;margin-bottom:22px;
+}
+.pcm-cancel{
+  display:block;margin:12px auto 0;background:none;border:none;
+  color:var(--muted);font-size:12px;cursor:pointer;
+  font-family:'DM Mono',monospace;letter-spacing:.04em;transition:color .15s;
+}
+.pcm-cancel:hover{color:var(--text);}
+@keyframes pinShake{
+  0%,100%{transform:translateX(0)}
+  20%,60%{transform:translateX(-7px)}
+  40%,80%{transform:translateX(7px)}
+}
+.pin-input.shake{animation:pinShake .36s ease;border-color:var(--red)!important;}
+
+/* ══ PIN STATUS ROW ══ */
+.pin-status-row{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-top:14px;padding-top:14px;border-top:1px solid var(--border);
+}
+.btn-change-pin{
+  background:transparent;color:var(--muted);
+  border:1.5px solid var(--border);border-radius:8px;
+  padding:8px 16px;font-size:12px;cursor:pointer;
+  font-family:'DM Mono',monospace;letter-spacing:.03em;transition:all .2s;
+}
+.btn-change-pin:hover{border-color:var(--teal);color:var(--teal);}
+.btn-secondary{background:#f0f4f8;color:#1a1a2e;border:1px solid #d0d7de;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;font-family:'DM Mono',monospace;transition:background .15s;}
+.btn-secondary:hover{background:#d0d7de;}
 </style>
 </head>
 <body>
@@ -480,8 +531,9 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
       </div>
       <div class="section-body">
         <div class="action-row">
-          <button class="btn-save" id="save-btn" onclick="saveSettings()">Save Settings</button>
-          <button class="btn-reset" onclick="showResetConfirm()">↺ Reset to Published Defaults</button>
+          <button class="btn-save" id="save-all-btn" onclick="saveAllSettings()" style="background:linear-gradient(135deg,var(--navy),var(--navy2));box-shadow:0 4px 14px rgba(15,39,68,.25);">Save All Settings</button>
+          <button class="btn-save" id="save-btn" onclick="saveSettings()" style="background:var(--teal);">Save Protocol Only</button>
+          <button class="btn-reset" onclick="showResetConfirm()">↺ Reset Protocol to Defaults</button>
           <span class="save-confirm-msg" id="save-msg">✓ Settings saved successfully</span>
         </div>
         <div class="reset-confirm-box" id="reset-confirm">
@@ -493,11 +545,58 @@ body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(-
             <button class="btn-no-reset" onclick="hideResetConfirm()">Cancel</button>
           </div>
         </div>
+        <div class="pin-status-row">
+          <span id="admin-pin-status" style="font-size:12px;font-family:'DM Mono',monospace;"></span>
+          <button class="btn-change-pin" id="change-pin-btn" onclick="openSetPin()">Change PIN</button>
+        </div>
       </div>
     </div>
 
   </div><!-- /admin-body -->
 </div><!-- /admin-panel -->
+
+<!-- ══════════════════════════════════
+     PIN CONFIRM MODAL
+══════════════════════════════════ -->
+<div id="pin-confirm-overlay">
+  <div class="pcm-card">
+    <div class="pcm-title">Confirm Changes</div>
+    <div class="pcm-sub">Enter your Admin PIN to save</div>
+    <div class="pcm-chip" id="pin-confirm-action-label"></div>
+    <label class="pin-lbl">Admin PIN</label>
+    <input id="pin-confirm-input" class="pin-input" type="password"
+           inputmode="numeric" maxlength="8" autocomplete="off"
+           placeholder="····"
+           onkeydown="if(event.key==='Enter')submitPinConfirm()">
+    <button class="pin-btn" style="margin-top:6px;" onclick="submitPinConfirm()">Confirm &amp; Save</button>
+    <div class="pin-err" id="pin-confirm-err"></div>
+    <button class="pcm-cancel" onclick="closePinConfirm()">Cancel</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SET PIN MODAL
+══════════════════════════════════ -->
+<div id="set-pin-overlay">
+  <div class="pcm-card">
+    <div class="pin-wordmark" style="margin-bottom:4px;">Dose<em style="color:var(--teal);font-style:italic;">Defender</em></div>
+    <div class="pin-eyebrow">Admin Security</div>
+    <div class="pcm-title" style="font-size:19px;margin-top:8px;">Set Admin PIN</div>
+    <div class="pcm-sub">Create a 4–8 digit PIN. You'll enter this each time you save admin settings.</div>
+    <label class="pin-lbl">New PIN</label>
+    <input id="set-pin-input" class="pin-input" type="password"
+           inputmode="numeric" maxlength="8" autocomplete="new-password"
+           placeholder="····">
+    <label class="pin-lbl" style="margin-top:14px;">Confirm PIN</label>
+    <input id="set-pin-confirm" class="pin-input" type="password"
+           inputmode="numeric" maxlength="8" autocomplete="new-password"
+           placeholder="····"
+           onkeydown="if(event.key==='Enter')submitSetPin()">
+    <button class="pin-btn" style="margin-top:6px;" onclick="submitSetPin()">Set PIN &amp; Continue</button>
+    <div class="pin-err" id="set-pin-err"></div>
+    <button class="pcm-cancel" onclick="closeSetPin()">Cancel</button>
+  </div>
+</div>
 
 <script>
 // ══ localStorage KEYS (must match DoseDefender.html getProtocol() / _ADMIN_LS) ══
@@ -681,7 +780,7 @@ function loadProtocol(pk){
 }
 
 // ══ SAVE ══
-function saveSettings(){
+function _doSaveSettings(){
   const pk = currentProto;
   const p  = getEffective(pk);
 
@@ -811,7 +910,7 @@ function renderRenalRulesTable() {
   tbody.innerHTML = rows;
 }
 
-function saveRenalRules() {
+function _doSaveRenalRules() {
   const rules = getRenalAdminRules();
   document.querySelectorAll('#renal-rules-tbody [data-di]').forEach(inp => {
     const di = parseInt(inp.dataset.di);
@@ -856,7 +955,7 @@ function addRenalRule() {
   renderRenalRulesTable();
 }
 
-function saveAFSettings() {
+function _doSaveAFSettings() {
   const enabled = document.getElementById('af-enabled')?.value || 'true';
   const threshold = document.getElementById('af-age-threshold')?.value || '65';
   const require = document.getElementById('af-require-audit')?.value || 'false';
@@ -890,13 +989,14 @@ function loadAFSettings() {
   if (autoTriggerEl) autoTriggerEl.value = autoTrigger;
 }
 
-// Hook into showAdminPanel to also render renal rules + users
+// Hook into showAdminPanel to also render renal rules + users + PIN status
 const _origShowAdminPanel = showAdminPanel;
 showAdminPanel = function() {
   _origShowAdminPanel();
   renderRenalRulesTable();
   loadAFSettings();
   loadAdminUsers();
+  updatePinStatus();
 };
 
 // ── Admin Users ────────────────────────────────────────
@@ -969,6 +1069,127 @@ async function adminSetTier() {
     msgEl.textContent = '✗ ' + err.message;
     msgEl.style.color = 'var(--red)';
     msgEl.style.display = '';
+  }
+}
+
+// ══ PIN-WRAPPED SAVE FUNCTIONS ══
+function saveSettings()    { openPinConfirm('Heparin Protocol', _doSaveSettings); }
+function saveRenalRules()  { openPinConfirm('Renal Drug Rules', _doSaveRenalRules); }
+function saveAFSettings()  { openPinConfirm('Age-Friendly Settings', _doSaveAFSettings); }
+
+function saveAllSettings() {
+  openPinConfirm('All Settings', () => {
+    _doSaveSettings();
+    _doSaveRenalRules();
+    _doSaveAFSettings();
+    // Flash the Save All button green
+    const btn = document.getElementById('save-all-btn');
+    if (btn) {
+      btn.textContent = '✓ All Saved';
+      btn.classList.add('saved');
+      setTimeout(() => { btn.textContent = 'Save All Settings'; btn.classList.remove('saved'); }, 3000);
+    }
+  });
+}
+
+// ══ ADMIN PIN MANAGEMENT ══
+const ADMIN_PIN_KEY = 'dosedefender_admin_pin';
+let _pendingSaveCallback = null;
+let _pendingActionLabel  = '';
+
+function hasAdminPin() { return !!localStorage.getItem(ADMIN_PIN_KEY); }
+
+function openPinConfirm(actionLabel, callback) {
+  _pendingSaveCallback = callback;
+  _pendingActionLabel  = actionLabel;
+  if (!hasAdminPin()) {
+    // No PIN set yet — open Set PIN flow, then continue to confirm
+    document.getElementById('set-pin-input').value    = '';
+    document.getElementById('set-pin-confirm').value  = '';
+    document.getElementById('set-pin-err').textContent = '';
+    document.getElementById('set-pin-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('set-pin-input').focus(), 80);
+    return;
+  }
+  document.getElementById('pin-confirm-action-label').textContent = actionLabel;
+  document.getElementById('pin-confirm-input').value  = '';
+  document.getElementById('pin-confirm-err').textContent = '';
+  document.getElementById('pin-confirm-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('pin-confirm-input').focus(), 80);
+}
+
+function closePinConfirm() {
+  document.getElementById('pin-confirm-overlay').classList.remove('open');
+  _pendingSaveCallback = null;
+}
+
+function submitPinConfirm() {
+  const entered = document.getElementById('pin-confirm-input').value;
+  const stored  = localStorage.getItem(ADMIN_PIN_KEY) || '';
+  if (entered !== stored) {
+    const inp = document.getElementById('pin-confirm-input');
+    document.getElementById('pin-confirm-err').textContent = 'Incorrect PIN — try again';
+    inp.classList.remove('shake');
+    void inp.offsetWidth; // reflow to restart animation
+    inp.classList.add('shake');
+    inp.value = '';
+    setTimeout(() => { inp.classList.remove('shake'); inp.focus(); }, 380);
+    return;
+  }
+  document.getElementById('pin-confirm-overlay').classList.remove('open');
+  const cb = _pendingSaveCallback;
+  _pendingSaveCallback = null;
+  if (cb) cb();
+}
+
+function openSetPin() {
+  // May be called from "Change PIN" button (no pending callback) or from openPinConfirm
+  document.getElementById('set-pin-input').value    = '';
+  document.getElementById('set-pin-confirm').value  = '';
+  document.getElementById('set-pin-err').textContent = '';
+  document.getElementById('set-pin-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('set-pin-input').focus(), 80);
+}
+
+function closeSetPin() {
+  document.getElementById('set-pin-overlay').classList.remove('open');
+  _pendingSaveCallback = null; // cancel any pending save
+}
+
+function submitSetPin() {
+  const pin     = document.getElementById('set-pin-input').value;
+  const confirm = document.getElementById('set-pin-confirm').value;
+  const errEl   = document.getElementById('set-pin-err');
+  if (!/^\d{4,8}$/.test(pin)) {
+    errEl.textContent = 'PIN must be 4–8 digits (numbers only)';
+    return;
+  }
+  if (pin !== confirm) {
+    errEl.textContent = 'PINs do not match — please re-enter';
+    return;
+  }
+  localStorage.setItem(ADMIN_PIN_KEY, pin);
+  document.getElementById('set-pin-overlay').classList.remove('open');
+  updatePinStatus();
+  // If this was triggered from a save action, now open the PIN confirm
+  if (_pendingSaveCallback) {
+    const cb    = _pendingSaveCallback;
+    const label = _pendingActionLabel;
+    _pendingSaveCallback = null;
+    setTimeout(() => openPinConfirm(label, cb), 160);
+  }
+}
+
+function updatePinStatus() {
+  const el       = document.getElementById('admin-pin-status');
+  const changeBtn = document.getElementById('change-pin-btn');
+  if (!el) return;
+  if (hasAdminPin()) {
+    el.innerHTML = '<span style="color:var(--green);font-weight:600;">✓ Admin PIN is set</span>';
+    if (changeBtn) changeBtn.textContent = 'Change PIN';
+  } else {
+    el.innerHTML = '<span style="color:var(--muted);">No PIN set — you\'ll be prompted to create one when you first save</span>';
+    if (changeBtn) changeBtn.textContent = 'Set PIN';
   }
 }
 

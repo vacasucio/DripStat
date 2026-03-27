@@ -9,7 +9,7 @@
 
   /**
    * calcCrCl — Cockcroft-Gault with ABW adjustment for obesity (BMI > 30)
-   * and an SCr floor of 0.6 mg/dL to prevent CrCl overestimation.
+   * and an SCr floor of 0.7 mg/dL to prevent CrCl overestimation (ASHP/IDSA 2020).
    * CrCl is capped at 120 mL/min.
    *
    * @param {object} p
@@ -21,9 +21,9 @@
    * @returns {object} { crcl, method, scrUsed, weightUsed, floorApplied }
    */
   function calcCrCl({ age, weightKg, heightCm, sex, scrMgDl }) {
-    // SCr floor at 0.6 mg/dL
-    const scrUsed = Math.max(scrMgDl, 0.6);
-    const floorApplied = scrMgDl < 0.6;
+    // SCr floor at 0.7 mg/dL (ASHP/IDSA 2020 standard)
+    const scrUsed = Math.max(scrMgDl, 0.7);
+    const floorApplied = scrMgDl < 0.7;
 
     // IBW (Devine formula, cm-based)
     const inchesOver5ft = (heightCm / 2.54) - 60;

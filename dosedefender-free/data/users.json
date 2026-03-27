@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "mmzkixdy3xfe7zkw3",
+    "email": "sclifford.pharm@gmail.com",
+    "passwordHash": "$2b$12$UQVftabNJ5N6afXcZEOJBOeOW/Kr2Mp4ZwFkModA5nMdLALY4.c36",
+    "tier": "pro",
+    "createdAt": "2026-03-21T00:06:53.062Z",
+    "stripeCustomerId": null,
+    "stripeSubscriptionId": null,
+    "subscriptionStatus": "comped",
+    "isAdmin": true
+  }
+]

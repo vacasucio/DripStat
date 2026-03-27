@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment — never commit secrets
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Data files with user/patient info
+data/users.json
+data/feedback.json
+
+# Claude Code local config
+.claude/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*

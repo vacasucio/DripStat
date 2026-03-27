@@ -18,7 +18,25 @@ const paymentsRoutes = require('./payments');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// ── CORS — restrict to known trusted origins ────────────────────────────────
+const FHIR_ALLOWED_ORIGINS = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map(s => s.trim())
+  : [
+      'https://dosedefender.com',
+      'https://www.dosedefender.com',
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ];
+app.use(cors({
+  origin(origin, callback) {
+    // Allow same-origin / server-to-server requests (no Origin header)
+    if (!origin) return callback(null, true);
+    if (FHIR_ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error('CORS: origin not allowed'));
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 
 // ── HTTP Basic Auth ────────────────────────────────────────────────────────
@@ -117,13 +135,18 @@ app.get('/launch', async (req, res) => {
     req.session.authorizationEndpoint = smartConfig.authorization_endpoint;
     req.session.tokenEndpoint = smartConfig.token_endpoint;
 
+    // Generate and store CSRF state — verified in /callback
+    const oauthState = Math.random().toString(36).substring(2, 14) +
+                       Math.random().toString(36).substring(2, 14);
+    req.session.oauthState = oauthState;
+
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: process.env.CERNER_CLIENT_ID,
       redirect_uri: process.env.CERNER_REDIRECT_URI,
       scope: 'launch openid fhirUser patient/*.read',
       aud: iss,
-      state: Math.random().toString(36).substring(2, 14),
+      state: oauthState,
     });
     if (launch) params.set('launch', launch);
 
@@ -139,8 +162,15 @@ app.get('/launch', async (req, res) => {
 // Exchanges the authorization code for an access token, stores it in the session,
 // and redirects to /app — optionally with the patient ID as a query param.
 app.get('/callback', async (req, res) => {
-  const { code } = req.query;
+  const { code, state } = req.query;
   if (!code) return res.status(400).send('Missing authorization code');
+
+  // Verify OAuth state parameter to prevent CSRF attacks
+  if (!state || !req.session.oauthState || state !== req.session.oauthState) {
+    console.warn('[SMART /callback] OAuth state mismatch — possible CSRF attempt');
+    return res.status(400).send('Invalid OAuth state parameter. Please restart the login flow.');
+  }
+  delete req.session.oauthState; // consume state — single use
 
   const tokenEndpoint = req.session.tokenEndpoint;
   if (!tokenEndpoint) {
@@ -227,8 +257,11 @@ app.get('/api/token/refresh', async (req, res) => {
   }
 });
 
-// ── Debug: env inspection (remove after confirming Railway env injection) ──
+// ── Debug: env inspection (development-only — blocked in production) ─────────
 app.get('/debug/env', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).send('Not found');
+  }
   res.json({
     NODE_ENV:        process.env.NODE_ENV        ?? null,
     FHIR_BASE_URL:   process.env.FHIR_BASE_URL   ?? null,

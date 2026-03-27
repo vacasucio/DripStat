@@ -16,7 +16,13 @@ function readUsers() {
 }
 
 function writeUsers(users) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  try {
+    fs.mkdirSync(path.dirname(USERS_FILE), { recursive: true });
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  } catch (err) {
+    console.error('[writeUsers] FAILED to write', USERS_FILE, '—', err.code, err.message);
+    throw err;
+  }
 }
 
 function generateId() {
@@ -84,7 +90,13 @@ router.post('/register', async (req, res) => {
     return res.status(409).json({ error: 'An account with this email already exists' });
   }
 
-  const passwordHash = await bcrypt.hash(password, 12);
+  let passwordHash;
+  try {
+    passwordHash = await bcrypt.hash(password, 12);
+  } catch (err) {
+    console.error('[register] bcrypt error:', err.message);
+    return res.status(500).json({ error: 'Registration failed' });
+  }
   const user = {
     id: generateId(),
     email: emailLower,
@@ -96,7 +108,12 @@ router.post('/register', async (req, res) => {
     subscriptionStatus: null,
   };
   users.push(user);
-  writeUsers(users);
+  try {
+    writeUsers(users);
+  } catch (err) {
+    console.error('[register] writeUsers failed — filesystem may be read-only (Railway ephemeral?):', err.code, err.message);
+    return res.status(500).json({ error: 'Registration failed — server storage error' });
+  }
 
   const token = signToken(user);
   res.json({ token, user: { id: user.id, email: user.email, tier: user.tier } });
@@ -112,7 +129,13 @@ router.post('/login', async (req, res) => {
   const user = users.find(u => u.email === emailLower);
   if (!user) return res.status(401).json({ error: 'Invalid email or password' });
 
-  const valid = await bcrypt.compare(password, user.passwordHash);
+  let valid;
+  try {
+    valid = await bcrypt.compare(password, user.passwordHash);
+  } catch (err) {
+    console.error('[login] bcrypt error:', err.message);
+    return res.status(500).json({ error: 'Login failed' });
+  }
   if (!valid) return res.status(401).json({ error: 'Invalid email or password' });
 
   const token = signToken(user);
