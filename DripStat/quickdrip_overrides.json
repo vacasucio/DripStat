@@ -1,0 +1,20 @@
+{
+  "vancomycin": {
+    "sideEffects": [
+      "Red Man Syndrome — flushing of upper body ('red neck'), chest/back pain from rapid infusion; prevent by infusing over ≥60 min",
+      "Nephrotoxicity — acute kidney injury; risk increases with higher levels or concomitant nephrotoxic drugs",
+      "Ototoxicity — hearing loss, vertigo, tinnitus; risk increases with renal dysfunction",
+      "Infusion-related reactions — hypotension, wheezing, dyspnea, urticaria, pruritus",
+      "Phlebitis — inflammation at injection site; minimize by slow infusion of dilute solution",
+      "Neutropenia — reversible; monitor CBC with prolonged therapy"
+    ],
+    "blackBoxWarnings": []
+  },
+  "amiodarone": {
+    "blackBoxWarnings": [
+      "Pulmonary toxicity — can cause fatal pneumonitis and pulmonary fibrosis",
+      "Hepatotoxicity — can cause hepatocellular necrosis or hepatic failure, sometimes fatal",
+      "Proarrhythmia — may worsen or provoke new arrhythmias; initiate only in hospital with continuous ECG monitoring"
+    ]
+  }
+}

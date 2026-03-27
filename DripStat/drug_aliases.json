@@ -1,0 +1,252 @@
+{
+  "_comment": "Brand name / abbreviation → generic name mapping for QuickDrip autocomplete",
+
+  "zosyn": "piperacillin-tazobactam",
+  "pip-tazo": "piperacillin-tazobactam",
+  "pip/tazo": "piperacillin-tazobactam",
+  "pip tazo": "piperacillin-tazobactam",
+
+  "levophed": "norepinephrine",
+  "norepi": "norepinephrine",
+
+  "precedex": "dexmedetomidine",
+  "dex": "dexmedetomidine",
+
+  "cardizem": "diltiazem",
+
+  "lasix": "furosemide",
+
+  "tylenol": "acetaminophen",
+  "ofirmev": "acetaminophen",
+  "apap": "acetaminophen",
+
+  "ativan": "lorazepam",
+
+  "versed": "midazolam",
+
+  "solu-medrol": "methylprednisolone",
+  "solumedrol": "methylprednisolone",
+
+  "ancef": "cefazolin",
+
+  "flagyl": "metronidazole",
+  "metro": "metronidazole",
+
+  "zofran": "ondansetron",
+
+  "protonix": "pantoprazole",
+
+  "maxipime": "cefepime",
+
+  "rocephin": "ceftriaxone",
+
+  "benadryl": "diphenhydramine",
+
+  "narcan": "naloxone",
+
+  "neo-synephrine": "phenylephrine",
+  "neo synephrine": "phenylephrine",
+  "neosynephrine": "phenylephrine",
+
+  "diprivan": "propofol",
+
+  "keppra": "levetiracetam",
+
+  "unasyn": "ampicillin-sulbactam",
+
+  "invanz": "ertapenem",
+
+  "merrem": "meropenem",
+
+  "zyvox": "linezolid",
+
+  "cubicin": "daptomycin",
+
+  "cancidas": "caspofungin",
+
+  "mycamine": "micafungin",
+
+  "diflucan": "fluconazole",
+
+  "vfend": "voriconazole",
+
+  "ambisome": "amphotericin b liposomal",
+
+  "reopro": "abciximab",
+
+  "integrilin": "eptifibatide",
+
+  "aggrastat": "tirofiban",
+
+  "angiomax": "bivalirudin",
+
+  "argatroban": "argatroban",
+
+  "hep": "heparin",
+
+  "cordarone": "amiodarone",
+  "amio": "amiodarone",
+
+  "adenocard": "adenosine",
+
+  "nipride": "nitroprusside",
+  "nitropress": "nitroprusside",
+
+  "ntg": "nitroglycerin",
+  "nitro": "nitroglycerin",
+  "tridil": "nitroglycerin",
+
+  "brevibloc": "esmolol",
+
+  "trandate": "labetalol",
+
+  "cleviprex": "clevidipine",
+
+  "primacor": "milrinone",
+
+  "dobutrex": "dobutamine",
+
+  "intropin": "dopamine",
+  "dopa": "dopamine",
+
+  "epi": "epinephrine",
+  "adrenalin": "epinephrine",
+
+  "pitressin": "vasopressin",
+
+  "isuprel": "isoproterenol",
+
+  "lanoxin": "digoxin",
+  "dig": "digoxin",
+
+  "bumex": "bumetanide",
+
+  "diamox": "acetazolamide",
+
+  "decadron": "dexamethasone",
+
+  "pepcid": "famotidine",
+
+  "reglan": "metoclopramide",
+
+  "phenergan": "promethazine",
+
+  "compazine": "prochlorperazine",
+
+  "toradol": "ketorolac",
+
+  "dilaudid": "hydromorphone",
+  "hm": "hydromorphone",
+
+  "ms contin": "morphine",
+  "mso4": "morphine",
+
+  "sublimaze": "fentanyl",
+
+  "nimbex": "cisatracurium",
+
+  "zemuron": "rocuronium",
+
+  "succs": "succinylcholine",
+  "anectine": "succinylcholine",
+
+  "bridion": "sugammadex",
+
+  "tpa": "alteplase",
+  "activase": "alteplase",
+
+  "acyclo": "acyclovir",
+  "zovirax": "acyclovir",
+
+  "vanco": "vancomycin",
+  "vancocin": "vancomycin",
+
+  "gent": "gentamicin",
+  "garamycin": "gentamicin",
+
+  "tobra": "tobramycin",
+
+  "cipro": "ciprofloxacin",
+
+  "levaquin": "levofloxacin",
+  "levo": "levofloxacin",
+
+  "avelox": "moxifloxacin",
+
+  "cleocin": "clindamycin",
+  "clinda": "clindamycin",
+
+  "bactrim": "trimethoprim-sulfamethoxazole",
+  "tmp-smx": "trimethoprim-sulfamethoxazole",
+  "septra": "trimethoprim-sulfamethoxazole",
+
+  "vibramycin": "doxycycline",
+  "doxy": "doxycycline",
+
+  "tygacil": "tigecycline",
+
+  "azithro": "azithromycin",
+  "zithromax": "azithromycin",
+  "zpak": "azithromycin",
+
+  "erythro": "erythromycin",
+
+  "voriconazole": "voriconazole",
+
+  "valcyte": "valganciclovir",
+  "cytovene": "ganciclovir",
+
+  "remdesivir": "remdesivir",
+  "veklury": "remdesivir",
+
+  "lovenox": "enoxaparin",
+
+  "coumadin": "warfarin",
+
+  "TPN": "amino acids",
+  "tpn": "amino acids",
+
+  "insulin": "insulin regular",
+  "regular insulin": "insulin regular",
+  "humulin": "insulin regular",
+  "novolin": "insulin regular",
+
+  "kcl": "potassium chloride",
+  "k rider": "potassium chloride",
+  "potassium": "potassium chloride",
+
+  "mag": "magnesium sulfate",
+  "mag sulfate": "magnesium sulfate",
+  "mgso4": "magnesium sulfate",
+
+  "bicarb": "sodium bicarbonate",
+  "nahco3": "sodium bicarbonate",
+
+  "calcium": "calcium gluconate",
+  "ca gluconate": "calcium gluconate",
+
+  "cacl": "calcium chloride",
+
+  "albumin 5": "albumin 5%",
+  "albumin 25": "albumin 25%",
+
+  "d50": "dextrose 50%",
+  "d5": "dextrose 5%",
+
+  "phos": "potassium phosphate",
+
+  "mannitol": "mannitol",
+
+  "depacon": "valproate sodium",
+  "valproic": "valproate sodium",
+
+  "dilantin": "phenytoin",
+  "fosphenytoin": "fosphenytoin",
+  "cerebyx": "fosphenytoin",
+
+  "seroquel": "quetiapine",
+  "haldol": "haloperidol",
+
+  "lopressor": "metoprolol",
+  "metop": "metoprolol"
+}

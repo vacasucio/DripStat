@@ -1,0 +1,22 @@
+{
+  "name": "dripstat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build_database.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build:cache": "node build_quickdrip_cache.js",
+    "validate": "node validate_cache.js",
+    "build:db": "node build_database.js",
+    "build:labels": "node fetch_labels.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^12.8.0",
+    "pdf-parse": "^1.1.1"
+  }
+}

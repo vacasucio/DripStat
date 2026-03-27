@@ -1,0 +1,6 @@
+node_modules/
+labels/
+pi_embeddings.db
+cache_failures.log
+*.log
+.env
