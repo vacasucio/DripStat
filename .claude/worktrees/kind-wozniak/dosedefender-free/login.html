@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — DoseDefender</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0f2744;--navy2:#1a3a5c;--teal:#00a896;--teal-light:#e6f9f7;--teal-mid:#7fd8d0;--text:#1a2332;--muted:#64748b;--border:#e2e8f0;--bg:#f0f4f8;--white:#fff;--red:#dc2626;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sora',sans-serif;background:linear-gradient(160deg,#060f1c 0%,#0f2744 55%,#091e38 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:white;border-radius:20px;padding:48px 44px 40px;max-width:400px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.45);}
+.logo{font-family:'Sora',sans-serif;font-size:26px;font-weight:700;color:var(--navy);margin-bottom:4px;letter-spacing:-.02em;}
+.logo em{color:var(--teal);font-style:normal;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:36px;}
+.field{margin-bottom:18px;}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Sora',sans-serif;color:var(--text);outline:none;transition:border-color .15s;}
+input:focus{border-color:var(--teal);}
+.btn{width:100%;background:var(--navy);color:white;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;transition:all .2s;margin-top:8px;}
+.btn:hover{background:var(--navy2);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.error{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px;display:none;}
+.footer{text-align:center;margin-top:24px;font-size:13px;color:var(--muted);}
+.footer a{color:var(--teal);text-decoration:none;font-weight:600;}
+.divider{text-align:center;color:var(--muted);font-size:12px;margin:20px 0;position:relative;}
+.divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border);}
+.divider span{background:white;padding:0 12px;position:relative;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Dose<em>Defender</em></div>
+  <div class="eyebrow">Clinical Calculators · Sign In</div>
+
+  <div class="error" id="error-msg"></div>
+
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="you@hospital.org" autocomplete="email">
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+  </div>
+  <button class="btn" id="login-btn" onclick="doLogin()">Sign In</button>
+
+  <div class="footer">
+    Don't have an account? <a href="/register">Create one free</a>
+  </div>
+  <div class="footer" style="margin-top:8px;">
+    <a href="/app-v2" style="color:var(--muted);font-weight:400;">Continue without signing in →</a>
+  </div>
+</div>
+
+<script>
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const errEl = document.getElementById('error-msg');
+  const btn = document.getElementById('login-btn');
+  errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; errEl.style.display = ''; return; }
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const r = await fetch('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Login failed');
+    localStorage.setItem('dosedefender_token', data.token);
+    const redirect = new URLSearchParams(window.location.search).get('redirect') || '/app-v2';
+    window.location.href = redirect;
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = '';
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+}
+
+// Already logged in?
+if (localStorage.getItem('dosedefender_token')) {
+  window.location.href = '/app-v2';
+}
+</script>
+</body>
+</html>

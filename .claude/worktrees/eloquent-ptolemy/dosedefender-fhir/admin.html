@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DoseDefender — Admin Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Instrument+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0f2744;--navy2:#1a3a5c;--navy3:#243b55;
+  --teal:#0d7c6e;--teal-light:#e6f4f2;--teal-mid:#9dcdc7;
+  --text:#1a2332;--muted:#64748b;--border:#e2e8f0;--bg:#f8fafc;--white:#fff;
+  --red:#dc2626;--red-light:#fef2f2;--green:#16a34a;--green-light:#f0fdf4;
+  --warn:#f59e0b;--warn-light:#fffbeb;--surface:#f1f5f9;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Instrument Sans',sans-serif;color:var(--text);background:var(--bg);min-height:100vh;}
+
+/* ══ PIN SCREEN ══ */
+#pin-screen{
+  min-height:100vh;
+  background:linear-gradient(160deg,#060f1c 0%,#0f2744 55%,#091e38 100%);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.pin-card{
+  background:white;border-radius:20px;padding:52px 44px 44px;
+  max-width:380px;width:100%;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.05);
+}
+.pin-wordmark{
+  font-family:'Playfair Display',serif;font-size:28px;font-weight:700;
+  color:var(--navy);letter-spacing:-.01em;margin-bottom:4px;
+}
+.pin-wordmark em{color:var(--teal);font-style:italic;}
+.pin-eyebrow{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:40px;
+}
+.pin-lbl{
+  display:block;font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:12px;
+}
+.pin-input{
+  width:100%;background:var(--bg);border:2px solid var(--border);
+  color:var(--navy);border-radius:12px;padding:16px;
+  font-size:30px;font-family:'DM Mono',monospace;letter-spacing:.5em;
+  text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;
+  margin-bottom:14px;
+}
+.pin-input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(13,124,110,.1);}
+.pin-input:disabled{opacity:.4;cursor:not-allowed;}
+.pin-btn{
+  width:100%;background:var(--navy);color:white;border:none;border-radius:12px;
+  padding:15px;font-size:14px;font-weight:600;cursor:pointer;
+  font-family:'Instrument Sans',sans-serif;transition:all .2s;
+  box-shadow:0 4px 14px rgba(15,39,68,.25);
+}
+.pin-btn:hover{background:var(--navy2);transform:translateY(-1px);}
+.pin-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.pin-err{
+  display:block;margin-top:12px;font-size:12px;
+  color:var(--red);font-family:'DM Mono',monospace;min-height:18px;
+}
+.pin-lock{
+  margin-top:10px;font-size:12px;color:var(--muted);
+  font-family:'DM Mono',monospace;display:none;
+}
+
+/* ══ ADMIN NAV ══ */
+#admin-panel{display:none;}
+.admin-nav{
+  position:sticky;top:0;z-index:100;height:64px;
+  background:rgba(255,255,255,.97);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:0 48px;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+}
+.nav-left{display:flex;align-items:center;gap:14px;}
+.nav-wordmark{
+  font-family:'Playfair Display',serif;font-size:20px;font-weight:700;
+  color:var(--navy);letter-spacing:-.01em;
+}
+.nav-wordmark em{color:var(--teal);font-style:italic;}
+.admin-badge{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;background:var(--warn-light);
+  border:1px solid #fde68a;color:#92400e;
+  padding:3px 10px;border-radius:100px;
+}
+.nav-right{display:flex;gap:8px;align-items:center;}
+.btn-return{
+  background:var(--navy);color:white;border:none;
+  border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all .2s;
+  text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+}
+.btn-return:hover{background:var(--navy2);}
+.btn-logout{
+  background:transparent;color:var(--muted);
+  border:1.5px solid var(--border);border-radius:8px;
+  padding:7px 16px;font-size:12px;cursor:pointer;
+  font-family:'DM Mono',monospace;letter-spacing:.03em;transition:all .2s;
+}
+.btn-logout:hover{border-color:#fca5a5;color:var(--red);}
+
+/* ══ BODY LAYOUT ══ */
+.admin-body{max-width:960px;margin:0 auto;padding:36px 24px 80px;}
+
+.disc-bar{
+  background:var(--warn-light);border:1px solid #fde68a;border-radius:10px;
+  padding:12px 18px;font-size:12px;color:#92400e;
+  display:flex;align-items:flex-start;gap:8px;margin-bottom:28px;line-height:1.6;
+}
+
+/* ══ SECTION CARDS ══ */
+.section-card{
+  background:white;border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;margin-bottom:20px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.section-hdr{
+  padding:15px 24px;background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.section-icon{font-size:17px;}
+.section-title{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--muted);font-weight:500;
+}
+.section-body{padding:24px;}
+
+/* ══ FORM ELEMENTS ══ */
+.field{margin-bottom:18px;}
+.field:last-child{margin-bottom:0;}
+.lbl{
+  display:block;font-size:10px;font-weight:600;color:var(--muted);
+  margin-bottom:6px;font-family:'DM Mono',monospace;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.inp{
+  background:var(--bg);border:1.5px solid var(--border);color:var(--text);
+  border-radius:10px;padding:11px 14px;font-size:14px;
+  font-family:'DM Mono',monospace;width:100%;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.inp:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,124,110,.1);background:white;}
+.inp-text{font-family:'Instrument Sans',sans-serif;}
+.inp-hint{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:5px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;}
+
+.proto-sel{
+  background:var(--bg);border:2px solid var(--teal-mid);color:var(--navy);
+  border-radius:10px;padding:12px 36px 12px 14px;font-size:15px;
+  font-family:'Instrument Sans',sans-serif;width:100%;outline:none;
+  appearance:none;cursor:pointer;font-weight:600;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;
+  transition:border-color .2s;
+}
+.proto-sel:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,124,110,.1);}
+.proto-status{
+  margin-top:8px;font-size:11px;font-family:'DM Mono',monospace;
+  display:flex;align-items:center;gap:6px;
+}
+.proto-status.custom{color:#92400e;}
+.proto-status.default{color:var(--green);}
+
+/* ══ NOMOGRAM TABLE ══ */
+.nomo-outer{margin-top:20px;}
+.nomo-sec-lbl{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+.nomo-sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.nomo-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:12px;}
+.nomo-tbl{width:100%;border-collapse:collapse;}
+.nomo-tbl thead th{
+  padding:10px 10px;
+  background:linear-gradient(135deg,var(--navy),var(--navy3));
+  color:rgba(255,255,255,.65);
+  font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:.1em;text-transform:uppercase;
+  text-align:left;font-weight:500;white-space:nowrap;
+}
+.nomo-tbl thead th:first-child{border-top-left-radius:11px;}
+.nomo-tbl thead th:last-child{border-top-right-radius:11px;}
+.nomo-tbl tbody td{
+  padding:7px 6px;border-bottom:1px solid var(--border);vertical-align:middle;
+}
+.nomo-tbl tbody tr:last-child td{border-bottom:none;}
+.nomo-tbl tbody tr:hover td{background:var(--teal-light);}
+.nomo-lbl{
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);
+  font-weight:600;white-space:nowrap;padding:0 8px 0 4px;
+}
+.type-chip{
+  font-family:'DM Mono',monospace;font-size:8px;padding:2px 7px;
+  border-radius:100px;font-weight:600;white-space:nowrap;
+}
+.t-increase{background:#fef3c7;color:#92400e;}
+.t-therapeutic{background:var(--green-light);color:var(--green);}
+.t-decrease{background:var(--teal-light);color:var(--teal);}
+.t-hold{background:var(--red-light);color:var(--red);}
+.nomo-inp{
+  background:var(--bg);border:1.5px solid var(--border);color:var(--text);
+  border-radius:6px;padding:6px 7px;font-size:12px;
+  font-family:'DM Mono',monospace;width:100%;outline:none;
+  transition:border-color .15s;min-width:54px;
+}
+.nomo-inp:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(13,124,110,.1);background:white;}
+.nomo-note{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:8px;}
+
+/* ══ SAVE / RESET ══ */
+.action-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.btn-save{
+  background:var(--teal);color:white;border:none;
+  border-radius:10px;padding:13px 32px;font-size:14px;font-weight:600;
+  cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all .2s;
+  box-shadow:0 4px 14px rgba(13,124,110,.25);
+}
+.btn-save:hover{background:#0a6358;transform:translateY(-1px);}
+.btn-save.saved{background:var(--green);box-shadow:0 4px 14px rgba(22,163,74,.25);}
+.btn-reset{
+  background:transparent;color:var(--muted);
+  border:1.5px solid var(--border);border-radius:10px;
+  padding:12px 22px;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all .2s;
+}
+.btn-reset:hover{border-color:#fca5a5;color:var(--red);}
+.save-confirm-msg{
+  font-size:13px;font-family:'DM Mono',monospace;
+  color:var(--green);display:none;
+}
+.reset-confirm-box{
+  display:none;margin-top:14px;background:var(--red-light);
+  border:1px solid #fecaca;border-radius:10px;padding:16px 20px;
+  font-size:13px;color:var(--red);line-height:1.65;
+}
+.reset-confirm-btns{display:flex;gap:8px;margin-top:12px;}
+.btn-yes-reset{
+  background:var(--red);color:white;border:none;border-radius:8px;
+  padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:'DM Mono',monospace;transition:background .2s;
+}
+.btn-yes-reset:hover{background:#b91c1c;}
+.btn-no-reset{
+  background:white;color:var(--muted);border:1.5px solid var(--border);
+  border-radius:8px;padding:8px 18px;font-size:12px;cursor:pointer;
+  font-family:'DM Mono',monospace;transition:all .2s;
+}
+.btn-no-reset:hover{border-color:var(--muted);color:var(--text);}
+
+@media(max-width:768px){
+  .admin-nav{padding:0 16px;}
+  .nav-wordmark{font-size:17px;}
+  .admin-body{padding:20px 16px 60px;}
+  .row2,.row3,.row4{grid-template-columns:1fr;}
+  .btn-return,.btn-logout{padding:7px 12px;font-size:12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     PIN SCREEN
+══════════════════════════════════ -->
+<div id="pin-screen">
+  <div class="pin-card">
+    <div class="pin-wordmark">Dose<em>Defender</em></div>
+    <div class="pin-eyebrow">Admin Settings</div>
+    <div id="auth-status" style="font-size:13px;color:var(--muted);text-align:center;margin-top:16px;">
+      Verifying credentials…
+    </div>
+    <div id="auth-error" style="display:none;font-size:13px;color:var(--red);text-align:center;margin-top:16px;"></div>
+    <a id="login-link" href="/login" style="display:none;margin-top:20px;background:var(--navy);color:white;border-radius:10px;padding:13px 24px;font-size:13px;font-weight:600;text-decoration:none;text-align:center;">
+      Sign In
+    </a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     ADMIN PANEL
+══════════════════════════════════ -->
+<div id="admin-panel">
+
+  <nav class="admin-nav">
+    <div class="nav-left">
+      <div class="nav-wordmark">Dose<em>Safe</em></div>
+      <span class="admin-badge">⚙ Admin Settings</span>
+    </div>
+    <div class="nav-right">
+      <a href="/" class="btn-return">← Back to DoseDefender</a>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="admin-body">
+
+    <div class="disc-bar">
+      ⚠️ <span>Settings saved here take effect immediately when clinicians return to DoseDefender. Only modify values in accordance with your institution's approved heparin protocol. All changes are stored in this browser's localStorage.</span>
+    </div>
+
+    <!-- ── Users Section ── -->
+    <div class="section-card" id="users-section-card">
+      <div class="section-hdr">
+        <span class="section-icon">👥</span>
+        <span class="section-title">Registered Users</span>
+      </div>
+      <div class="section-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+            <div style="font-size:28px;font-weight:700;color:var(--navy);" id="admin-total-users">—</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Total Users</div>
+          </div>
+          <div style="background:var(--green-light);border:1px solid #bbf7d0;border-radius:12px;padding:20px;text-align:center;">
+            <div style="font-size:28px;font-weight:700;color:var(--green);" id="admin-pro-users">—</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">PRO Users</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+            <div style="font-size:28px;font-weight:700;color:var(--muted);" id="admin-free-users">—</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Free Users</div>
+          </div>
+        </div>
+
+        <!-- Manual tier override -->
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;">
+          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;">Manual Tier Override (comp accounts / testing)</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <input type="email" id="admin-tier-email" placeholder="user@example.com" style="flex:1;min-width:200px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Instrument Sans',sans-serif;">
+            <select id="admin-tier-select" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Instrument Sans',sans-serif;">
+              <option value="pro">→ PRO</option>
+              <option value="free">→ Free</option>
+            </select>
+            <button onclick="adminSetTier()" style="background:var(--navy);color:white;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;">Set Tier</button>
+          </div>
+          <div id="admin-tier-msg" style="font-size:12px;margin-top:8px;display:none;"></div>
+        </div>
+
+        <!-- Recent users table -->
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Recent Sign-ups</div>
+        <div id="admin-users-table" style="border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:13px;">
+          <div style="padding:20px;color:var(--muted);text-align:center;">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Shared Settings ── -->
+    <div class="section-card">
+      <div class="section-hdr">
+        <span class="section-icon">🏥</span>
+        <span class="section-title">Shared Settings</span>
+      </div>
+      <div class="section-body">
+        <div class="row2">
+          <div class="field">
+            <label class="lbl" for="inst-name">Institution Name</label>
+            <input id="inst-name" class="inp inp-text" type="text"
+                   placeholder="e.g. General Hospital Pharmacy">
+            <div class="inp-hint">Displayed in the calculator header when set</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Protocol Settings ── -->
+    <div class="section-card">
+      <div class="section-hdr">
+        <span class="section-icon">💉</span>
+        <span class="section-title">Heparin Protocol Settings</span>
+      </div>
+      <div class="section-body">
+        <div class="field" style="margin-bottom:24px;">
+          <label class="lbl" for="proto-select">Protocol</label>
+          <select id="proto-select" class="proto-sel"
+                  onchange="loadProtocol(this.value)">
+            <option value="DVT">Heparin VTE — DVT / Venous Thromboembolism</option>
+            <option value="ACS">Heparin ACS — Acute Coronary Syndrome</option>
+          </select>
+          <div class="proto-status" id="proto-status"></div>
+        </div>
+
+        <!-- Protocol parameter fields — rendered by JS -->
+        <div id="proto-fields"></div>
+      </div>
+    </div>
+
+    <!-- ── Renal Drug Rules ── -->
+    <div class="section-card">
+      <div class="section-hdr">
+        <span class="section-icon">🫘</span>
+        <span class="section-title">Renal Drug Rules</span>
+      </div>
+      <div class="section-body">
+        <div class="disc-bar" style="margin-bottom:20px;">
+          ⚠️ <span>Changes to renal drug rules apply immediately when clinicians use the Renal Dose Defender. Rules are stored in this browser's localStorage and override the built-in defaults.</span>
+        </div>
+        <div id="renal-rules-status" class="proto-status default" style="margin-bottom:16px;">✓ Using published defaults — no customizations saved</div>
+
+        <div id="renal-rules-table-wrap" style="overflow-x:auto;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;">
+          <table class="nomo-tbl" id="renal-rules-tbl">
+            <thead>
+              <tr>
+                <th style="min-width:130px;">Drug</th>
+                <th>Category</th>
+                <th style="min-width:60px;">CrCl Max</th>
+                <th style="min-width:60px;">CrCl Min</th>
+                <th>Severity</th>
+                <th style="min-width:220px;">Recommendation</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="renal-rules-tbody"></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <button class="btn-save" id="renal-save-btn" onclick="saveRenalRules()">Save Renal Rules</button>
+          <button class="btn-reset" onclick="resetRenalRules()">↺ Reset to Defaults</button>
+          <button class="btn-secondary" style="padding:12px 20px;font-size:13px;" onclick="addRenalRule()">＋ Add Drug</button>
+          <span class="save-confirm-msg" id="renal-save-msg">✓ Renal rules saved</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Age-Friendly Audit Settings ── -->
+    <div class="section-card" id="af-admin-section">
+      <div class="section-hdr">
+        <span class="section-icon">🛡️</span>
+        <span class="section-title">Age-Friendly Audit Settings</span>
+      </div>
+      <div class="section-body">
+        <div class="disc-bar" style="margin-bottom:20px;">
+          📋 <span>Settings for the Beers Criteria Admission Audit tool. Changes apply immediately to the app.</span>
+        </div>
+        <div class="row2" style="margin-bottom:16px;">
+          <div class="field">
+            <label class="lbl">Enable Age-Friendly Audit</label>
+            <select id="af-enabled" class="inp">
+              <option value="true">Enabled</option>
+              <option value="false">Disabled</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Age Threshold (years)</label>
+            <input id="af-age-threshold" class="inp" type="number" min="1" max="120" value="65">
+          </div>
+        </div>
+        <div class="row2" style="margin-bottom:16px;">
+          <div class="field">
+            <label class="lbl">Require Audit Before Calculator Use</label>
+            <select id="af-require-audit" class="inp">
+              <option value="false">Not Required</option>
+              <option value="true">Required (warn clinicians)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Auto-Trigger Audit on Patient Load</label>
+            <select id="af-auto-trigger" class="inp">
+              <option value="true">Enabled (prompt on admission)</option>
+              <option value="false">Disabled</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <button class="btn-save" id="af-save-btn" onclick="saveAFSettings()">Save Age-Friendly Settings</button>
+          <span class="save-confirm-msg" id="af-save-msg" style="display:none;">✓ Settings saved</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Save / Reset ── -->
+    <div class="section-card">
+      <div class="section-hdr">
+        <span class="section-icon">💾</span>
+        <span class="section-title">Save Changes</span>
+      </div>
+      <div class="section-body">
+        <div class="action-row">
+          <button class="btn-save" id="save-btn" onclick="saveSettings()">Save Settings</button>
+          <button class="btn-reset" onclick="showResetConfirm()">↺ Reset to Published Defaults</button>
+          <span class="save-confirm-msg" id="save-msg">✓ Settings saved successfully</span>
+        </div>
+        <div class="reset-confirm-box" id="reset-confirm">
+          <strong>Reset this protocol to published defaults?</strong><br>
+          All custom changes for the selected protocol will be permanently removed
+          from localStorage. Other protocols are not affected.
+          <div class="reset-confirm-btns">
+            <button class="btn-yes-reset" onclick="doReset()">Yes, Reset to Defaults</button>
+            <button class="btn-no-reset" onclick="hideResetConfirm()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin-body -->
+</div><!-- /admin-panel -->
+
+<script>
+// ══ localStorage KEYS (must match DoseDefender.html getProtocol() / _ADMIN_LS) ══
+const LS = {
+  INST:        'dosedefender_admin_inst',
+  ACS:         'dosedefender_admin_heparin_acs',
+  DVT:         'dosedefender_admin_heparin_vte',
+  RENAL_RULES: 'dosedefender_renal_rules',
+};
+
+// ══ PUBLISHED DEFAULTS (mirror of PROTOCOLS in DoseDefender.html) ══
+const DEFAULTS = {
+  ACS: {
+    bolus_per_kg:60, max_bolus:5000, inf_per_kg_hr:12, max_inf:1000,
+    round_inc:50, restart_rate:null,
+    ptt_ranges:[
+      {label:'< 30 sec',  min:0,  max:29,   type:'increase',    bolus_per_kg:60, max_bolus:4000, rate_per_kg:2,  hold:null, redraw:6, notify:true,  note:'Notify MD if 2 consecutive results in this range'},
+      {label:'30–49 sec', min:30, max:49,   type:'increase',    bolus_per_kg:30, max_bolus:2000, rate_per_kg:1,  hold:null, redraw:6, notify:false, note:'Notify MD if 2 consecutive results in this range'},
+      {label:'50–70 sec', min:50, max:70,   type:'therapeutic', bolus_per_kg:0,  max_bolus:0,    rate_per_kg:0,  hold:null, redraw:6, notify:false, note:'PTT daily if 2 consecutive therapeutic values'},
+      {label:'71–95 sec', min:71, max:95,   type:'decrease',    bolus_per_kg:0,  max_bolus:0,    rate_per_kg:-2, hold:null, redraw:6, notify:false, note:'', warn_row:true},
+      {label:'> 95 sec',  min:96, max:9999, type:'hold',        bolus_per_kg:0,  max_bolus:0,    rate_per_kg:-3, hold:60,   redraw:6, notify:true,  note:''},
+    ]
+  },
+  DVT: {
+    bolus_per_kg:80, max_bolus:8000, inf_per_kg_hr:18, max_inf:1800,
+    round_inc:50, restart_rate:null,
+    ptt_ranges:[
+      {label:'< 35 sec',    min:0,   max:34,   type:'increase',    bolus_per_kg:60, max_bolus:5000, rate_per_kg:4,  hold:null, redraw:6, notify:true,  note:''},
+      {label:'35–59 sec',   min:35,  max:59,   type:'increase',    bolus_per_kg:30, max_bolus:3000, rate_per_kg:2,  hold:null, redraw:6, notify:false, note:''},
+      {label:'60–90 sec',   min:60,  max:90,   type:'therapeutic', bolus_per_kg:0,  max_bolus:0,    rate_per_kg:0,  hold:null, redraw:6, notify:false, note:'PTT daily if 2 consecutive therapeutic values'},
+      {label:'91–120 sec',  min:91,  max:120,  type:'decrease',    bolus_per_kg:0,  max_bolus:0,    rate_per_kg:-2, hold:null, redraw:6, notify:false, note:'', warn_row:true},
+      {label:'121–138 sec', min:121, max:138,  type:'hold',        bolus_per_kg:0,  max_bolus:0,    rate_per_kg:-3, hold:30,   redraw:6, notify:false, note:''},
+      {label:'> 139 sec',   min:139, max:9999, type:'hold',        bolus_per_kg:0,  max_bolus:0,    rate_per_kg:-4, hold:60,   redraw:6, notify:true,  note:''},
+    ]
+  }
+};
+
+// ══ JWT AUTH ══
+let _adminToken = null;
+
+async function checkAdminAuth() {
+  const token = localStorage.getItem('dosedefender_token');
+  if (!token) { showAuthError('Not signed in.', true); return; }
+  try {
+    const r = await fetch('/auth/me', { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) { localStorage.removeItem('dosedefender_token'); showAuthError('Session expired. Please sign in again.', true); return; }
+    const user = await r.json();
+    if (!user.isAdmin) { showAuthError('Access denied. Admin account required.', false); return; }
+    _adminToken = token;
+    showAdminPanel();
+  } catch { showAuthError('Could not verify credentials. Check your connection.', false); }
+}
+
+function showAuthError(msg, showLink) {
+  document.getElementById('auth-status').style.display = 'none';
+  const errEl = document.getElementById('auth-error');
+  errEl.textContent = msg; errEl.style.display = '';
+  if (showLink) document.getElementById('login-link').style.display = 'block';
+}
+
+function showAdminPanel(){
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  document.getElementById('inst-name').value = localStorage.getItem(LS.INST) || '';
+  loadProtocol('DVT');
+}
+
+function logout(){
+  _adminToken = null;
+  window.location.href = '/login';
+}
+
+// ══ PROTOCOL LOADING ══
+let currentProto = 'DVT';
+
+function getEffective(pk){
+  try {
+    const raw = localStorage.getItem(LS[pk]);
+    if(!raw) return JSON.parse(JSON.stringify(DEFAULTS[pk]));
+    const saved = JSON.parse(raw);
+    const base  = DEFAULTS[pk];
+    let ptt_ranges = base.ptt_ranges;
+    if(saved.ptt_ranges && saved.ptt_ranges.length === base.ptt_ranges.length){
+      ptt_ranges = saved.ptt_ranges.map((r, i) => ({...base.ptt_ranges[i], ...r}));
+    }
+    return {...base, ...saved, ptt_ranges};
+  } catch(e){ return JSON.parse(JSON.stringify(DEFAULTS[pk])); }
+}
+
+function loadProtocol(pk){
+  currentProto = pk;
+  document.getElementById('reset-confirm').style.display = 'none';
+
+  const isCustom = !!localStorage.getItem(LS[pk]);
+  const statusEl = document.getElementById('proto-status');
+  statusEl.className = 'proto-status ' + (isCustom ? 'custom' : 'default');
+  statusEl.textContent = isCustom
+    ? '⚙ Custom settings are active for this protocol'
+    : '✓ Using published defaults — no customizations saved';
+
+  const p = getEffective(pk);
+  const ther = p.ptt_ranges.find(r => r.type === 'therapeutic') || {};
+
+  document.getElementById('proto-fields').innerHTML = `
+    <div class="row4" style="margin-bottom:4px;">
+      <div class="field">
+        <label class="lbl">Initial Bolus (units/kg)</label>
+        <input id="pf-bolus-per-kg" class="inp" type="number" min="0" value="${p.bolus_per_kg}">
+      </div>
+      <div class="field">
+        <label class="lbl">Max Initial Bolus (units)</label>
+        <input id="pf-max-bolus" class="inp" type="number" min="0" value="${p.max_bolus}">
+      </div>
+      <div class="field">
+        <label class="lbl">Infusion Rate (units/kg/hr)</label>
+        <input id="pf-inf-per-kg-hr" class="inp" type="number" min="0" step="0.5" value="${p.inf_per_kg_hr}">
+      </div>
+      <div class="field">
+        <label class="lbl">Max Infusion Rate (units/hr)</label>
+        <input id="pf-max-inf" class="inp" type="number" min="0" value="${p.max_inf}">
+      </div>
+    </div>
+    <div class="row4">
+      <div class="field">
+        <label class="lbl">Therapeutic PTT Low (sec)</label>
+        <input id="pf-ther-low" class="inp" type="number" min="0" value="${ther.min ?? ''}">
+      </div>
+      <div class="field">
+        <label class="lbl">Therapeutic PTT High (sec)</label>
+        <input id="pf-ther-high" class="inp" type="number" min="0" value="${ther.max ?? ''}">
+      </div>
+      <div class="field">
+        <label class="lbl">Rate Rounding Increment (units/hr)</label>
+        <input id="pf-round-inc" class="inp" type="number" min="1" value="${p.round_inc || 50}">
+      </div>
+      <div class="field">
+        <label class="lbl">Restart Rate After Hold (units/hr)</label>
+        <input id="pf-restart-rate" class="inp" type="number" min="0"
+               value="${p.restart_rate || ''}" placeholder="optional">
+      </div>
+    </div>
+
+    <div class="nomo-outer">
+      <div class="nomo-sec-lbl">PTT Adjustment Nomogram</div>
+      <div class="nomo-scroll">
+        <table class="nomo-tbl">
+          <thead>
+            <tr>
+              <th style="min-width:110px;">PTT Range</th>
+              <th>Type</th>
+              <th>Bolus /kg</th>
+              <th>Max Bolus</th>
+              <th>Rate /kg/hr</th>
+              <th>Hold (min)</th>
+              <th>Redraw (hr)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${p.ptt_ranges.map((r, i) => `
+              <tr>
+                <td><span class="nomo-lbl">${r.label}</span></td>
+                <td><span class="type-chip t-${r.type}">${r.type}</span></td>
+                <td><input class="nomo-inp" data-ri="${i}" data-f="bolus_per_kg"
+                     type="number" min="0" value="${r.bolus_per_kg}"></td>
+                <td><input class="nomo-inp" data-ri="${i}" data-f="max_bolus"
+                     type="number" min="0" value="${r.max_bolus}"></td>
+                <td><input class="nomo-inp" data-ri="${i}" data-f="rate_per_kg"
+                     type="number" step="0.5" value="${r.rate_per_kg}"></td>
+                <td><input class="nomo-inp" data-ri="${i}" data-f="hold"
+                     type="number" min="0" value="${r.hold ?? ''}"></td>
+                <td><input class="nomo-inp" data-ri="${i}" data-f="redraw"
+                     type="number" min="1" value="${r.redraw}"></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="nomo-note">
+        Negative rate/kg/hr values decrease the infusion rate. Leave Hold blank for ranges with no hold. Changes apply to the selected protocol only.
+      </div>
+    </div>`;
+}
+
+// ══ SAVE ══
+function saveSettings(){
+  const pk = currentProto;
+  const p  = getEffective(pk);
+
+  // Shared
+  const instName = (document.getElementById('inst-name').value || '').trim();
+  if(instName) localStorage.setItem(LS.INST, instName);
+
+  // PTT ranges — deep copy defaults, overlay editable fields
+  const ranges = JSON.parse(JSON.stringify(p.ptt_ranges));
+  document.querySelectorAll('.nomo-inp').forEach(inp => {
+    const ri = parseInt(inp.dataset.ri);
+    const f  = inp.dataset.f;
+    if(ri >= ranges.length) return;
+    const raw = inp.value;
+    ranges[ri][f] = raw === '' ? null
+      : f === 'rate_per_kg' ? parseFloat(raw)
+      : parseInt(raw);
+  });
+
+  // Apply therapeutic range boundaries from convenience fields
+  const therLow  = parseInt(document.getElementById('pf-ther-low').value);
+  const therHigh = parseInt(document.getElementById('pf-ther-high').value);
+  if(!isNaN(therLow) && !isNaN(therHigh)){
+    const ti = ranges.findIndex(r => r.type === 'therapeutic');
+    if(ti >= 0){ ranges[ti].min = therLow; ranges[ti].max = therHigh; }
+  }
+
+  const restartRaw = document.getElementById('pf-restart-rate').value;
+  const settings = {
+    bolus_per_kg:  parseFloat(document.getElementById('pf-bolus-per-kg').value)  || p.bolus_per_kg,
+    max_bolus:     parseInt(document.getElementById('pf-max-bolus').value)        || p.max_bolus,
+    inf_per_kg_hr: parseFloat(document.getElementById('pf-inf-per-kg-hr').value) || p.inf_per_kg_hr,
+    max_inf:       parseInt(document.getElementById('pf-max-inf').value)          || p.max_inf,
+    round_inc:     parseInt(document.getElementById('pf-round-inc').value)        || 50,
+    restart_rate:  restartRaw ? parseInt(restartRaw) : null,
+    ptt_ranges:    ranges,
+  };
+
+  localStorage.setItem(LS[pk], JSON.stringify(settings));
+
+  // Feedback
+  const btn = document.getElementById('save-btn');
+  const msg = document.getElementById('save-msg');
+  btn.textContent = '✓ Saved';
+  btn.classList.add('saved');
+  msg.style.display = 'inline';
+  const statusEl = document.getElementById('proto-status');
+  statusEl.className = 'proto-status custom';
+  statusEl.textContent = '⚙ Custom settings are active for this protocol';
+  setTimeout(()=>{
+    btn.textContent = 'Save Settings';
+    btn.classList.remove('saved');
+    msg.style.display = 'none';
+  }, 3000);
+}
+
+// ══ RESET ══
+function showResetConfirm(){ document.getElementById('reset-confirm').style.display = 'block'; }
+function hideResetConfirm(){ document.getElementById('reset-confirm').style.display = 'none'; }
+function doReset(){
+  localStorage.removeItem(LS[currentProto]);
+  hideResetConfirm();
+  loadProtocol(currentProto);
+}
+
+// ══ RENAL DRUG RULES ══
+
+// Built-in renal rule defaults (abbreviated for admin editing — full rules in drugRules.js)
+const RENAL_DEFAULTS = [
+  { id:'metformin',      name:'Metformin',                  category:'Antidiabetic',          thresholds:[{crcl_max:30,severity:'contraindicated',recommendation:'Contraindicated — lactic acidosis risk. Discontinue.',action:'DISCONTINUE'},{crcl_max:45,crcl_min:30,severity:'high',recommendation:'eGFR 30–45: not recommended (ADA). Consider discontinuation.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'enoxaparin',     name:'Enoxaparin',                 category:'Anticoagulant',         thresholds:[{crcl_max:15,severity:'contraindicated',recommendation:'Avoid — switch to UFH.',action:'SWITCH-AGENT'},{crcl_max:30,crcl_min:15,severity:'high',recommendation:'CrCl 15–30: reduce to 1 mg/kg q24h for treatment; 30 mg q24h prophylaxis.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'apixaban',       name:'Apixaban',                   category:'Anticoagulant',         thresholds:[{crcl_max:25,severity:'high',recommendation:'Avoid — insufficient data in severe renal impairment.',action:'AVOID'},{crcl_max:50,crcl_min:25,severity:'moderate',recommendation:'Reduce to 2.5 mg BID if ≥2 criteria met (age≥80, wt≤60, SCr≥1.5).',action:'DOSE-ADJUSTMENT'}] },
+  { id:'rivaroxaban',    name:'Rivaroxaban',                category:'Anticoagulant',         thresholds:[{crcl_max:15,severity:'high',recommendation:'Avoid.',action:'AVOID'},{crcl_max:30,crcl_min:15,severity:'moderate',recommendation:'Use with extreme caution.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'dabigatran',     name:'Dabigatran',                 category:'Anticoagulant',         thresholds:[{crcl_max:15,severity:'contraindicated',recommendation:'Contraindicated.',action:'DISCONTINUE'},{crcl_max:30,crcl_min:15,severity:'high',recommendation:'Avoid — high bleeding risk.',action:'AVOID'},{crcl_max:50,crcl_min:30,severity:'moderate',recommendation:'Reduce to 75 mg BID for AF.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'gabapentin',     name:'Gabapentin',                 category:'Analgesic',             thresholds:[{crcl_max:15,severity:'moderate',recommendation:'100–300 mg daily.',action:'DOSE-ADJUSTMENT'},{crcl_max:30,crcl_min:15,severity:'moderate',recommendation:'200–700 mg daily.',action:'DOSE-ADJUSTMENT'},{crcl_max:60,crcl_min:30,severity:'low',recommendation:'200–700 mg BID.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'pregabalin',     name:'Pregabalin',                 category:'Analgesic',             thresholds:[{crcl_max:15,severity:'moderate',recommendation:'25–75 mg daily.',action:'DOSE-ADJUSTMENT'},{crcl_max:30,crcl_min:15,severity:'moderate',recommendation:'25–150 mg/day.',action:'DOSE-ADJUSTMENT'},{crcl_max:60,crcl_min:30,severity:'low',recommendation:'75–300 mg/day.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'vancomycin',     name:'Vancomycin',                 category:'Antibiotic',            thresholds:[{crcl_max:50,severity:'moderate',recommendation:'AUC-guided dosing, extended intervals. Target AUC/MIC 400–600.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'piptazo',        name:'Piperacillin-Tazobactam',   category:'Antibiotic',            thresholds:[{crcl_max:20,severity:'moderate',recommendation:'2.25 g q6h.',action:'DOSE-ADJUSTMENT'},{crcl_max:40,crcl_min:20,severity:'low',recommendation:'3.375 g q8h.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'meropenem',      name:'Meropenem',                  category:'Antibiotic',            thresholds:[{crcl_max:10,severity:'high',recommendation:'0.5 g q24h.',action:'DOSE-ADJUSTMENT'},{crcl_max:25,crcl_min:10,severity:'moderate',recommendation:'0.5 g q12h.',action:'DOSE-ADJUSTMENT'},{crcl_max:50,crcl_min:25,severity:'low',recommendation:'1 g q12h.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'ciprofloxacin',  name:'Ciprofloxacin',             category:'Antibiotic',            thresholds:[{crcl_max:30,severity:'moderate',recommendation:'PO 250–500 mg q18h or IV 200–400 mg q18–24h.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'digoxin',        name:'Digoxin',                    category:'Cardiac Glycoside',     thresholds:[{crcl_max:10,severity:'high',recommendation:'0.0625 mg every other day or avoid.',action:'DOSE-ADJUSTMENT'},{crcl_max:50,crcl_min:10,severity:'moderate',recommendation:'Reduce 25–75%. Monitor levels (target 0.5–0.9 ng/mL).',action:'DOSE-ADJUSTMENT'}] },
+  { id:'methotrexate',   name:'Methotrexate',              category:'DMARD',                 thresholds:[{crcl_max:10,severity:'contraindicated',recommendation:'Contraindicated.',action:'DISCONTINUE'},{crcl_max:30,crcl_min:10,severity:'high',recommendation:'Avoid.',action:'AVOID'},{crcl_max:60,crcl_min:30,severity:'moderate',recommendation:'Reduce 50%, monitor CBC/LFT.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'colchicine',     name:'Colchicine',                 category:'Antigout',              thresholds:[{crcl_max:10,severity:'contraindicated',recommendation:'Contraindicated.',action:'DISCONTINUE'},{crcl_max:30,crcl_min:10,severity:'high',recommendation:'Max 0.5 mg/day. Avoid prolonged use.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'acyclovir',      name:'Acyclovir',                  category:'Antiviral',             thresholds:[{crcl_max:10,severity:'high',recommendation:'IV 5 mg/kg q24h; PO 200 mg q12h.',action:'DOSE-ADJUSTMENT'},{crcl_max:25,crcl_min:10,severity:'moderate',recommendation:'IV q24h; PO 800 mg q8h.',action:'DOSE-ADJUSTMENT'},{crcl_max:50,crcl_min:25,severity:'low',recommendation:'IV q12h; PO 800 mg q12h.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'tramadol',       name:'Tramadol',                   category:'Analgesic/Opioid',      thresholds:[{crcl_max:30,severity:'moderate',recommendation:'Max 200 mg/day q12h.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'spironolactone', name:'Spironolactone',             category:'Diuretic',              thresholds:[{crcl_max:30,severity:'high',recommendation:'Avoid — severe hyperkalemia risk.',action:'AVOID'},{crcl_max:50,crcl_min:30,severity:'moderate',recommendation:'Use with caution, monitor K+ closely.',action:'DOSE-ADJUSTMENT'}] },
+  { id:'nitrofurantoin', name:'Nitrofurantoin',             category:'Antibiotic/Urinary',    thresholds:[{crcl_max:45,severity:'contraindicated',recommendation:'Contraindicated — inadequate levels + toxic metabolite accumulation.',action:'DISCONTINUE'}] },
+];
+
+function getRenalAdminRules() {
+  try {
+    const stored = localStorage.getItem(LS.RENAL_RULES);
+    if(stored) return JSON.parse(stored);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(RENAL_DEFAULTS));
+}
+
+function renderRenalRulesTable() {
+  const rules = getRenalAdminRules();
+  const isCustom = !!localStorage.getItem(LS.RENAL_RULES);
+  const statusEl = document.getElementById('renal-rules-status');
+  if(statusEl) {
+    statusEl.className = 'proto-status ' + (isCustom ? 'custom' : 'default');
+    statusEl.textContent = isCustom ? '⚙ Custom renal rules active' : '✓ Using published defaults';
+  }
+  const tbody = document.getElementById('renal-rules-tbody');
+  if(!tbody) return;
+  const SEVS = ['info','low','moderate','high','contraindicated'];
+  let rows = '';
+  rules.forEach((drug, di) => {
+    drug.thresholds.forEach((t, ti) => {
+      rows += `<tr>
+        <td>${ti === 0 ? `<span class="nomo-lbl">${drug.name}</span>` : ''}</td>
+        <td>${ti === 0 ? `<span class="type-chip" style="background:var(--surface);">${drug.category}</span>` : ''}</td>
+        <td><input class="nomo-inp" data-di="${di}" data-ti="${ti}" data-f="crcl_max" type="number" min="0" max="200" value="${t.crcl_max ?? ''}"></td>
+        <td><input class="nomo-inp" data-di="${di}" data-ti="${ti}" data-f="crcl_min" type="number" min="0" max="200" value="${t.crcl_min ?? ''}"></td>
+        <td>
+          <select class="nomo-inp" data-di="${di}" data-ti="${ti}" data-f="severity" style="min-width:120px;">
+            ${SEVS.map(s => `<option value="${s}" ${t.severity===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td><input class="nomo-inp inp-text" data-di="${di}" data-ti="${ti}" data-f="recommendation" type="text" style="min-width:220px;" value="${(t.recommendation||'').replace(/"/g,'&quot;')}"></td>
+        <td><input class="nomo-inp" data-di="${di}" data-ti="${ti}" data-f="action" type="text" style="min-width:100px;" value="${t.action||''}"></td>
+      </tr>`;
+    });
+  });
+  tbody.innerHTML = rows;
+}
+
+function saveRenalRules() {
+  const rules = getRenalAdminRules();
+  document.querySelectorAll('#renal-rules-tbody [data-di]').forEach(inp => {
+    const di = parseInt(inp.dataset.di);
+    const ti = parseInt(inp.dataset.ti);
+    const f  = inp.dataset.f;
+    if(!rules[di] || !rules[di].thresholds[ti]) return;
+    const raw = inp.value;
+    if(f === 'crcl_max' || f === 'crcl_min') {
+      rules[di].thresholds[ti][f] = raw === '' ? undefined : parseInt(raw);
+    } else {
+      rules[di].thresholds[ti][f] = raw;
+    }
+  });
+  localStorage.setItem(LS.RENAL_RULES, JSON.stringify(rules));
+  const btn = document.getElementById('renal-save-btn');
+  const msg = document.getElementById('renal-save-msg');
+  if(btn) { btn.textContent = '✓ Saved'; btn.classList.add('saved'); }
+  if(msg) msg.style.display = 'inline';
+  renderRenalRulesTable();
+  setTimeout(() => {
+    if(btn) { btn.textContent = 'Save Renal Rules'; btn.classList.remove('saved'); }
+    if(msg) msg.style.display = 'none';
+  }, 3000);
+}
+
+function resetRenalRules() {
+  if(!confirm('Reset renal drug rules to published defaults? All customizations will be removed.')) return;
+  localStorage.removeItem(LS.RENAL_RULES);
+  renderRenalRulesTable();
+}
+
+function addRenalRule() {
+  const rules = getRenalAdminRules();
+  rules.push({
+    id: 'new-drug-' + Date.now(),
+    name: 'New Drug',
+    category: 'Other',
+    thresholds: [{ crcl_max: 30, severity: 'moderate', recommendation: 'Dose adjustment required.', action: 'DOSE-ADJUSTMENT' }],
+  });
+  // Save temporarily so table re-renders
+  localStorage.setItem(LS.RENAL_RULES, JSON.stringify(rules));
+  renderRenalRulesTable();
+}
+
+function saveAFSettings() {
+  const enabled = document.getElementById('af-enabled')?.value || 'true';
+  const threshold = document.getElementById('af-age-threshold')?.value || '65';
+  const require = document.getElementById('af-require-audit')?.value || 'false';
+  const autoTrigger = document.getElementById('af-auto-trigger')?.value || 'true';
+  localStorage.setItem('dosedefender_af_enabled', enabled);
+  localStorage.setItem('dosedefender_af_age_threshold', threshold);
+  localStorage.setItem('dosedefender_af_require_audit', require);
+  localStorage.setItem('dosedefender_af_auto_trigger', autoTrigger);
+  const btn = document.getElementById('af-save-btn');
+  const msg = document.getElementById('af-save-msg');
+  if (btn) { btn.textContent = '✓ Saved'; btn.classList.add('saved'); }
+  if (msg) msg.style.display = 'inline';
+  setTimeout(() => {
+    if (btn) { btn.textContent = 'Save Age-Friendly Settings'; btn.classList.remove('saved'); }
+    if (msg) msg.style.display = 'none';
+  }, 3000);
+}
+
+function loadAFSettings() {
+  const enabled = localStorage.getItem('dosedefender_af_enabled') || 'true';
+  const threshold = localStorage.getItem('dosedefender_af_age_threshold') || '65';
+  const require = localStorage.getItem('dosedefender_af_require_audit') || 'false';
+  const autoTrigger = localStorage.getItem('dosedefender_af_auto_trigger') || 'true';
+  const enabledEl = document.getElementById('af-enabled');
+  const thresholdEl = document.getElementById('af-age-threshold');
+  const requireEl = document.getElementById('af-require-audit');
+  const autoTriggerEl = document.getElementById('af-auto-trigger');
+  if (enabledEl) enabledEl.value = enabled;
+  if (thresholdEl) thresholdEl.value = threshold;
+  if (requireEl) requireEl.value = require;
+  if (autoTriggerEl) autoTriggerEl.value = autoTrigger;
+}
+
+// Hook into showAdminPanel to also render renal rules + users
+const _origShowAdminPanel = showAdminPanel;
+showAdminPanel = function() {
+  _origShowAdminPanel();
+  renderRenalRulesTable();
+  loadAFSettings();
+  loadAdminUsers();
+};
+
+// ── Admin Users ────────────────────────────────────────
+async function loadAdminUsers() {
+  try {
+    const r = await fetch('/api/admin/users', {
+      headers: { Authorization: 'Bearer ' + (_adminToken || '') }
+    });
+    if (!r.ok) return;
+    const users = await r.json();
+    const total = users.length;
+    const pro = users.filter(u => u.tier === 'pro').length;
+    document.getElementById('admin-total-users').textContent = total;
+    document.getElementById('admin-pro-users').textContent = pro;
+    document.getElementById('admin-free-users').textContent = total - pro;
+
+    const recent = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 20);
+    const table = document.getElementById('admin-users-table');
+    if (!recent.length) {
+      table.innerHTML = '<div style="padding:20px;color:var(--muted);text-align:center;">No users yet.</div>';
+      return;
+    }
+    table.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:var(--bg);">
+        <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Email</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Tier</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Status</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Daily Analyses</th>
+        <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Joined</th>
+      </tr></thead>
+      <tbody>${recent.map((u, i) => {
+        const usagePct = u.dailyLimit > 0 ? Math.round((u.dailyUsageToday / u.dailyLimit) * 100) : 0;
+        const usageColor = usagePct >= 80 ? '#dc2626' : usagePct >= 50 ? '#f59e0b' : '#16a34a';
+        const usageCell = u.tier === 'pro'
+          ? `<span style="font-size:12px;font-weight:600;color:${usageColor};">${u.dailyUsageToday}/${u.dailyLimit}</span><span style="font-size:10px;color:var(--muted);margin-left:4px;">(${u.billingPeriod})</span>`
+          : `<span style="font-size:12px;color:var(--muted);">—</span>`;
+        return `<tr style="border-top:1px solid var(--border);${i%2===0?'background:white;':'background:var(--bg);'}">
+          <td style="padding:10px 14px;font-size:13px;">${u.email}</td>
+          <td style="padding:10px 14px;"><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:${u.tier==='pro'?'var(--green-light)':'var(--surface)'};color:${u.tier==='pro'?'var(--green)':'var(--muted)'};">${u.tier.toUpperCase()}</span></td>
+          <td style="padding:10px 14px;font-size:12px;color:var(--muted);">${u.subscriptionStatus || '—'}</td>
+          <td style="padding:10px 14px;">${usageCell}</td>
+          <td style="padding:10px 14px;font-size:12px;color:var(--muted);">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  } catch (err) {
+    console.error('[Admin users]', err);
+  }
+}
+
+async function adminSetTier() {
+  const email = document.getElementById('admin-tier-email').value.trim();
+  const tier = document.getElementById('admin-tier-select').value;
+  const msgEl = document.getElementById('admin-tier-msg');
+  if (!email) { msgEl.textContent = 'Enter an email address.'; msgEl.style.color = 'var(--red)'; msgEl.style.display = ''; return; }
+  try {
+    const r = await fetch('/api/admin/set-tier', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (_adminToken || '') },
+      body: JSON.stringify({ email, tier }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Failed');
+    msgEl.textContent = `✓ ${data.user.email} is now ${data.user.tier.toUpperCase()}`;
+    msgEl.style.color = 'var(--green)';
+    msgEl.style.display = '';
+    document.getElementById('admin-tier-email').value = '';
+    setTimeout(loadAdminUsers, 500);
+  } catch (err) {
+    msgEl.textContent = '✗ ' + err.message;
+    msgEl.style.color = 'var(--red)';
+    msgEl.style.display = '';
+  }
+}
+
+// ══ INIT ══
+checkAdminAuth();
+</script>
+</body>
+</html>

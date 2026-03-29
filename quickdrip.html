@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickDrip — IV Drug Reference</title>
+<link href="quickdrip_files/css2.css" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F1F3D;
+    --navy-mid: #162844;
+    --navy-light: #1d3560;
+    --teal: #00a896;
+    --teal-light: #7fd8d0;
+    --teal-dark: #007a6e;
+    --white: #FFFFFF;
+    --offwhite: #E8EFF7;
+    --muted: rgba(255,255,255,0.45);
+    --dim: rgba(255,255,255,0.18);
+    --border: rgba(0,168,150,0.22);
+    --border-dim: rgba(255,255,255,0.07);
+    --warn: #F59E0B;
+    --warn-bg: rgba(245,158,11,0.07);
+    --warn-border: rgba(245,158,11,0.22);
+    --red: #EF4444;
+    --red-bg: rgba(239,68,68,0.07);
+    --red-border: rgba(239,68,68,0.22);
+    --green: #22C55E;
+    --green-bg: rgba(34,197,94,0.07);
+    --green-border: rgba(34,197,94,0.22);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--offwhite);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--navy); }
+  ::-webkit-scrollbar-thumb { background: var(--teal-dark); border-radius: 2px; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  /* NAV */
+  .navbar {
+    background: var(--navy-mid);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 62px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-row { display: flex; align-items: center; gap: 12px; }
+
+  .shield-svg { flex-shrink: 0; }
+
+  .logo-text-main {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    line-height: 1.1;
+    color: var(--white);
+  }
+  .logo-text-main span { color: var(--teal-light); }
+  .logo-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .nav-right { display: flex; align-items: center; gap: 14px; }
+
+  .source-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-dim);
+    color: var(--muted);
+  }
+  .source-badge.active {
+    border-color: var(--teal);
+    color: var(--teal-light);
+    background: rgba(13,157,168,0.1);
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--green);
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  /* MAIN */
+  .main { max-width: 1000px; margin: 0 auto; padding: 36px 32px 80px; }
+
+  .page-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 5px;
+  }
+  .page-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.05;
+    margin-bottom: 6px;
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 28px;
+  }
+
+  /* SEARCH BOX */
+  .search-box {
+    background: var(--navy-mid);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  }
+
+  .search-row { display: flex; gap: 10px; margin-bottom: 14px; }
+
+  .search-input-wrap { flex: 1; position: relative; }
+  .search-icon {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.3;
+    font-size: 15px;
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    background: var(--navy);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+    padding: 13px 16px 13px 42px;
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    transition: all 0.2s;
+  }
+  .search-input::placeholder { color: rgba(255,255,255,0.2); }
+  .search-input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,157,168,0.12); }
+
+  .search-btn {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border: none;
+    border-radius: 8px;
+    padding: 13px 30px;
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 18px rgba(13,157,168,0.4);
+    white-space: nowrap;
+  }
+  .search-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .search-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; background: var(--navy-light); box-shadow: none; }
+
+  .quick-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .quick-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    flex-shrink: 0;
+  }
+  .qp-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 4px 13px;
+    border-radius: 20px;
+    border: 1px solid var(--border-dim);
+    color: var(--muted);
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.15s;
+  }
+  .qp-btn:hover { border-color: var(--teal); color: var(--teal-light); background: rgba(13,157,168,0.07); }
+  /* MODE TOGGLE */
+  .mode-toggle {
+    display: flex;
+    background: var(--navy-mid);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
+    margin-bottom: 20px;
+    width: fit-content;
+  }
+  .mode-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.18s;
+    background: transparent;
+    color: var(--muted);
+  }
+  .mode-btn.active {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: var(--white);
+    box-shadow: 0 2px 10px rgba(13,157,168,0.35);
+  }
+
+  /* DRIP BUILDER */
+  .drip-card {
+    background: var(--navy-mid);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease both;
+  }
+  .drip-header {
+    background: linear-gradient(135deg, rgba(13,157,168,0.15), rgba(10,122,132,0.1));
+    border-bottom: 1px solid var(--border);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .drip-drug-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--white);
+  }
+  .drip-dose-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    background: rgba(13,157,168,0.15);
+    border: 1px solid var(--border);
+    color: var(--teal-light);
+    letter-spacing: 0.06em;
+  }
+  .drip-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border-dim);
+  }
+  .drip-cell {
+    background: var(--navy-mid);
+    padding: 16px 20px;
+  }
+  .drip-cell-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .drip-cell-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.02em;
+  }
+  .drip-cell-value.highlight { color: var(--teal-light); font-size: 20px; }
+  .drip-prep {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-dim);
+  }
+  .drip-prep-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+  .drip-prep-text {
+    font-size: 13.5px;
+    color: var(--offwhite);
+    line-height: 1.6;
+  }
+  .drip-filter {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-dim);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .filter-required { color: var(--warn); }
+  .filter-not-required { color: var(--muted); }
+
+
+  /* PIPELINE */
+  .pipeline {
+    display: none;
+    background: var(--navy-mid);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .pipeline.visible { display: flex; }
+
+  .pipe-step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    border-right: 1px solid var(--border-dim);
+    transition: all 0.25s;
+  }
+  .pipe-step:last-child { border-right: none; }
+  .pipe-step.searching { color: var(--teal-light); background: rgba(13,157,168,0.06); }
+  .pipe-step.done { color: var(--green); }
+  .pipe-step.skipped { opacity: 0.35; }
+
+  .pipe-spinner {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid var(--teal-light);
+    border-top-color: transparent;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  /* ERROR */
+  .error-box {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    color: #FCA5A5;
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .error-box.visible { display: block; }
+
+  /* RESULTS */
+  .results { display: none; flex-direction: column; gap: 16px; animation: fadeUp 0.3s ease both; }
+  .results.visible { display: flex; }
+
+  /* DRUG HEADER */
+  .drug-header {
+    background: var(--navy-mid);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .drug-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .drug-brand {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    color: var(--muted);
+    font-style: italic;
+    margin-left: 10px;
+  }
+  .drug-badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .drug-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.08em;
+  }
+  .badge-teal { background: rgba(13,157,168,0.1); color: var(--teal-light); border: 1px solid var(--border); }
+  .badge-green { background: var(--green-bg); color: #86EFAC; border: 1px solid var(--green-border); }
+  .badge-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; color: var(--dim); }
+
+  .bbw-badge {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #FCA5A5;
+  }
+
+  /* BBW BLOCK */
+  .bbw-block {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .bbw-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 10px;
+  }
+  .bbw-text { font-size: 13px; color: #FCA5A5; line-height: 1.6; margin-bottom: 6px; }
+  .bbw-text:last-child { margin-bottom: 0; }
+
+  /* TABS */
+  .tabs {
+    background: var(--navy-mid);
+    border: 1px solid var(--border-dim);
+    border-radius: 10px;
+    padding: 5px;
+    display: flex;
+    gap: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 9px 8px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.18s;
+    background: transparent;
+    color: var(--muted);
+  }
+  .tab-btn:hover { background: rgba(13,157,168,0.08); color: var(--teal-light); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: var(--white);
+    box-shadow: 0 2px 12px rgba(13,157,168,0.35);
+  }
+
+  /* TAB PANELS */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeUp 0.2s ease both; }
+
+  /* CARDS */
+  .card {
+    background: var(--navy-mid);
+    border: 1px solid var(--border-dim);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card.accent { border-color: var(--border); }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border-dim);
+  }
+  .card.accent .card-header { background: rgba(13,157,168,0.07); }
+
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .card.accent .card-title { color: var(--teal-light); }
+  .card-source {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+  }
+
+  .card-body { padding: 4px 18px 14px; }
+
+  .data-row {
+    display: flex;
+    gap: 16px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-dim);
+    align-items: flex-start;
+  }
+  .data-row:last-child { border-bottom: none; }
+
+  .data-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    min-width: 155px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+  .data-value {
+    font-size: 13.5px;
+    color: var(--offwhite);
+    line-height: 1.55;
+  }
+
+  /* COMPAT ROWS */
+  .compat-row {
+    display: flex;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-dim);
+    align-items: flex-start;
+  }
+  .compat-row:last-child { border-bottom: none; }
+
+  .compat-label-wrap {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 165px;
+    flex-shrink: 0;
+    padding-top: 4px;
+  }
+  .compat-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .compat-drug-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .compat-right { flex: 1; }
+  .compat-status-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-bottom: 4px;
+  }
+  .status-compatible { background: var(--green-bg); border: 1px solid var(--green-border); color: #86EFAC; }
+  .status-incompatible { background: var(--red-bg); border: 1px solid var(--red-border); color: #FCA5A5; }
+  .status-caution { background: var(--warn-bg); border: 1px solid var(--warn-border); color: #FDE68A; }
+  .status-unknown { background: transparent; border: 1px solid var(--border-dim); color: var(--muted); }
+  .dot-compatible { background: #22C55E; box-shadow: 0 0 5px #22C55E; }
+  .dot-incompatible { background: #EF4444; box-shadow: 0 0 5px #EF4444; }
+  .dot-caution { background: #F59E0B; box-shadow: 0 0 5px #F59E0B; }
+  .dot-unknown { background: rgba(255,255,255,0.3); }
+
+  .compat-value { font-size: 13px; color: var(--offwhite); line-height: 1.5; }
+
+  /* ALERTS */
+  .alerts-block {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .alerts-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--warn);
+    margin-bottom: 10px;
+  }
+  .alert-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .alert-item:last-child { margin-bottom: 0; }
+  .alert-arrow { color: var(--warn); flex-shrink: 0; margin-top: 1px; }
+  .alert-text { font-size: 13px; color: #FDE68A; line-height: 1.6; }
+
+  /* CITATION */
+  .citation-block {
+    background: var(--navy-mid);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    gap: 12px;
+  }
+  .citation-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.9;
+    letter-spacing: 0.03em;
+  }
+  .citation-text a { color: var(--teal-light); text-decoration: none; }
+  .citation-text a:hover { text-decoration: underline; }
+  .citation-strong { color: var(--offwhite); font-weight: 600; }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    padding-top: 14px;
+    border-top: 1px solid var(--border-dim);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    color: var(--dim);
+    line-height: 1.85;
+    letter-spacing: 0.03em;
+  }
+
+  /* SOURCE BADGES on data rows */
+  .src-badge {
+    display: inline-block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 7px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .src-PI           { background: rgba(13,157,168,0.12); color: var(--teal-light); border: 1px solid rgba(13,157,168,0.3); }
+  .src-PubMed       { background: rgba(59,130,246,0.12); color: #93C5FD; border: 1px solid rgba(59,130,246,0.3); }
+  .src-ASHP         { background: rgba(245,158,11,0.12); color: #FDE68A; border: 1px solid rgba(245,158,11,0.3); }
+  .src-IVPushCoalition { background: rgba(34,197,94,0.12); color: #86EFAC; border: 1px solid rgba(34,197,94,0.3); }
+
+  /* SECTION DIVIDER (branded) */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 0 6px;
+  }
+  .section-divider-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(13,157,168,0.22);
+  }
+  .section-divider-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(13,157,168,0.55);
+  }
+
+  /* RETRIEVAL FAILURE BANNER */
+  .retrieval-warn {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #FDE68A;
+    font-size: 13px;
+    display: none;
+    margin-bottom: 16px;
+  }
+  .retrieval-warn.visible { display: block; }
+
+  /* FLAG / FEEDBACK */
+  .flag-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(13,157,168,0.35);
+    font-size: 11px;
+    padding: 1px 3px;
+    border-radius: 3px;
+    transition: color 0.15s;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .flag-btn:hover { color: var(--teal-light); }
+
+  .feedback-dropdown {
+    padding: 8px 0 12px 160px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: fadeUp 0.15s ease both;
+  }
+  .feedback-select {
+    background: var(--navy);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--offwhite);
+    font-family: 'Barlow', sans-serif;
+    font-size: 12px;
+    padding: 5px 10px;
+    cursor: pointer;
+    flex: 1;
+    max-width: 220px;
+  }
+  .feedback-submit-btn {
+    background: var(--teal-dark);
+    border: none;
+    border-radius: 6px;
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .feedback-submit-btn:hover { opacity: 0.85; }
+
+  /* FEEDBACK TOAST */
+  .feedback-toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--teal-dark);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .feedback-toast.show { opacity: 1; transform: translateY(0); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 72px 24px;
+  }
+  .empty-icon { opacity: 0.18; margin-bottom: 18px; }
+  .empty-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .empty-sub { font-size: 13px; color: var(--dim); font-weight: 300; line-height: 1.7; }
+
+  /* DILUENT PILLS */
+  .diluent-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .diluent-pill {
+    display: inline-block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: rgba(13,157,168,0.08);
+    border: 1px solid var(--border);
+    color: var(--teal-light);
+  }
+
+  /* AUTOCOMPLETE DROPDOWN */
+  .search-input-wrap { position: relative; }
+  .ac-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--navy-mid);
+    border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    z-index: 200;
+    display: none;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .ac-item {
+    padding: 10px 16px 10px 42px;
+    font-size: 14px;
+    color: var(--offwhite);
+    cursor: pointer;
+    transition: background 0.1s;
+    border-bottom: 1px solid var(--border-dim);
+  }
+  .ac-item:last-child { border-bottom: none; }
+  .ac-item:hover, .ac-item.ac-selected { background: rgba(13,157,168,0.12); }
+  .ac-item strong { color: var(--teal-light); font-weight: 700; }
+  .ac-alias {
+    margin-left: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .ac-fuzzy {
+    margin-left: 8px;
+    font-size: 10px;
+    color: var(--warn);
+    font-style: italic;
+  }
+
+  /* QUICK FACTS STRIP */
+  .quick-facts {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 0;
+  }
+  .qf-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--navy-mid);
+    border: 1px solid var(--border-dim);
+    border-radius: 6px;
+    padding: 5px 12px;
+  }
+  .qf-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .qf-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--offwhite);
+    letter-spacing: 0.03em;
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .navbar { padding: 0 14px; height: 54px; }
+    .nav-right { display: none; }
+    .logo-text-main { font-size: 18px; }
+    .main { padding: 20px 14px 60px; }
+    .page-title { font-size: 26px; }
+    .search-row { flex-direction: column; }
+    .search-btn { width: 100%; }
+    .quick-row { display: none; }
+    .mode-toggle { width: 100%; }
+    .mode-btn { flex: 1; padding: 8px 12px; font-size: 11px; }
+    .drug-header { flex-direction: column; }
+    .drug-name { font-size: 26px; }
+    .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab-btn { white-space: nowrap; padding: 9px 14px; font-size: 11px; }
+    .data-row { flex-direction: column; gap: 4px; }
+    .data-label { min-width: unset; }
+    .compat-row { flex-direction: column; gap: 4px; }
+    .compat-label-wrap { min-width: unset; }
+    .drip-grid { grid-template-columns: 1fr; }
+    .quick-facts { gap: 6px; }
+    .qf-item { padding: 4px 8px; }
+    .citation-block { flex-direction: column; }
+  }
+
+  /* PRINT */
+  @media print {
+    body { background: white; color: #111; font-size: 12px; }
+    .navbar, .search-box, .mode-toggle, .pipeline, .empty-state,
+    .quick-row, .flag-btn, .feedback-dropdown, .feedback-toast,
+    .ac-dropdown { display: none !important; }
+    .main { max-width: 100%; padding: 0; }
+    .results { display: flex !important; }
+    .card, .drug-header, .bbw-block, .alerts-block, .citation-block {
+      border-color: #ccc; background: white; break-inside: avoid;
+    }
+    .drug-name { color: #111; }
+    .card-title, .data-label { color: #555; }
+    .data-value { color: #111; }
+    a { color: #0066cc; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="logo-row">
+    <svg class="shield-svg" width="34" height="40" viewBox="0 0 46 54" fill="none">
+      <path d="M23 2L4 10V26C4 37.5 12.5 47.8 23 52C33.5 47.8 42 37.5 42 26V10L23 2Z" fill="#0F1F3D" stroke="#00a896" stroke-width="1.8"></path>
+      <g transform="rotate(-45,23,27)">
+        <rect x="12" y="22" width="22" height="10" rx="5" fill="white"></rect>
+        <rect x="17" y="22" width="17" height="10" rx="5" fill="rgba(15,31,61,0.35)" clip-path="url(#pr)"></rect>
+        <line x1="23" y1="22" x2="23" y2="32" stroke="#0F1F3D" stroke-width="1.3" opacity="0.55"></line>
+      </g>
+      <defs><clipPath id="pr"><rect x="23" y="22" width="11" height="10"></rect></clipPath></defs>
+    </svg>
+    <div>
+      <div class="logo-text-main">Quick<span>Drip</span></div>
+      <div class="logo-sub">IV Drug Reference · by DoseSafe</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <span class="source-badge active">DailyMed</span>
+    <span class="source-badge">PubMed</span>
+    <span class="source-badge">OpenFDA</span>
+    <div style="width:1px;height:24px;background:rgba(255,255,255,0.07)"></div>
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- MODE TOGGLE -->
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeLookupBtn" onclick="setMode('lookup')">Drug Lookup</button>
+    <button class="mode-btn" id="modeDripBtn" onclick="setMode('drip')">Drip Builder</button>
+  </div>
+
+  <!-- LOOKUP MODE -->
+  <div id="lookupMode">
+    <div class="page-eyebrow">Reconstitution · Administration · Compatibility</div>
+    <div class="page-title">IV Drug Lookup</div>
+    <div class="page-sub">Real-time package insert data from FDA DailyMed — always current, always cited</div>
+    <div class="search-box">
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input id="drugInput" class="search-input" type="text" placeholder="Search any IV drug — e.g. vancomycin, azithromycin, norepinephrine...">
+        </div>
+        <button id="searchBtn" class="search-btn" onclick="runSearch()">LOOK UP →</button>
+      </div>
+      <div class="quick-row">
+        <span class="quick-label">Quick:</span>
+        <button class="qp-btn" onclick="quickSearch('vancomycin')">vancomycin</button>
+        <button class="qp-btn" onclick="quickSearch('azithromycin')">azithromycin</button>
+        <button class="qp-btn" onclick="quickSearch('meropenem')">meropenem</button>
+        <button class="qp-btn" onclick="quickSearch('piperacillin-tazobactam')">pip-tazo</button>
+        <button class="qp-btn" onclick="quickSearch('heparin')">heparin</button>
+        <button class="qp-btn" onclick="quickSearch('amiodarone')">amiodarone</button>
+        <button class="qp-btn" onclick="quickSearch('norepinephrine')">norepinephrine</button>
+        <button class="qp-btn" onclick="quickSearch('cefepime')">cefepime</button>
+        <button class="qp-btn" onclick="quickSearch('furosemide')">furosemide</button>
+        <button class="qp-btn" onclick="quickSearch('morphine')">morphine</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRIP BUILDER MODE -->
+  <div id="dripMode" style="display:none">
+    <div class="page-eyebrow">FDA Package Insert · Single Best Option</div>
+    <div class="page-title">Drip Builder</div>
+    <div class="page-sub">Enter a drug and dose — get exact diluent, volume, concentration, and infusion time</div>
+    <div class="search-box">
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <span class="search-icon">💊</span>
+          <input id="dripInput" class="search-input" type="text" placeholder="e.g. doxycycline 200mg, vancomycin 1.5g, meropenem 1g...">
+        </div>
+        <button id="dripBtn" class="search-btn" onclick="runDrip()">BUILD DRIP →</button>
+      </div>
+      <div class="quick-row">
+        <span class="quick-label">Examples:</span>
+        <button class="qp-btn" onclick="quickDrip('vancomycin 1g')">vancomycin 1g</button>
+        <button class="qp-btn" onclick="quickDrip('azithromycin 500mg')">azithromycin 500mg</button>
+        <button class="qp-btn" onclick="quickDrip('meropenem 1g')">meropenem 1g</button>
+        <button class="qp-btn" onclick="quickDrip('doxycycline 200mg')">doxycycline 200mg</button>
+        <button class="qp-btn" onclick="quickDrip('piperacillin-tazobactam 3.375g')">pip-tazo 3.375g</button>
+        <button class="qp-btn" onclick="quickDrip('cefepime 2g')">cefepime 2g</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="pipeline" id="pipeline">
+    <div class="pipe-step" id="pq"><span class="pipe-icon">○</span> Query</div>
+    <div class="pipe-step" id="pdm"><span class="pipe-icon">○</span> DailyMed</div>
+    <div class="pipe-step" id="pashp" style="display:none"><span class="pipe-icon">○</span> ASHP</div>
+    <div class="pipe-step" id="ppm" style="display:none"><span class="pipe-icon">○</span> PubMed</div>
+    <div class="pipe-step" id="prn"><span class="pipe-icon">○</span> Render</div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+
+    <!-- Drug header -->
+    <div class="drug-header" id="drugHeader"></div>
+
+    <!-- Quick Facts Strip -->
+    <div id="quickFacts" style="display:none"></div>
+
+    <!-- BBW -->
+    <div id="bbwBlock" style="display:none"></div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('reconstitution', this)" data-tab="reconstitution">Reconstitution</button>
+      <button class="tab-btn" onclick="switchTab('administration', this)" data-tab="administration">Administration</button>
+      <button class="tab-btn" onclick="switchTab('compatibility', this)" data-tab="compatibility">IV Compatibility</button>
+    </div>
+
+    <div id="tab-reconstitution" class="tab-panel active"></div>
+    <div id="tab-administration" class="tab-panel"></div>
+    <div id="tab-compatibility" class="tab-panel"></div>
+
+    <!-- Alerts -->
+    <div id="alertsBlock" style="display:none"></div>
+
+    <!-- Citation -->
+    <div id="citationBlock"></div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      ⚠ REFERENCE TOOL ONLY — QuickDrip presents data from FDA-approved package inserts (DailyMed) and published literature, summarized with AI assistance. AI-generated content may contain errors or omissions. All results must be independently verified by a qualified clinician against the current package insert and institutional protocols before use. Not a substitute for professional clinical judgment.
+    </div>
+  </div>
+
+  <!-- RETRIEVAL FAILURE WARNING (drip builder) -->
+  <div id="retrievalWarn" class="retrieval-warn">
+    ⚠ Retrieval incomplete — one or more core fields could not be sourced directly from the package insert. Verify diluent, volume, concentration, and infusion time against the current PI before use.
+  </div>
+
+  <!-- DRIP RESULTS -->
+  <div id="dripResults" style="display:none;flex-direction:column;gap:16px"></div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">
+      <svg width="56" height="66" viewBox="0 0 46 54" fill="none">
+        <path d="M23 2L4 10V26C4 37.5 12.5 47.8 23 52C33.5 47.8 42 37.5 42 26V10L23 2Z" fill="#0F1F3D" stroke="#00a896" stroke-width="1.8"></path>
+        <g transform="rotate(-45,23,27)">
+          <rect x="12" y="22" width="22" height="10" rx="5" fill="white"></rect>
+          <rect x="17" y="22" width="17" height="10" rx="5" fill="rgba(15,31,61,0.35)" clip-path="url(#pr2)"></rect>
+          <line x1="23" y1="22" x2="23" y2="32" stroke="#0F1F3D" stroke-width="1.3" opacity="0.55"></line>
+        </g>
+        <defs><clipPath id="pr2"><rect x="23" y="22" width="11" height="10"></rect></clipPath></defs>
+      </svg>
+    </div>
+    <div class="empty-title">Search any IV drug above</div>
+    <div class="empty-sub">
+      Reconstitution · Administration · Compatible Diluents · IV Compatibility<br>
+      Real-time FDA package insert data — always cited, never inferred
+    </div>
+  </div>
+
+</div>
+
+<!-- FEEDBACK TOAST -->
+<div id="feedbackToast" class="feedback-toast">✓ Feedback submitted — thank you</div>
+
+<script>
+const SERVER = window.location.origin;
+
+// Single drug data cache — one fetch, all tabs
+let currentDrug = "";
+let currentData = null;  // The full parsed drug object
+
+// ── Autocomplete (brand names, abbreviations, fuzzy matching) ────────────────
+let drugEntries = []; // { name, generic, isAlias }
+fetch(`${SERVER}/drugs`).then(r => r.json()).then(entries => { drugEntries = entries; }).catch(() => {});
+
+// Simple Levenshtein distance for fuzzy matching
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const d = Array.from({length: m + 1}, (_, i) => [i]);
+  for (let j = 1; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      d[i][j] = a[i-1] === b[j-1]
+        ? d[i-1][j-1]
+        : 1 + Math.min(d[i-1][j], d[i][j-1], d[i-1][j-1]);
+    }
+  }
+  return d[m][n];
+}
+
+function fuzzySearch(q, entries, limit) {
+  // Phase 1: exact substring matches (fast)
+  const exact = [];
+  const seen = new Set();
+  for (const e of entries) {
+    if (!e.name.includes(q)) continue;
+    const key = e.isAlias ? `a:${e.name}` : `g:${e.generic}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    exact.push({ ...e, priority: e.name.startsWith(q) ? 0 : 1, dist: 0 });
+  }
+  exact.sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name));
+
+  if (exact.length >= limit) return exact.slice(0, limit);
+
+  // Phase 2: fuzzy matches (Levenshtein ≤ 2) for remaining slots
+  if (q.length >= 3) {
+    const fuzzy = [];
+    for (const e of entries) {
+      const key = e.isAlias ? `a:${e.name}` : `g:${e.generic}`;
+      if (seen.has(key)) continue;
+      const name = e.name;
+      if (Math.abs(name.length - q.length) > 3) continue; // skip very different lengths
+      // Full string distance for similar-length names
+      const dist = levenshtein(q, name);
+      const threshold = q.length <= 5 ? 1 : q.length <= 10 ? 2 : 3;
+      if (dist <= threshold) {
+        seen.add(key);
+        fuzzy.push({ ...e, priority: 2, dist });
+      }
+    }
+    fuzzy.sort((a, b) => a.dist - b.dist || a.name.localeCompare(b.name));
+    exact.push(...fuzzy);
+  }
+
+  return exact.slice(0, limit);
+}
+
+function setupAutocomplete(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  let dropdown = input.parentElement.querySelector(".ac-dropdown");
+  if (!dropdown) {
+    dropdown = document.createElement("div");
+    dropdown.className = "ac-dropdown";
+    input.parentElement.appendChild(dropdown);
+  }
+  let selectedIdx = -1;
+
+  input.addEventListener("input", () => {
+    const q = input.value.toLowerCase().trim();
+    if (q.length < 1) { dropdown.innerHTML = ""; dropdown.style.display = "none"; return; }
+
+    const matches = fuzzySearch(q, drugEntries, 10);
+    if (!matches.length) { dropdown.innerHTML = ""; dropdown.style.display = "none"; return; }
+    selectedIdx = -1;
+
+    dropdown.innerHTML = matches.map((m, i) => {
+      const displayName = m.name;
+      const idx = displayName.indexOf(q);
+      let highlighted;
+      if (idx >= 0) {
+        highlighted = displayName.slice(0, idx) + `<strong>${displayName.slice(idx, idx + q.length)}</strong>` + displayName.slice(idx + q.length);
+      } else {
+        highlighted = displayName; // fuzzy match — no exact substring to bold
+      }
+      // Show "brand → generic" for aliases
+      const aliasHint = m.isAlias ? `<span class="ac-alias">→ ${m.generic}</span>` : "";
+      const fuzzyHint = m.dist > 0 ? `<span class="ac-fuzzy">did you mean?</span>` : "";
+      // Store the generic name for lookup (not the alias)
+      const lookupName = m.isAlias ? m.generic : m.name;
+      return `<div class="ac-item" data-idx="${i}" data-drug="${lookupName}" data-display="${m.isAlias ? m.generic : m.name}">${highlighted}${aliasHint}${fuzzyHint}</div>`;
+    }).join("");
+    dropdown.style.display = "block";
+
+    dropdown.querySelectorAll(".ac-item").forEach(item => {
+      item.addEventListener("mousedown", e => {
+        e.preventDefault();
+        input.value = item.dataset.display || item.dataset.drug;
+        dropdown.style.display = "none";
+        if (inputId === "drugInput") runSearch();
+        else if (inputId === "dripInput") runDrip();
+      });
+    });
+  });
+
+  input.addEventListener("keydown", e => {
+    const items = dropdown.querySelectorAll(".ac-item");
+    if (!items.length) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); selectedIdx = Math.min(selectedIdx + 1, items.length - 1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); selectedIdx = Math.max(selectedIdx - 1, 0); }
+    else if (e.key === "Enter" && selectedIdx >= 0) {
+      e.preventDefault();
+      const sel = items[selectedIdx];
+      input.value = sel.dataset.display || sel.dataset.drug;
+      dropdown.style.display = "none";
+      if (inputId === "drugInput") runSearch();
+      else if (inputId === "dripInput") runDrip();
+      return;
+    } else return;
+    items.forEach((it, i) => it.classList.toggle("ac-selected", i === selectedIdx));
+  });
+
+  input.addEventListener("blur", () => { setTimeout(() => { dropdown.style.display = "none"; }, 150); });
+}
+
+// ── Recent Searches (localStorage) ───────────────────────────────────────────
+const RECENT_KEY = "quickdrip_recent";
+function getRecent() { try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch { return []; } }
+function addRecent(drug) {
+  let recent = getRecent().filter(d => d !== drug);
+  recent.unshift(drug);
+  if (recent.length > 10) recent = recent.slice(0, 10);
+  localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+}
+
+setupAutocomplete("drugInput");
+setupAutocomplete("dripInput");
+
+// ── Pipeline Steps ───────────────────────────────────────────────────────────
+function setStep(id, state) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = "pipe-step " + state;
+  const icon = el.querySelector(".pipe-icon");
+  if (state === "searching") {
+    if (icon) icon.outerHTML = '<div class="pipe-spinner"></div>';
+  } else if (state === "done") {
+    const sp = el.querySelector(".pipe-spinner");
+    if (sp) sp.outerHTML = '<span class="pipe-icon">✓</span>';
+    else if (icon) icon.textContent = "✓";
+  } else if (state === "skipped") {
+    const sp = el.querySelector(".pipe-spinner");
+    if (sp) sp.outerHTML = '<span class="pipe-icon">–</span>';
+    else if (icon) icon.textContent = "–";
+  } else {
+    const sp = el.querySelector(".pipe-spinner");
+    if (sp) sp.outerHTML = '<span class="pipe-icon">○</span>';
+    else if (icon) icon.textContent = "○";
+  }
+}
+
+// ── Single-Fetch Lookup ──────────────────────────────────────────────────────
+// One API call returns ALL tab data. switchTab renders from memory.
+
+async function fetchDrug(drug) {
+  const res = await fetch(`${SERVER}/lookup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ drug })
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) throw new Error(data.error || "Server error");
+  let parsed = null;
+  const raw = data.raw || "";
+  try { parsed = JSON.parse(raw.trim()); } catch {}
+  if (!parsed) { const m = raw.match(/\{[\s\S]*\}/); if (m) try { parsed = JSON.parse(m[0]); } catch {} }
+  if (!parsed) throw new Error("Could not parse server response.");
+  return { parsed, data };
+}
+
+// Switch tabs — instant from already-loaded data
+function switchTab(tab, btn) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("tab-" + tab).classList.add("active");
+  if (currentData) renderTabContent(tab, currentData);
+}
+
+function quickSearch(drug) {
+  document.getElementById("drugInput").value = drug;
+  runSearch();
+}
+
+// Escape value for use in HTML data- attributes
+function escAttr(s) {
+  return String(s || "").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;");
+}
+
+function buildDataRows(rows, drug) {
+  if (!rows || !rows.length) return "<div style='padding:12px 0;color:var(--muted);font-size:13px'>No data documented in package insert.</div>";
+  const d = drug || currentDrug || "";
+  return rows.map((r, i) => {
+    const srcLabel = r.src === "IVPushCoalition" ? "IV Push" : r.src;
+    const srcBadge = r.src ? `<span class="src-badge src-${r.src}">${srcLabel}</span>` : "";
+    const val = (r.value != null && r.value !== "null" && r.value !== "")
+      ? r.value
+      : `<span style="color:var(--muted);font-style:italic">Not documented</span>`;
+    const flagBtn = `<button class="flag-btn" title="Flag this field" onclick="toggleFeedback(this)" data-drug="${escAttr(d)}" data-field="${escAttr(r.label)}" data-value="${escAttr(r.value || "")}">⚑</button>`;
+    return `
+    <div class="data-row" ${i === rows.length-1 ? 'style="border-bottom:none"' : ''}>
+      <div class="data-label" style="display:flex;align-items:center;gap:6px">${r.label}${srcBadge}${flagBtn}</div>
+      <div class="data-value">${val}</div>
+    </div>
+    <div class="feedback-dropdown" style="display:none;padding:8px 0 12px 170px">
+      <select class="feedback-select">
+        <option value="">Select issue…</option>
+        <option value="Incorrect data">Incorrect data</option>
+        <option value="Missing data">Missing data</option>
+        <option value="Wrong source">Wrong source</option>
+        <option value="Other">Other</option>
+      </select>
+      <button class="feedback-submit-btn" onclick="submitFeedback(this)">Submit</button>
+    </div>`;
+  }).join("");
+}
+
+function sectionDivider(label, lineColor, textColor) {
+  const lc = lineColor || "rgba(13,157,168,0.22)";
+  const tc = textColor  || "rgba(13,157,168,0.55)";
+  return `<div class="section-divider">
+    <div class="section-divider-line" style="background:${lc}"></div>
+    <span class="section-divider-label" style="color:${tc}">${label}</span>
+    <div class="section-divider-line" style="background:${lc}"></div>
+  </div>`;
+}
+
+function buildCompatRows(rows) {
+  if (!rows || !rows.length) return "<div style='padding:12px 0;color:var(--muted);font-size:13px'>No compatibility data in package insert. Refer to Trissel's or institutional resources.</div>";
+  return rows.map((r, i) => `
+    <div class="compat-row" ${i === rows.length-1 ? 'style="border-bottom:none"' : ''}>
+      <div class="compat-label-wrap">
+        <div class="compat-dot dot-${r.status || 'unknown'}"></div>
+        <div class="compat-drug-name">${r.label}</div>
+      </div>
+      <div class="compat-right">
+        <div class="compat-status-badge status-${r.status || 'unknown'}">${r.status || 'unknown'}</div>
+        <div class="compat-value">${r.value}</div>
+      </div>
+    </div>`).join("");
+}
+
+// Render the reconstitution tab content
+function renderReconstitution(d) {
+  const reconRows = d.reconstitution && d.reconstitution.length
+    ? buildDataRows(d.reconstitution)
+    : `<div class="data-row" style="border:none;color:var(--muted);font-size:12px">No reconstitution data in PI</div>`;
+
+  // Consolidate dilution: group "Compatible diluent" rows into one pill list,
+  // keep other rows (min volume, concentration, stability, pH) as normal data rows
+  let dilutionHtml = "";
+  if (d.dilution && d.dilution.length) {
+    const diluents = d.dilution.filter(r => /compatible diluent/i.test(r.label || ""));
+    const otherRows = d.dilution.filter(r => !/compatible diluent/i.test(r.label || ""));
+
+    if (diluents.length) {
+      const pills = diluents.map(r => `<span class="diluent-pill">${r.value}</span>`).join("");
+      dilutionHtml += `
+        <div class="data-row" style="flex-direction:column;gap:8px">
+          <div class="data-label">Compatible Diluents</div>
+          <div class="diluent-pills">${pills}</div>
+        </div>`;
+    }
+    if (otherRows.length) {
+      dilutionHtml += buildDataRows(otherRows);
+    }
+  }
+  if (!dilutionHtml) {
+    dilutionHtml = `<div class="data-row" style="border:none;color:var(--muted);font-size:12px">No dilution data in PI</div>`;
+  }
+
+  document.getElementById("tab-reconstitution").innerHTML = `
+    <div class="card accent">
+      <div class="card-header"><span class="card-title">Reconstitution</span><span class="card-source">DailyMed / PI</span></div>
+      <div class="card-body">${reconRows}</div>
+    </div>
+    ${sectionDivider("Dilution", "rgba(13,157,168,0.3)", "rgba(13,157,168,0.7)")}
+    <div class="card accent">
+      <div class="card-header"><span class="card-title">IV Dilution</span><span class="card-source">DailyMed / PI</span></div>
+      <div class="card-body">${dilutionHtml}</div>
+    </div>`;
+}
+
+// Render the administration tab content
+function renderAdministration(d) {
+  let ivPushHtml = "";
+  if (d.ivPush && (d.ivPush.eligible === "yes" || d.ivPush.eligible === "emergency only")) {
+    // Show IV Push section only when drug IS pushable
+    const eligibleColor = d.ivPush.eligible === "yes" ? "var(--green)" : "var(--warn)";
+    const srcBadge = src => src ? `<span class="src-badge src-${src}">${src}</span>` : "";
+    const pushFields = [
+      { label: "Eligible",           value: d.ivPush.eligible ? d.ivPush.eligible.toUpperCase() : null, bold: true, color: eligibleColor },
+      { label: "Push Rate",          value: d.ivPush.pushRate,          badge: srcBadge(d.ivPush.pushRateSrc) },
+      { label: "Max Concentration",  value: d.ivPush.maxConcentration },
+      { label: "Dilution Required",  value: d.ivPush.dilutionRequired },
+      { label: "Special Conditions", value: d.ivPush.specialConditions, badge: srcBadge(d.ivPush.specialConditionsSrc) },
+    ].filter(f => f.value);
+    const pushRows = pushFields.map((f, i) => `
+      <div class="data-row" ${i === pushFields.length-1 ? 'style="border-bottom:none"' : ''}>
+        <div class="data-label">${f.label}${f.badge || ""}</div>
+        <div class="data-value"${f.bold ? ` style="color:${f.color};font-weight:600"` : ""}>${f.value}</div>
+      </div>`).join("");
+    ivPushHtml = sectionDivider("IV Push", "rgba(34,197,94,0.25)", "rgba(34,197,94,0.75)") +
+      `<div style="padding:4px 0 10px">${pushRows}</div>`;
+  } else if (d.ivPush && d.ivPush.eligible === "no" && d.ivPush.warning) {
+    // PI explicitly warns against IV push — show safety alert, not a section
+    ivPushHtml = `<div style="background:rgba(239,68,68,0.12);border-left:3px solid var(--red);padding:8px 12px;margin:8px 0;border-radius:6px;font-size:0.85rem;">
+      <strong style="color:var(--red);">Do NOT IV Push</strong> — ${d.ivPush.warning}
+    </div>`;
+  }
+  // If ivPush is null (PI silent on the topic), no section or mention at all
+
+  const DOSING_LABELS = /\bdose\b|\bdosing\b|\bdosage\b/i;
+  const infusionRows = (d.administration || []).filter(r => !DOSING_LABELS.test(r.label || ""));
+  const infusionHtml = sectionDivider("IV Infusion", "rgba(13,157,168,0.25)", "rgba(13,157,168,0.7)") +
+    `<div style="padding:4px 0 10px">${buildDataRows(infusionRows.length ? infusionRows : d.administration)}</div>`;
+
+  const mon = d.monitoring;
+  let monHtml = "";
+  if (mon) {
+    const monRows = [
+      { label: "Labs",            value: mon.labs,           src: mon.labsSrc        || "PI" },
+      { label: "Drug Levels",     value: mon.drugLevels,     src: mon.drugLevelsSrc  || "PI" },
+      { label: "Vitals",          value: mon.vitals,         src: "PI" },
+      { label: "During Infusion", value: mon.duringInfusion, src: "PI" },
+    ].filter(r => r.value && r.value !== "null");
+    if (monRows.length) {
+      monHtml = sectionDivider("Monitoring", "rgba(168,85,247,0.25)", "rgba(168,85,247,0.75)") +
+        `<div style="padding:4px 0 10px">${buildDataRows(monRows)}</div>`;
+    }
+  }
+
+  let sideEffectsHtml = "";
+  if (d.sideEffects && d.sideEffects.length) {
+    const bullets = d.sideEffects.map(s =>
+      `<div style="display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px solid var(--border-dim)">
+        <span style="color:rgba(245,158,11,0.7);flex-shrink:0;font-size:11px">›</span>
+        <span style="color:var(--offwhite);font-size:13px">${s}</span>
+      </div>`).join("");
+    sideEffectsHtml = sectionDivider("Common Side Effects", "rgba(245,158,11,0.25)", "rgba(245,158,11,0.75)") +
+      `<div style="padding:4px 0 10px">${bullets}</div>`;
+  }
+
+  document.getElementById("tab-administration").innerHTML = `
+    <div class="card accent">
+      <div class="card-header"><span class="card-title">Administration</span><span class="card-source">DailyMed / PI</span></div>
+      <div class="card-body">${ivPushHtml}${infusionHtml}${monHtml}${sideEffectsHtml}</div>
+    </div>`;
+}
+
+// Render the compatibility tab content
+function renderCompatibility(d) {
+  document.getElementById("tab-compatibility").innerHTML = `
+    <div class="card accent">
+      <div class="card-header"><span class="card-title">IV Compatibility — Y-Site &amp; Admixture</span><span class="card-source">DailyMed / PI + PubMed</span></div>
+      <div class="card-body">${buildCompatRows(d.ivCompatibility)}</div>
+    </div>`;
+}
+
+// Dispatch to the right tab renderer
+function renderTabContent(tab, d) {
+  if (tab === "reconstitution") renderReconstitution(d);
+  else if (tab === "administration") renderAdministration(d);
+  else if (tab === "compatibility") renderCompatibility(d);
+}
+
+// Build quick-facts strip from drug data
+function buildQuickFacts(d) {
+  const facts = [];
+  // Infusion time
+  const adminRow = (d.administration || []).find(r => /infusion|duration|rate/i.test(r.label || ""));
+  if (adminRow?.value) facts.push({ label: "Infusion", value: adminRow.value.replace(/^.*?(\d+\s*(to\s*\d+\s*)?minutes?|hours?).*/i, "$1") || adminRow.value.slice(0, 40) });
+  // IV Push — only show when drug is pushable or PI explicitly warns against it
+  if (d.ivPush && d.ivPush.eligible === "yes") {
+    facts.push({ label: "IV Push", value: "Eligible", color: "var(--green)" });
+  } else if (d.ivPush && d.ivPush.eligible === "emergency only") {
+    facts.push({ label: "IV Push", value: "Emergency Only", color: "var(--warn)" });
+  } else if (d.ivPush && d.ivPush.eligible === "no") {
+    facts.push({ label: "IV Push", value: "Do NOT Push", color: "var(--red)" });
+  }
+  // If ivPush is null (PI silent), omit entirely — don't assume
+  // Filter
+  const hasFilter = (d.administration || []).some(r => /filter/i.test(r.label || "") && r.value && !/not required/i.test(r.value));
+  facts.push({ label: "Filter", value: hasFilter ? "Required" : "Not required", color: hasFilter ? "var(--warn)" : "var(--muted)" });
+  // BBW
+  if (d.blackBoxWarnings?.length) facts.push({ label: "BBW", value: "Yes", color: "var(--red)" });
+
+  return `<div class="quick-facts">${facts.map(f =>
+    `<div class="qf-item"><span class="qf-label">${f.label}</span><span class="qf-value"${f.color ? ` style="color:${f.color}"` : ""}>${f.value}</span></div>`
+  ).join("")}</div>`;
+}
+
+function renderResult(d, piSource) {
+  currentData = d;
+
+  // Drug header with source confidence badge
+  const hasBBW = d.blackBoxWarnings && d.blackBoxWarnings.length > 0;
+  const sourceBadge = piSource === "cache"
+    ? `<span class="drug-badge" style="background:rgba(34,197,94,0.1);color:#86EFAC;border:1px solid rgba(34,197,94,0.22)">FDA PI Verified</span>`
+    : `<span class="drug-badge" style="background:rgba(59,130,246,0.1);color:#93C5FD;border:1px solid rgba(59,130,246,0.22)">Live Extracted</span>`;
+
+  document.getElementById("drugHeader").innerHTML = `
+    <div>
+      <div style="margin-bottom:8px">
+        <span class="drug-name">${d.drugName}</span>
+        ${d.brandName ? `<span class="drug-brand">(${d.brandName})</span>` : ""}
+      </div>
+      <div class="drug-badges">
+        ${d.drugClass ? `<span class="drug-badge badge-teal">${d.drugClass}</span>` : ""}
+        ${sourceBadge}
+        ${d.labelDate ? `<span class="badge-label">Label: ${d.labelDate}</span>` : ""}
+      </div>
+    </div>
+    ${hasBBW ? `<div class="bbw-badge">⚠ BLACK BOX WARNING</div>` : ""}
+  `;
+
+  // Quick facts strip
+  document.getElementById("quickFacts").innerHTML = buildQuickFacts(d);
+  document.getElementById("quickFacts").style.display = "block";
+
+  // BBW
+  const bbwEl = document.getElementById("bbwBlock");
+  if (hasBBW) {
+    bbwEl.style.display = "block";
+    bbwEl.innerHTML = `<div class="bbw-block">
+      <div class="bbw-title">⚠ Black Box Warning</div>
+      ${d.blackBoxWarnings.map(w => `<div class="bbw-text">${w}</div>`).join("")}
+    </div>`;
+  } else {
+    bbwEl.style.display = "none";
+  }
+
+  // Render ALL tabs immediately — no lazy loading
+  renderTabContent("reconstitution", d);
+  renderTabContent("administration", d);
+  renderTabContent("compatibility", d);
+
+  // Clinical alerts
+  const alertsEl = document.getElementById("alertsBlock");
+  if (d.clinicalAlerts && d.clinicalAlerts.length > 0) {
+    alertsEl.style.display = "block";
+    alertsEl.innerHTML = `<div class="alerts-block">
+      <div class="alerts-title">Clinical Alerts</div>
+      ${d.clinicalAlerts.map(a => `<div class="alert-item"><span class="alert-arrow">›</span><div class="alert-text">${a}</div></div>`).join("")}
+    </div>`;
+  } else { alertsEl.style.display = "none"; }
+
+  // Citation
+  document.getElementById("citationBlock").innerHTML = `
+    <div class="citation-block">
+      <span style="flex-shrink:0;margin-top:1px;opacity:0.6">📎</span>
+      <div class="citation-text">
+        <span class="citation-strong">Source:</span> ${d.citation?.primary || "FDA Package Insert / DailyMed"}<br>
+        <a href="${d.citation?.url || 'https://dailymed.nlm.nih.gov/dailymed/'}" target="_blank">${d.citation?.url || 'https://dailymed.nlm.nih.gov/dailymed/'}</a>
+      </div>
+    </div>`;
+
+  // Reset to first tab
+  document.querySelectorAll(".tab-btn").forEach((b, i) => b.classList.toggle("active", i === 0));
+  document.querySelectorAll(".tab-panel").forEach((p, i) => p.classList.toggle("active", i === 0));
+}
+
+async function runSearch() {
+  const drug = document.getElementById("drugInput").value.trim();
+  if (!drug) return;
+
+  currentDrug = drug;
+  currentData = null;
+  addRecent(drug);
+
+  const btn = document.getElementById("searchBtn");
+  btn.disabled = true;
+  btn.textContent = "SEARCHING...";
+
+  document.getElementById("emptyState").style.display = "none";
+  document.getElementById("errorBox").classList.remove("visible");
+  document.getElementById("results").classList.remove("visible");
+  document.getElementById("quickFacts").style.display = "none";
+
+  // Show pipeline for live fallback, skip for cached
+  document.getElementById("pipeline").classList.add("visible");
+  document.getElementById("ppm").style.display = "none";
+  document.getElementById("pashp").style.display = "";
+  ["pq","pdm","pashp","prn"].forEach(id => setStep(id, ""));
+
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+  setStep("pq", "searching"); await delay(100); setStep("pq", "done");
+  setStep("pdm", "searching");
+
+  try {
+    // Single fetch — returns ALL data for ALL tabs
+    const { parsed, data } = await fetchDrug(drug);
+
+    if (data.piSource === "cache") {
+      // Instant — skip pipeline animation
+      setStep("pdm", "done");
+      setStep("pashp", data.ashpUsed ? "done" : "skipped");
+      setStep("prn", "done");
+    } else {
+      setStep("pdm", "done");
+      setStep("pashp", data.ashpUsed ? "done" : "skipped");
+      setStep("prn", "searching"); await delay(100); setStep("prn", "done");
+    }
+
+    renderResult(parsed, data.piSource);
+    document.getElementById("results").classList.add("visible");
+
+    // Hide pipeline after brief display for cached results
+    if (data.piSource === "cache") {
+      setTimeout(() => { document.getElementById("pipeline").classList.remove("visible"); }, 600);
+    }
+
+  } catch (err) {
+    setStep("pdm", "skipped"); setStep("pashp", "skipped"); setStep("prn", "skipped");
+    const eb = document.getElementById("errorBox");
+    eb.textContent = "⚠ " + err.message;
+    eb.classList.add("visible");
+  }
+
+  btn.disabled = false;
+  btn.textContent = "LOOK UP →";
+}
+
+document.getElementById("drugInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") runSearch();
+});
+document.getElementById("dripInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") runDrip();
+});
+
+function setMode(mode) {
+  const isLookup = mode === "lookup";
+  document.getElementById("lookupMode").style.display = isLookup ? "block" : "none";
+  document.getElementById("dripMode").style.display = isLookup ? "none" : "block";
+  document.getElementById("modeLookupBtn").classList.toggle("active", isLookup);
+  document.getElementById("modeDripBtn").classList.toggle("active", !isLookup);
+  document.getElementById("pipeline").classList.remove("visible");
+  document.getElementById("results").classList.remove("visible");
+  document.getElementById("dripResults").style.display = "none";
+  document.getElementById("errorBox").classList.remove("visible");
+  document.getElementById("emptyState").style.display = "block";
+}
+
+function quickDrip(q) {
+  document.getElementById("dripInput").value = q;
+  runDrip();
+}
+
+async function runDrip() {
+  const query = document.getElementById("dripInput").value.trim();
+  if (!query) return;
+
+  const btn = document.getElementById("dripBtn");
+  btn.disabled = true;
+  btn.textContent = "BUILDING...";
+
+  document.getElementById("emptyState").style.display = "none";
+  document.getElementById("errorBox").classList.remove("visible");
+  document.getElementById("dripResults").style.display = "none";
+  document.getElementById("pipeline").classList.add("visible");
+
+  document.getElementById("ppm").style.display = "";
+  ["pq","pdm","ppm","prn"].forEach(id => setStep(id, ""));
+  const delay = ms => new Promise(r => setTimeout(r, ms));
+
+  setStep("pq", "searching"); await delay(200); setStep("pq", "done");
+  setStep("pdm", "searching");
+  setStep("ppm", "searching");
+
+  try {
+    const res = await fetch(`${SERVER}/drip`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query })
+    });
+
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || "Server error");
+
+    setStep("pdm", data.openFDAUsed ? "done" : "skipped");
+    setStep("ppm", data.pubmedUsed  ? "done" : "skipped");
+    document.getElementById("retrievalWarn").classList.toggle("visible", !!data.retrieval_failure);
+
+    let parsed = null;
+    const raw = data.raw || "";
+    try { parsed = JSON.parse(raw.trim()); } catch {}
+    if (!parsed) { const m = raw.match(/\{[\s\S]*\}/); if (m) try { parsed = JSON.parse(m[0]); } catch {} }
+    if (!parsed) throw new Error("Could not parse response. Please try again.");
+
+    setStep("prn", "searching"); await delay(100); setStep("prn", "done");
+
+    renderDrip(parsed, data.piSource);
+
+  } catch (err) {
+    setStep("pdm", "skipped"); setStep("ppm", "skipped");
+    setStep("prn", "skipped");
+    document.getElementById("retrievalWarn").classList.remove("visible");
+    const eb = document.getElementById("errorBox");
+    eb.textContent = "⚠ " + err.message;
+    eb.classList.add("visible");
+  }
+
+  btn.disabled = false;
+  btn.textContent = "BUILD DRIP →";
+}
+
+// ── Feedback flag functions ──────────────────────────────────────────────────
+
+function toggleFeedback(flagBtn) {
+  const row = flagBtn.closest(".data-row");
+  if (!row) return;
+  const dropdown = row.nextElementSibling;
+  if (!dropdown || !dropdown.classList.contains("feedback-dropdown")) return;
+  const isOpen = dropdown.style.display !== "none";
+  // Close all open dropdowns first
+  document.querySelectorAll(".feedback-dropdown").forEach(d => { d.style.display = "none"; });
+  if (!isOpen) dropdown.style.display = "flex";
+}
+
+async function submitFeedback(submitBtn) {
+  const dropdown = submitBtn.closest(".feedback-dropdown");
+  const select   = dropdown.querySelector(".feedback-select");
+  const issue    = select ? select.value : "";
+  if (!issue) { select.style.borderColor = "var(--red)"; return; }
+
+  const row      = dropdown.previousElementSibling;
+  const flagBtn  = row ? row.querySelector(".flag-btn") : null;
+  const drug     = flagBtn ? flagBtn.dataset.drug  : currentDrug;
+  const field    = flagBtn ? flagBtn.dataset.field : "";
+  const currentValue = flagBtn ? flagBtn.dataset.value : "";
+
+  try {
+    await fetch(`${SERVER}/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ drug, field, issue, currentValue })
+    });
+  } catch { /* non-blocking */ }
+
+  dropdown.style.display = "none";
+  const toast = document.getElementById("feedbackToast");
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+function renderDrip(d, piSource) {
+  const filterIsRequired = d.filterRequired && !d.filterRequired.toLowerCase().includes("not required");
+  const filterClass = filterIsRequired ? "filter-required" : "filter-not-required";
+  const filterIcon = filterIsRequired ? "⚠" : "✓";
+
+  const sourceBadge = piSource === "vector"
+    ? `<span style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:4px;background:#1a3a1a;color:#5dba5d;border:1px solid #2e5e2e;text-transform:uppercase">FDA PI Verified</span>`
+    : piSource === "dailymed"
+    ? `<span style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:4px;background:#1a2e3a;color:#5db3d8;border:1px solid #2a4a5e;text-transform:uppercase">DailyMed Live</span>`
+    : "";
+
+  let warningsHtml = "";
+  if (d.blackBoxWarnings && d.blackBoxWarnings.length) {
+    warningsHtml += `<div class="bbw-block" style="margin-bottom:0">
+      <div class="bbw-title">⚠ Black Box Warning</div>
+      ${d.blackBoxWarnings.map(w => `<div class="bbw-text">${w}</div>`).join("")}
+    </div>`;
+  }
+  if (d.clinicalWarnings && d.clinicalWarnings.length) {
+    warningsHtml += `<div class="alerts-block" style="margin-bottom:0">
+      <div class="alerts-title">Clinical Alerts</div>
+      ${d.clinicalWarnings.map(a => `<div class="alert-item"><span class="alert-arrow">›</span><div class="alert-text">${a}</div></div>`).join("")}
+    </div>`;
+  }
+
+  const html = `
+    <div class="drip-card">
+      <div class="drip-header">
+        <div>
+          <div class="drip-drug-name">${d.drugName}</div>
+          ${d.brandName ? `<div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--muted);font-style:italic;margin-top:2px">(${d.brandName})</div>` : ""}
+          ${sourceBadge ? `<div style="margin-top:6px">${sourceBadge}</div>` : ""}
+        </div>
+        <div class="drip-dose-badge">${d.dose}</div>
+      </div>
+
+      <div class="drip-grid">
+        <div class="drip-cell">
+          <div class="drip-cell-label">Diluent</div>
+          <div class="drip-cell-value highlight">${d.diluent || "—"}</div>
+        </div>
+        <div class="drip-cell">
+          <div class="drip-cell-label">Total Volume</div>
+          <div class="drip-cell-value highlight">${d.totalVolume || "—"}</div>
+        </div>
+        <div class="drip-cell">
+          <div class="drip-cell-label">Final Concentration</div>
+          <div class="drip-cell-value">${d.finalConcentration || "—"}</div>
+        </div>
+        <div class="drip-cell">
+          <div class="drip-cell-label">Infusion Time</div>
+          <div class="drip-cell-value">${d.infusionTime || "—"}</div>
+        </div>
+      </div>
+
+      <div class="drip-prep">
+        <div class="drip-prep-label">Preparation</div>
+        <div class="drip-prep-text">${d.preparation || "See package insert."}</div>
+      </div>
+
+      <div class="drip-filter ${filterClass}">
+        <span>${filterIcon}</span>
+        <span>Filter: ${d.filterRequired || "Not documented"}</span>
+      </div>
+    </div>
+
+    ${warningsHtml ? `<div style="display:flex;flex-direction:column;gap:12px">${warningsHtml}</div>` : ""}
+
+    <div class="citation-block">
+      <span style="flex-shrink:0;margin-top:1px;opacity:0.6">📎</span>
+      <div class="citation-text">
+        <span class="citation-strong">Source:</span> ${d.citation?.primary || "FDA Package Insert / DailyMed"}<br>
+        <a href="${d.citation?.url || 'https://dailymed.nlm.nih.gov/dailymed/'}" target="_blank">${d.citation?.url || 'https://dailymed.nlm.nih.gov/dailymed/'}</a>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      ⚠ AI-GENERATED — VERIFY BEFORE USE. This drip protocol was generated with AI assistance from FDA package insert data. AI output may contain errors. All values (diluent, concentration, rate, infusion time) must be independently verified by a licensed clinician against the current package insert and institutional protocols before preparation or administration. Not a substitute for professional clinical judgment.
+    </div>`;
+
+  const dr = document.getElementById("dripResults");
+  dr.innerHTML = html;
+  dr.style.display = "flex";
+}
+</script>
+
+
+</body></html>

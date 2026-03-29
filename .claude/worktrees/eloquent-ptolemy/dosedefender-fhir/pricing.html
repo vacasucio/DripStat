@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — DoseDefender</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0f2744;--navy2:#1a3a5c;--teal:#00a896;--teal-light:#e6f9f7;--teal-mid:#7fd8d0;--text:#1a2332;--muted:#64748b;--border:#e2e8f0;--bg:#f0f4f8;--white:#fff;--surface:#f1f5f9;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sora',sans-serif;color:var(--text);background:var(--white);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 48px;}
+.nav-logo{font-size:20px;font-weight:700;color:var(--navy);letter-spacing:-.02em;text-decoration:none;}
+.nav-logo em{color:var(--teal);font-style:normal;}
+.hero{padding:120px 48px 80px;text-align:center;background:linear-gradient(160deg,#f8fafc 0%,#e6f9f7 50%,#f0f4f8 100%);}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,56px);color:var(--navy);margin-bottom:16px;}
+.hero h1 em{color:var(--teal);}
+.hero p{font-size:17px;color:var(--muted);max-width:500px;margin:0 auto 48px;line-height:1.7;}
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:820px;margin:0 auto;padding:0 24px;}
+.plan-card{border-radius:20px;overflow:hidden;border:2px solid var(--border);background:white;}
+.plan-card.featured{border-color:var(--teal);box-shadow:0 8px 40px rgba(0,168,150,.15);}
+.plan-header{padding:28px 28px 20px;background:var(--bg);}
+.plan-header.featured{background:var(--teal);color:white;}
+.plan-badge{display:inline-block;background:var(--teal-light);color:var(--teal);font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;font-family:'JetBrains Mono',monospace;letter-spacing:.05em;margin-bottom:12px;}
+.plan-badge.white{background:rgba(255,255,255,.2);color:white;}
+.plan-name{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.plan-name.white{color:white;}
+.plan-price{font-size:40px;font-weight:700;color:var(--navy);line-height:1;}
+.plan-price.white{color:white;}
+.plan-price span{font-size:16px;font-weight:500;color:var(--muted);}
+.plan-price.white span{color:rgba(255,255,255,.75);}
+.plan-annual{font-size:13px;color:var(--teal);margin-top:6px;font-weight:600;}
+.plan-annual.white{color:rgba(255,255,255,.85);}
+.plan-body{padding:28px;}
+.feature-list{list-style:none;margin-bottom:28px;}
+.feature-list li{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px;color:var(--text);}
+.feature-list li::before{content:'✓';color:var(--teal);font-weight:700;font-size:15px;flex-shrink:0;}
+.feature-list li.pro-only{font-weight:600;color:var(--navy);}
+.plan-btn{display:block;width:100%;text-align:center;padding:13px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:none;font-family:'Sora',sans-serif;transition:all .2s;}
+.btn-free{background:var(--navy);color:white;}
+.btn-free:hover{background:var(--navy2);}
+.btn-pro{background:var(--teal);color:white;}
+.btn-pro:hover{background:#008a7c;}
+.section{padding:80px 48px;max-width:820px;margin:0 auto;}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(24px,3vw,36px);color:var(--navy);margin-bottom:40px;text-align:center;}
+.faq-item{border-bottom:1px solid var(--border);padding:24px 0;}
+.faq-q{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:10px;}
+.faq-a{font-size:14px;color:var(--muted);line-height:1.7;}
+.cms-banner{background:var(--navy);color:white;padding:60px 48px;text-align:center;}
+.cms-banner h2{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:12px;}
+.cms-banner p{color:rgba(255,255,255,.7);font-size:15px;max-width:500px;margin:0 auto 28px;}
+.cms-btn{display:inline-block;background:var(--teal);color:white;padding:13px 28px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;}
+footer{background:var(--bg);border-top:1px solid var(--border);padding:32px 48px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);}
+footer a{color:var(--muted);text-decoration:none;margin-left:20px;}
+@media(max-width:640px){.pricing-grid{grid-template-columns:1fr;}nav{padding:0 24px;}.hero{padding:100px 24px 60px;}.section{padding:60px 24px;}.cms-banner{padding:48px 24px;}footer{flex-direction:column;gap:12px;text-align:center;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">Dose<em>Defender</em></a>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <a href="/app-v2" style="font-size:13px;color:var(--muted);text-decoration:none;">App</a>
+    <a href="/login" style="font-size:13px;font-weight:600;color:var(--navy);text-decoration:none;padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;">Sign In</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Simple, honest <em>pricing</em></h1>
+  <p>All clinical calculators are free forever. PRO unlocks Snap & Calculate — AI that extracts lab values from any EHR screenshot.</p>
+
+  <div class="pricing-grid">
+    <!-- FREE -->
+    <div class="plan-card">
+      <div class="plan-header">
+        <div class="plan-badge">FREE</div>
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0 <span>/ forever</span></div>
+      </div>
+      <div class="plan-body">
+        <ul class="feature-list">
+          <li>All clinical calculators</li>
+          <li>Manual data entry</li>
+          <li>Heparin infusion protocol</li>
+          <li>Vancomycin AUC/MIC (population PK &amp; Bayesian)</li>
+          <li>DKA 2-bag protocol</li>
+          <li>Age-Friendly Beers Criteria audit</li>
+          <li>Image import via OCR</li>
+          <li>Works on any device</li>
+          <li>No credit card required</li>
+        </ul>
+        <a href="/register" class="plan-btn btn-free">Start Free</a>
+      </div>
+    </div>
+
+    <!-- PRO -->
+    <div class="plan-card featured">
+      <div class="plan-header featured">
+        <div class="plan-badge white">⭐ MOST POPULAR</div>
+        <div class="plan-name white">PRO</div>
+        <div class="plan-price white">$14.99 <span>/month</span></div>
+        <div class="plan-annual white">or $99/year — save 45%</div>
+      </div>
+      <div class="plan-body">
+        <ul class="feature-list">
+          <li>Everything in Free</li>
+          <li class="pro-only">⚡ Snap &amp; Calculate image import</li>
+          <li class="pro-only">Paste any EHR screenshot</li>
+          <li class="pro-only">AI extracts lab values automatically</li>
+          <li class="pro-only">Works with Epic, Cerner, Meditech, any EHR</li>
+          <li class="pro-only">Medications auto-detected from screenshots</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="plan-btn btn-pro" onclick="startCheckout('monthly')">Go PRO — $14.99/mo</button>
+        <button class="plan-btn" style="margin-top:10px;background:var(--surface);color:var(--navy);border:1.5px solid var(--border);" onclick="startCheckout('annual')">Annual — $99/year (save 45%)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="section">
+  <div class="sec-title">Frequently Asked Questions</div>
+  <div class="faq-item">
+    <div class="faq-q">Does DoseDefender store patient data?</div>
+    <div class="faq-a">No. Images uploaded for Snap & Calculate are processed in real time and immediately discarded. No patient data is ever stored on our servers. We only store your email address and subscription status.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">What EHRs does Snap & Calculate work with?</div>
+    <div class="faq-a">All of them. Snap & Calculate works with any EHR screenshot — Epic, Cerner, Meditech, Allscripts, or any other system. If it's visible on your screen, it can be extracted.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Is DoseDefender FDA cleared?</div>
+    <div class="faq-a">DoseDefender is a clinical reference tool for use by licensed healthcare professionals. It is not FDA cleared as a medical device. Always verify all calculations independently against your institution's current protocols.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Can I cancel anytime?</div>
+    <div class="faq-a">Yes. Cancel anytime from your account settings. You'll retain PRO access until the end of your billing period, then automatically revert to the free plan.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Can my hospital get a contract?</div>
+    <div class="faq-a">Yes. Contact us at <a href="mailto:hello@dosedefender.com" style="color:var(--teal);">hello@dosedefender.com</a> for institutional pricing and FHIR integration options.</div>
+  </div>
+</div>
+
+<!-- CMS Banner -->
+<div class="cms-banner">
+  <h2>Protecting up to $258,000 in CMS penalties?</h2>
+  <p>Supporting CMS Age-Friendly Hospital Measure Domain 2 compliance — Responsible Medication Management. Ask about our Hospital plan for institution-wide access and reporting.</p>
+  <a href="mailto:hello@dosedefender.com" class="cms-btn">Contact Us About Hospital Pricing</a>
+</div>
+
+<footer>
+  <span>© 2025 DoseDefender LLC. All rights reserved.</span>
+  <div>
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/app-v2">App</a>
+  </div>
+</footer>
+
+<script>
+async function startCheckout(plan) {
+  const token = localStorage.getItem('dosedefender_token');
+  if (!token) {
+    window.location.href = '/register?redirect=/pricing';
+    return;
+  }
+  try {
+    const r = await fetch('/payments/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ plan }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Could not start checkout');
+    if (data.url) window.location.href = data.url;
+  } catch (err) {
+    alert('Checkout error: ' + err.message + '\n\nMake sure Stripe is configured in your environment.');
+  }
+}
+
+// Show cancellation/upgrade messages
+const params = new URLSearchParams(window.location.search);
+if (params.get('cancelled')) {
+  const banner = document.createElement('div');
+  banner.style.cssText = 'background:#fffbeb;border-bottom:1px solid #fde68a;padding:12px 48px;font-size:13px;color:#92400e;text-align:center;margin-top:60px;';
+  banner.textContent = 'Checkout cancelled — your plan has not changed.';
+  document.body.insertBefore(banner, document.body.children[1]);
+}
+</script>
+</body>
+</html>

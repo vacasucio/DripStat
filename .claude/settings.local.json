@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netstat -ano)",
+      "Bash(cmd //c \"taskkill /PID 15892 /F\")",
+      "Bash(curl -s -X POST http://localhost:3579/drip -H \"Content-Type: application/json\" -d '{\"\"query\"\":\"\"doxycycline 200mg\"\"}' -o C:/tmp/drip_response2.json)",
+      "Read(//c/tmp/**)",
+      "Bash(node -e \"const d=JSON.parse\\(require\\(''fs''\\).readFileSync\\(''C:/tmp/drip_response2.json'',''utf8''\\)\\); console.log\\(''openFDAUsed:'',d.openFDAUsed,''pubmedUsed:'',d.pubmedUsed\\);\")",
+      "Bash(mkdir -p \"$TEMP\")",
+      "Bash(echo $TEMP)",
+      "Bash(curl -s -X POST http://localhost:3579/drip -H \"Content-Type: application/json\" -d '{\"\"query\"\":\"\"doxycycline 200mg\"\"}' -o /tmp/drip_response3.json)",
+      "Read(//tmp/**)",
+      "Bash(node -e \"const d=JSON.parse\\(require\\(''fs''\\).readFileSync\\(''/tmp/drip_response3.json'',''utf8''\\)\\); console.log\\(''openFDAUsed:'',d.openFDAUsed,''pubmedUsed:'',d.pubmedUsed\\);\")",
+      "Bash(node:*)",
+      "Bash(node -e \"require\\(''''better-sqlite3''''\\)\")",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(cd:*)",
+      "Bash(cmd /c \"taskkill /PID 8608 /F\")",
+      "Bash(powershell -Command \"Stop-Process -Id 8608 -Force -ErrorAction SilentlyContinue; Start-Sleep 2; netstat -ano | Select-String '3579'\")",
+      "Bash(curl:*)",
+      "Bash(grep -n \"raw\\\\|JSON.parse\\\\|backtick\\\\|replace.*\\\\`\\\\`\\\\`\" D:/Dosafy/DripStat/quickdrip.html)",
+      "Bash(findstr :3579)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c \"taskkill /PID 684 /F\")",
+      "Bash(cmd /c \"netstat -ano | findstr :3579\")",
+      "Bash(cmd /c \"netstat -ano\")",
+      "Bash(wmic process:*)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d[''''results''''][0].keys\\(\\)\\)\\)\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(python -c \":*)",
+      "Bash(ls D:/Dosafy/DripStat/*.js D:/Dosafy/DripStat/*.html D:/Dosafy/DripStat/*.json)"
+    ]
+  }
+}
