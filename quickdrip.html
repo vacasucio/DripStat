@@ -814,6 +814,99 @@
   }
   .feedback-toast.show { opacity: 1; transform: translateY(0); }
 
+  /* QUICK ACCESS PANEL (Favorites, Recents, Unit Presets) */
+  .quick-access {
+    margin-bottom: 24px;
+    animation: fadeUp 0.3s ease both;
+  }
+  .qa-section { margin-bottom: 18px; }
+  .qa-section:last-child { margin-bottom: 0; }
+  .qa-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .qa-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--teal);
+  }
+  .qa-line { flex: 1; height: 1px; background: var(--border-dim); }
+  .qa-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .qa-pill {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-dim);
+    color: var(--muted);
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .qa-pill:hover { border-color: var(--teal); color: var(--teal-light); background: rgba(13,157,168,0.07); }
+  .qa-pill .qa-star { font-size: 10px; opacity: 0.5; }
+  .qa-pill .qa-remove {
+    font-size: 10px;
+    opacity: 0;
+    margin-left: 2px;
+    transition: opacity 0.15s;
+    cursor: pointer;
+  }
+  .qa-pill:hover .qa-remove { opacity: 0.6; }
+  .qa-pill:hover .qa-remove:hover { opacity: 1; color: var(--red); }
+
+  /* Favorite star in drug header */
+  .fav-star {
+    font-size: 22px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px 6px;
+    line-height: 1;
+    transition: transform 0.15s;
+    color: var(--muted);
+  }
+  .fav-star:hover { transform: scale(1.2); }
+  .fav-star.active { color: #FBBF24; }
+
+  /* Unit preset selector */
+  .unit-selector {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .unit-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-dim);
+    color: var(--muted);
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.15s;
+  }
+  .unit-btn:hover { border-color: var(--teal); color: var(--teal-light); }
+  .unit-btn.active {
+    border-color: var(--teal);
+    color: var(--teal-light);
+    background: rgba(13,157,168,0.1);
+  }
+
   /* EMPTY STATE */
   .empty-state {
     text-align: center;
@@ -945,6 +1038,10 @@
     .quick-facts { gap: 6px; }
     .qf-item { padding: 4px 8px; }
     .citation-block { flex-direction: column; }
+    .qa-pills { gap: 4px; }
+    .qa-pill { font-size: 11px; padding: 4px 10px; }
+    .unit-selector { gap: 4px; }
+    .unit-btn { font-size: 10px; padding: 4px 10px; }
   }
 
   /* PRINT */
@@ -1053,6 +1150,42 @@
         <button class="qp-btn" onclick="quickDrip('piperacillin-tazobactam 3.375g')">pip-tazo 3.375g</button>
         <button class="qp-btn" onclick="quickDrip('cefepime 2g')">cefepime 2g</button>
       </div>
+    </div>
+  </div>
+
+  <!-- QUICK ACCESS: Favorites, Recents, Unit Presets -->
+  <div class="quick-access" id="quickAccess" style="display:none">
+    <!-- Favorites -->
+    <div class="qa-section" id="qaFavorites" style="display:none">
+      <div class="qa-header">
+        <span class="qa-label">Favorites</span>
+        <div class="qa-line"></div>
+      </div>
+      <div class="qa-pills" id="qaFavPills"></div>
+    </div>
+    <!-- Recent -->
+    <div class="qa-section" id="qaRecent" style="display:none">
+      <div class="qa-header">
+        <span class="qa-label">Recent</span>
+        <div class="qa-line"></div>
+      </div>
+      <div class="qa-pills" id="qaRecentPills"></div>
+    </div>
+    <!-- Unit Presets -->
+    <div class="qa-section">
+      <div class="qa-header">
+        <span class="qa-label">Unit Quick Lists</span>
+        <div class="qa-line"></div>
+      </div>
+      <div class="unit-selector" id="unitSelector">
+        <button class="unit-btn" data-unit="icu" onclick="selectUnit('icu')">ICU</button>
+        <button class="unit-btn" data-unit="ed" onclick="selectUnit('ed')">ED</button>
+        <button class="unit-btn" data-unit="medsurg" onclick="selectUnit('medsurg')">Med-Surg</button>
+        <button class="unit-btn" data-unit="ld" onclick="selectUnit('ld')">L&amp;D</button>
+        <button class="unit-btn" data-unit="peds" onclick="selectUnit('peds')">Peds</button>
+        <button class="unit-btn" data-unit="onc" onclick="selectUnit('onc')">Oncology</button>
+      </div>
+      <div class="qa-pills" id="qaUnitPills" style="display:none"></div>
     </div>
   </div>
 
@@ -1283,8 +1416,150 @@ function addRecent(drug) {
   localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
 }
 
+// ── Favorites (localStorage) ────────────────────────────────────────────────
+const FAV_KEY = "quickdrip_favorites";
+function getFavorites() { try { return JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); } catch { return []; } }
+function saveFavorites(favs) { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); }
+function toggleFavorite(drug) {
+  const normalized = drug.toLowerCase().trim();
+  let favs = getFavorites();
+  const idx = favs.findIndex(f => f.toLowerCase() === normalized);
+  if (idx >= 0) favs.splice(idx, 1);
+  else favs.unshift(drug);
+  saveFavorites(favs);
+  renderQuickAccess();
+  updateFavStar();
+}
+function isFavorite(drug) {
+  return getFavorites().some(f => f.toLowerCase() === drug.toLowerCase().trim());
+}
+function removeFavorite(drug, evt) {
+  if (evt) { evt.stopPropagation(); evt.preventDefault(); }
+  let favs = getFavorites().filter(f => f.toLowerCase() !== drug.toLowerCase());
+  saveFavorites(favs);
+  renderQuickAccess();
+  updateFavStar();
+}
+
+// ── Unit Presets ─────────────────────────────────────────────────────────────
+const UNIT_PRESETS = {
+  icu: {
+    label: "ICU",
+    drugs: ["norepinephrine","vasopressin","epinephrine","phenylephrine","dopamine",
+            "propofol","midazolam","fentanyl","dexmedetomidine","ketamine",
+            "heparin","insulin regular","vancomycin","meropenem","piperacillin-tazobactam",
+            "amiodarone","nitroglycerin","sodium bicarbonate","calcium gluconate","magnesium sulfate"]
+  },
+  ed: {
+    label: "ED",
+    drugs: ["ceftriaxone","azithromycin","metronidazole","ketorolac","ondansetron",
+            "pantoprazole","morphine","fentanyl","diphenhydramine","methylprednisolone",
+            "amiodarone","epinephrine","norepinephrine","tranexamic acid","nitroglycerin",
+            "magnesium sulfate","normal saline","lactated ringers","vancomycin","cefepime"]
+  },
+  medsurg: {
+    label: "Med-Surg",
+    drugs: ["vancomycin","ceftriaxone","cefazolin","piperacillin-tazobactam","metronidazole",
+            "pantoprazole","ondansetron","ketorolac","morphine","hydromorphone",
+            "furosemide","potassium chloride","heparin","enoxaparin","insulin regular",
+            "dexamethasone","famotidine","metoclopramide","acetaminophen iv","azithromycin"]
+  },
+  ld: {
+    label: "L&D",
+    drugs: ["oxytocin","magnesium sulfate","terbutaline","fentanyl","morphine",
+            "ondansetron","ketorolac","cefazolin","ampicillin","gentamicin",
+            "methylergonovine","tranexamic acid","calcium gluconate","labetalol",
+            "hydralazine","lactated ringers","normal saline","epinephrine","ondansetron","famotidine"]
+  },
+  peds: {
+    label: "Peds",
+    drugs: ["ceftriaxone","ampicillin","vancomycin","gentamicin","acyclovir",
+            "dexamethasone","ondansetron","morphine","fentanyl","midazolam",
+            "furosemide","epinephrine","dopamine","milrinone","albumin",
+            "potassium chloride","calcium gluconate","magnesium sulfate","pantoprazole","normal saline"]
+  },
+  onc: {
+    label: "Oncology",
+    drugs: ["ondansetron","granisetron","dexamethasone","diphenhydramine","famotidine",
+            "filgrastim","epoetin alfa","leucovorin","mesna","palonosetron",
+            "vancomycin","cefepime","meropenem","piperacillin-tazobactam","acyclovir",
+            "fluconazole","pantoprazole","potassium chloride","magnesium sulfate","normal saline"]
+  }
+};
+
+let activeUnit = null;
+
+function selectUnit(unit) {
+  if (activeUnit === unit) {
+    activeUnit = null;
+    document.querySelectorAll(".unit-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("qaUnitPills").style.display = "none";
+    return;
+  }
+  activeUnit = unit;
+  document.querySelectorAll(".unit-btn").forEach(b => b.classList.toggle("active", b.dataset.unit === unit));
+  const preset = UNIT_PRESETS[unit];
+  if (!preset) return;
+  const container = document.getElementById("qaUnitPills");
+  container.innerHTML = preset.drugs.map(d =>
+    `<button class="qa-pill" onclick="quickSearch('${escAttr(d)}')">${d}</button>`
+  ).join("");
+  container.style.display = "flex";
+}
+
+// ── Render Quick Access Panel ────────────────────────────────────────────────
+function renderQuickAccess() {
+  const favs = getFavorites();
+  const recents = getRecent();
+  const favSection = document.getElementById("qaFavorites");
+  const recentSection = document.getElementById("qaRecent");
+  const panel = document.getElementById("quickAccess");
+
+  // Favorites
+  if (favs.length > 0) {
+    document.getElementById("qaFavPills").innerHTML = favs.map(d =>
+      `<button class="qa-pill" onclick="quickSearch('${escAttr(d)}')">` +
+      `<span class="qa-star">★</span>${d}` +
+      `<span class="qa-remove" onclick="removeFavorite('${escAttr(d)}', event)" title="Remove from favorites">✕</span>` +
+      `</button>`
+    ).join("");
+    favSection.style.display = "block";
+  } else {
+    favSection.style.display = "none";
+  }
+
+  // Recents (exclude drugs already in favorites)
+  const favLower = new Set(favs.map(f => f.toLowerCase()));
+  const filteredRecents = recents.filter(d => !favLower.has(d.toLowerCase()));
+  if (filteredRecents.length > 0) {
+    document.getElementById("qaRecentPills").innerHTML = filteredRecents.map(d =>
+      `<button class="qa-pill" onclick="quickSearch('${escAttr(d)}')">${d}</button>`
+    ).join("");
+    recentSection.style.display = "block";
+  } else {
+    recentSection.style.display = "none";
+  }
+
+  // Show panel if there's anything to display (favs, recents, or unit presets always available)
+  panel.style.display = "block";
+}
+
+// Update the star in drug header if currently viewing a result
+function updateFavStar() {
+  const starBtn = document.getElementById("favStarBtn");
+  if (starBtn && currentDrug) {
+    const faved = isFavorite(currentDrug);
+    starBtn.classList.toggle("active", faved);
+    starBtn.innerHTML = faved ? "★" : "☆";
+    starBtn.title = faved ? "Remove from favorites" : "Add to favorites";
+  }
+}
+
 setupAutocomplete("drugInput");
 setupAutocomplete("dripInput");
+
+// Initialize quick access panel on load
+renderQuickAccess();
 
 // ── Pipeline Steps ───────────────────────────────────────────────────────────
 function setStep(id, state) {
@@ -1572,11 +1847,13 @@ function renderResult(d, piSource) {
     ? `<span class="drug-badge" style="background:rgba(34,197,94,0.1);color:#86EFAC;border:1px solid rgba(34,197,94,0.22)">FDA PI Verified</span>`
     : `<span class="drug-badge" style="background:rgba(59,130,246,0.1);color:#93C5FD;border:1px solid rgba(59,130,246,0.22)">Live Extracted</span>`;
 
+  const faved = isFavorite(currentDrug || drug || d.drugName);
   document.getElementById("drugHeader").innerHTML = `
     <div>
-      <div style="margin-bottom:8px">
+      <div style="margin-bottom:8px;display:flex;align-items:center;gap:6px">
         <span class="drug-name">${d.drugName}</span>
         ${d.brandName ? `<span class="drug-brand">(${d.brandName})</span>` : ""}
+        <button id="favStarBtn" class="fav-star${faved ? ' active' : ''}" onclick="toggleFavorite(currentDrug || '${escAttr(d.drugName)}')" title="${faved ? 'Remove from favorites' : 'Add to favorites'}">${faved ? '★' : '☆'}</button>
       </div>
       <div class="drug-badges">
         ${d.drugClass ? `<span class="drug-badge badge-teal">${d.drugClass}</span>` : ""}
@@ -1693,6 +1970,7 @@ async function runSearch() {
 
   btn.disabled = false;
   btn.textContent = "LOOK UP →";
+  renderQuickAccess();
 }
 
 document.getElementById("drugInput").addEventListener("keydown", e => {
