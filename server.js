@@ -232,8 +232,7 @@ const API_KEY = process.env.ANTHROPIC_API_KEY;
 const PORT = process.env.PORT || 3579;
 
 if (!API_KEY) {
-  console.error("\n  ERROR: ANTHROPIC_API_KEY not found in .env file\n");
-  process.exit(1);
+  console.warn("\n  ⚠ ANTHROPIC_API_KEY not found — running in cache-only mode\n");
 }
 
 // In-memory lookup cache — keyed by "drug:tab", TTL 10 minutes
