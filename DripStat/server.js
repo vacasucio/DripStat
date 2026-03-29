@@ -229,7 +229,7 @@ if (fs.existsSync(envPath)) {
 }
 
 const API_KEY = process.env.ANTHROPIC_API_KEY;
-const PORT = 3579;
+const PORT = process.env.PORT || 3579;
 
 if (!API_KEY) {
   console.error("\n  ERROR: ANTHROPIC_API_KEY not found in .env file\n");
