@@ -21,7 +21,7 @@ const CACHE_PATH  = path.join(__dirname, "quickdrip_cache.json");
 const FAIL_LOG    = path.join(__dirname, "cache_failures.log");
 const BATCH_SIZE  = 5;
 const DELAY_MS    = 400;   // between requests (stay under rate limits)
-const MAX_TOKENS  = 2500;
+const MAX_TOKENS  = 3000;
 const MODEL       = "claude-haiku-4-5-20251001";  // Haiku: 12x cheaper than Sonnet, sufficient for structured extraction
 
 // Load .env

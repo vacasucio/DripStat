@@ -1085,11 +1085,14 @@
       <button class="tab-btn active" onclick="switchTab('reconstitution', this)" data-tab="reconstitution">Reconstitution</button>
       <button class="tab-btn" onclick="switchTab('administration', this)" data-tab="administration">Administration</button>
       <button class="tab-btn" onclick="switchTab('compatibility', this)" data-tab="compatibility">IV Compatibility</button>
+      <!-- Dosage tab hidden until data quality is validated across all drugs -->
+      <!-- <button class="tab-btn" onclick="switchTab('dosage', this)" data-tab="dosage">Dosage</button> -->
     </div>
 
     <div id="tab-reconstitution" class="tab-panel active"></div>
     <div id="tab-administration" class="tab-panel"></div>
     <div id="tab-compatibility" class="tab-panel"></div>
+    <div id="tab-dosage" class="tab-panel"></div>
 
     <!-- Alerts -->
     <div id="alertsBlock" style="display:none"></div>
@@ -1514,11 +1517,24 @@ function renderCompatibility(d) {
     </div>`;
 }
 
+// Render the dosage & titration tab content
+function renderDosage(d) {
+  const rows = d.dosageAndTitration && d.dosageAndTitration.length
+    ? buildDataRows(d.dosageAndTitration)
+    : `<div class="data-row" style="border:none;color:var(--muted);font-size:12px">No adult IV dosage data in PI</div>`;
+  document.getElementById("tab-dosage").innerHTML = `
+    <div class="card accent">
+      <div class="card-header"><span class="card-title">Dosage &amp; Titration</span><span class="card-source">DailyMed / PI</span></div>
+      <div class="card-body">${rows}</div>
+    </div>`;
+}
+
 // Dispatch to the right tab renderer
 function renderTabContent(tab, d) {
   if (tab === "reconstitution") renderReconstitution(d);
   else if (tab === "administration") renderAdministration(d);
   else if (tab === "compatibility") renderCompatibility(d);
+  else if (tab === "dosage") renderDosage(d);
 }
 
 // Build quick-facts strip from drug data
@@ -1537,8 +1553,8 @@ function buildQuickFacts(d) {
   }
   // If ivPush is null (PI silent), omit entirely — don't assume
   // Filter
-  const hasFilter = (d.administration || []).some(r => /filter/i.test(r.label || "") && r.value && !/not required/i.test(r.value));
-  facts.push({ label: "Filter", value: hasFilter ? "Required" : "Not required", color: hasFilter ? "var(--warn)" : "var(--muted)" });
+  const filterRow = [...(d.administration || []), ...(d.dilution || [])].find(r => /filter/i.test(r.label || "") && r.value);
+  if (filterRow) facts.push({ label: "Filter", value: filterRow.value, color: "var(--warn)" });
   // BBW
   if (d.blackBoxWarnings?.length) facts.push({ label: "BBW", value: "Yes", color: "var(--red)" });
 
@@ -1591,6 +1607,7 @@ function renderResult(d, piSource) {
   renderTabContent("reconstitution", d);
   renderTabContent("administration", d);
   renderTabContent("compatibility", d);
+  renderTabContent("dosage", d);
 
   // Clinical alerts
   const alertsEl = document.getElementById("alertsBlock");

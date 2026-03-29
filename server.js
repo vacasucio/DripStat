@@ -670,7 +670,11 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      console.log(`  → [${ms()}] Cache miss — falling back to live extraction`);
+      // ── Cache-only mode: no live API calls ──
+      console.log(`  → [${ms()}] Cache miss — live extraction disabled (cache-only mode)`);
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: `"${drug}" is not yet available in our pre-verified database. Check back soon.` }));
+      return;
 
       // Section focus for vector search (tab-specific)
       const focusSections = tab ? TAB_SECTIONS[tab] : null;
@@ -835,6 +839,12 @@ const server = http.createServer((req, res) => {
         }));
         return;
       }
+
+      // ── Cache-only mode: no live API calls for drip builder ──
+      console.log(`  → Drip builder disabled in cache-only mode`);
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: `Drip builder is temporarily unavailable. Live API calls are disabled.` }));
+      return;
 
       let piContext = null;
       let piSource  = "none";

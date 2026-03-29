@@ -24,6 +24,7 @@ Rules:
 - monitoring.drugLevels: use PI first; supplement with ASHP guidelines — tag src
 - monitoring.vitals and monitoring.duringInfusion: PI only
 - sideEffects: Extract COMMON side effects that bedside nurses need to watch for during IV administration. Focus on reactions that are frequently seen in clinical practice (e.g., Red Man Syndrome, hypotension, phlebitis, nephrotoxicity, nausea). Include 4-8 entries. Each entry should name the reaction and a brief practical note (prevention or what to watch for). Skip rare reactions (TEN, SJS, DRESS, etc.) — those belong in the PI, not a quick reference.
+- dosageAndTitration: Extract from DOSAGE AND ADMINISTRATION section. ADULT IV doses only — skip pediatric, neonatal, and oral doses entirely. Use label/value pairs. Include: usual adult dose and frequency, dose range if documented, loading dose if applicable, renal impairment adjustment (if documented in PI), hepatic impairment adjustment (if documented in PI), titration guidance (if applicable, e.g. vasopressors, insulin drips), maximum daily dose (if stated). Only include what the PI explicitly documents — return [] if no adult IV dosing found.
 
 Return this exact JSON:
 {
@@ -39,6 +40,7 @@ Return this exact JSON:
   "ivCompatibility": [{"label": "string", "value": "string or null", "status": "compatible or incompatible or caution or unknown"}],
   "ivPush": null,
   "monitoring": {"labs": "string or null", "labsSrc": "PI or ASHP or null", "drugLevels": "string or null", "drugLevelsSrc": "PI or ASHP or null", "vitals": "string or null", "duringInfusion": "string or null"},
+  "dosageAndTitration": [{"label": "string", "value": "string"}],
   "sideEffects": ["string"],
   "blackBoxWarnings": ["string"],
   "clinicalAlerts": ["string"],
