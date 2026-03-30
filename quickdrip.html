@@ -1226,9 +1226,6 @@
     <div id="tab-compatibility" class="tab-panel"></div>
     <div id="tab-dosage" class="tab-panel"></div>
 
-    <!-- ISMP High-Alert -->
-    <div id="ismpBlock" style="display:none"></div>
-
     <!-- Alerts -->
     <div id="alertsBlock" style="display:none"></div>
 
@@ -1695,14 +1692,37 @@ function renderReconstitution(d) {
       dilutionHtml += buildDataRows(otherRows);
     }
   }
+  // Inject ISMP concentration standardization into dilution
+  if (d.ismp && d.ismp.highAlert) {
+    const concItems = (d.ismp.safetyStrategies || []).filter(s => /standardize concentrations/i.test(s));
+    if (concItems.length) {
+      dilutionHtml += concItems.map(s => `
+        <div class="data-row" style="background:rgba(239,68,68,0.06);border-left:3px solid rgba(239,68,68,0.4)">
+          <div class="data-label" style="color:#FCA5A5">ISMP</div>
+          <div class="data-value">${s}</div>
+        </div>`).join("");
+    }
+  }
   if (!dilutionHtml) {
     dilutionHtml = `<div class="data-row" style="border:none;color:var(--muted);font-size:12px">No dilution data in PI</div>`;
   }
 
+  // Inject ISMP premixed bag guidance into reconstitution
+  let ismpReconHtml = "";
+  if (d.ismp && d.ismp.highAlert) {
+    const premixItems = (d.ismp.safetyStrategies || []).filter(s => /premix/i.test(s));
+    if (premixItems.length) {
+      ismpReconHtml = premixItems.map(s => `
+        <div class="data-row" style="background:rgba(239,68,68,0.06);border-left:3px solid rgba(239,68,68,0.4)">
+          <div class="data-label" style="color:#FCA5A5">ISMP</div>
+          <div class="data-value">${s}</div>
+        </div>`).join("");
+    }
+  }
   document.getElementById("tab-reconstitution").innerHTML = `
     <div class="card accent">
       <div class="card-header"><span class="card-title">Reconstitution</span><span class="card-source">DailyMed / PI</span></div>
-      <div class="card-body">${reconRows}</div>
+      <div class="card-body">${reconRows}${ismpReconHtml}</div>
     </div>
     ${sectionDivider("Dilution", "rgba(13,157,168,0.3)", "rgba(13,157,168,0.7)")}
     <div class="card accent">
@@ -1882,24 +1902,25 @@ function renderResult(d, piSource) {
   renderTabContent("compatibility", d);
   renderTabContent("dosage", d);
 
-  // ISMP High-Alert block
-  const ismpEl = document.getElementById("ismpBlock");
-  if (d.ismp && d.ismp.highAlert) {
-    ismpEl.style.display = "block";
-    ismpEl.innerHTML = `<div class="alerts-block" style="border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.06)">
-      <div class="alerts-title" style="color:#FCA5A5">ISMP High-Alert Medication — ${d.ismp.class}</div>
-      ${d.ismp.safetyStrategies.map(s => `<div class="alert-item"><span class="alert-arrow" style="color:#FCA5A5">›</span><div class="alert-text">${s}</div></div>`).join("")}
-      ${d.ismp.tallManLettering ? `<div class="alert-item"><span class="alert-arrow" style="color:#FCA5A5">›</span><div class="alert-text"><strong>Tall-Man Lettering:</strong> ${d.ismp.tallManLettering}</div></div>` : ""}
-    </div>`;
-  } else { ismpEl.style.display = "none"; }
-
-  // Clinical alerts
+  // Clinical alerts (merge ISMP safety strategies that aren't recon/dilution-specific)
   const alertsEl = document.getElementById("alertsBlock");
-  if (d.clinicalAlerts && d.clinicalAlerts.length > 0) {
+  const ismpAlerts = [];
+  if (d.ismp && d.ismp.highAlert) {
+    (d.ismp.safetyStrategies || []).forEach(s => {
+      if (!/premix|standardize concentrations/i.test(s)) ismpAlerts.push(s);
+    });
+    if (d.ismp.tallManLettering) ismpAlerts.push(`Tall-Man Lettering: ${d.ismp.tallManLettering}`);
+  }
+  const piAlerts = d.clinicalAlerts || [];
+  if (piAlerts.length || ismpAlerts.length) {
     alertsEl.style.display = "block";
     alertsEl.innerHTML = `<div class="alerts-block">
       <div class="alerts-title">Clinical Alerts</div>
-      ${d.clinicalAlerts.map(a => `<div class="alert-item"><span class="alert-arrow">›</span><div class="alert-text">${a}</div></div>`).join("")}
+      ${piAlerts.map(a => `<div class="alert-item"><span class="alert-arrow">›</span><div class="alert-text">${a}</div></div>`).join("")}
+      ${ismpAlerts.length ? `<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(239,68,68,0.2)">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#FCA5A5;margin-bottom:4px;opacity:0.8">ISMP Safety — ${d.ismp.class}</div>
+        ${ismpAlerts.map(a => `<div class="alert-item"><span class="alert-arrow" style="color:#FCA5A5">›</span><div class="alert-text">${a}</div></div>`).join("")}
+      </div>` : ""}
     </div>`;
   } else { alertsEl.style.display = "none"; }
 
