@@ -16213,7 +16213,18 @@
       "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=02fb700d-a28c-4d45-b78d-382dc0d5986c",
       "ashp": null
     },
-    "dataComplete": true
+    "dataComplete": true,
+    "ismp": {
+      "highAlert": true,
+      "class": "Anticoagulants",
+      "safetyStrategies": [
+        "Independent double-check required before administration",
+        "Use only premixed bags when available — avoid manual compounding",
+        "Standardize concentrations (25,000 units/500 mL or 25,000 units/250 mL)",
+        "LASA warning: heparin vs Hespan"
+      ],
+      "tallManLettering": null
+    }
   },
   "hetastarch": {
     "drugName": "Hetastarch (Hydroxyethyl Starch 6%)",
@@ -19838,7 +19849,19 @@
       "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=1034467f-d436-4b87-a902-c7e8885daa8a",
       "ashp": null
     },
-    "dataComplete": true
+    "dataComplete": true,
+    "ismp": {
+      "highAlert": true,
+      "class": "Opioids, IV, transdermal, and oral",
+      "safetyStrategies": [
+        "Independent double-check for IV opioid infusions",
+        "LASA warning: morphine vs HYDROmorphone (10x potency difference)",
+        "Naloxone must be readily available",
+        "Use smart pump drug libraries with hard limits",
+        "Assess sedation level before redosing"
+      ],
+      "tallManLettering": "morphine (not HYDROmorphone)"
+    }
   },
   "moxifloxacin": {
     "drugName": "Moxifloxacin Hydrochloride",
@@ -20584,7 +20607,18 @@
       "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=0ea48ab6-e166-df31-b132-70ef982a2d02",
       "ashp": null
     },
-    "dataComplete": true
+    "dataComplete": true,
+    "ismp": {
+      "highAlert": true,
+      "class": "Adrenergic agonists, IV",
+      "safetyStrategies": [
+        "Standardize concentrations (4 mg/250 mL D5W or 8 mg/250 mL D5W)",
+        "Must run on infusion pump — never gravity drip",
+        "Independent double-check of concentration and rate at initiation",
+        "Extravasation protocol must be immediately accessible"
+      ],
+      "tallManLettering": null
+    }
   },
   "nusinersen": {
     "drugName": "Nusinersen",
@@ -22735,7 +22769,19 @@
       "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=01721071-af03-4894-95c1-10b8bc64b888",
       "ashp": null
     },
-    "dataComplete": true
+    "dataComplete": true,
+    "ismp": {
+      "highAlert": true,
+      "class": "Concentrated electrolytes",
+      "safetyStrategies": [
+        "NEVER stock concentrated KCl vials on patient care units",
+        "Use only premixed bags — fatal if given IV push",
+        "Independent double-check of dose, rate, and concentration",
+        "Cardiac monitoring required for rates >10 mEq/hr",
+        "LASA warning: KCl vs NaCl vials look similar"
+      ],
+      "tallManLettering": null
+    }
   },
   "potassium phosphate": {
     "drugName": "Potassium Phosphate",
@@ -27066,7 +27112,19 @@
       "url": "https://dailymed.nlm.nih.gov/dailymed/search.cfm?labeltype=all&query=insulin+regular+injection",
       "ashp": null
     },
-    "dataComplete": true
+    "dataComplete": true,
+    "ismp": {
+      "highAlert": true,
+      "class": "Insulin, subcutaneous and IV",
+      "safetyStrategies": [
+        "Independent double-check required for ALL insulin doses",
+        "LASA warning: Humulin R vs Humulin N, NovoLOG vs NovoLIN",
+        "Standardize drip concentration (1 unit/mL in NS)",
+        "Blood glucose monitoring per protocol — hypoglycemia risk",
+        "Never abbreviate units as U — misread as 0"
+      ],
+      "tallManLettering": "HumuLIN R / NovoLIN R"
+    }
   },
   "dextrose 50%": {
     "drugName": "Dextrose 50% Injection (D50W)",
