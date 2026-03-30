@@ -1226,6 +1226,9 @@
     <div id="tab-compatibility" class="tab-panel"></div>
     <div id="tab-dosage" class="tab-panel"></div>
 
+    <!-- ISMP High-Alert -->
+    <div id="ismpBlock" style="display:none"></div>
+
     <!-- Alerts -->
     <div id="alertsBlock" style="display:none"></div>
 
@@ -1854,6 +1857,7 @@ function renderResult(d, piSource) {
       </div>
     </div>
     ${hasBBW ? `<div class="bbw-badge">⚠ BLACK BOX WARNING</div>` : ""}
+    ${d.ismp?.highAlert ? `<div class="bbw-badge" style="background:rgba(239,68,68,0.15);color:#FCA5A5;border-color:rgba(239,68,68,0.4)">⚠ ISMP HIGH-ALERT</div>` : ""}
   `;
 
   // Quick facts strip
@@ -1877,6 +1881,17 @@ function renderResult(d, piSource) {
   renderTabContent("administration", d);
   renderTabContent("compatibility", d);
   renderTabContent("dosage", d);
+
+  // ISMP High-Alert block
+  const ismpEl = document.getElementById("ismpBlock");
+  if (d.ismp && d.ismp.highAlert) {
+    ismpEl.style.display = "block";
+    ismpEl.innerHTML = `<div class="alerts-block" style="border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.06)">
+      <div class="alerts-title" style="color:#FCA5A5">ISMP High-Alert Medication — ${d.ismp.class}</div>
+      ${d.ismp.safetyStrategies.map(s => `<div class="alert-item"><span class="alert-arrow" style="color:#FCA5A5">›</span><div class="alert-text">${s}</div></div>`).join("")}
+      ${d.ismp.tallManLettering ? `<div class="alert-item"><span class="alert-arrow" style="color:#FCA5A5">›</span><div class="alert-text"><strong>Tall-Man Lettering:</strong> ${d.ismp.tallManLettering}</div></div>` : ""}
+    </div>`;
+  } else { ismpEl.style.display = "none"; }
 
   // Clinical alerts
   const alertsEl = document.getElementById("alertsBlock");
